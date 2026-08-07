@@ -1,0 +1,2692 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>知识库 · Java 八股 / Ragent 项目</title><style>
+:root{
+  --bg:#f2efe7; --card:#fffdf8; --ink:#222a33; --ink2:#3d4650; --muted:#7a828c;
+  --line:#e5dfcf; --gold:#a87c2a; --gold-2:#cfa553; --gold-soft:rgba(168,124,42,.10);
+  --code-bg:#f7f1e2; --code-fg:#8a5a18; --code-bd:#eadfc4;
+  --quote-bg:linear-gradient(90deg,#faf4e4,#f8f2e2); --quote-fg:#5d5644;
+  --strong:#96691c; --tbl-hover:#faf4e4;
+  --tbl-head:linear-gradient(135deg,#1e2c38,#294253);
+  --grad:linear-gradient(135deg,#8a6420,#cfa553 60%,#ecd9a4);
+  --shadow:0 1px 2px rgba(35,42,50,.04),0 4px 12px rgba(35,42,50,.04),0 24px 64px rgba(35,42,50,.10);
+}
+[data-theme="dark"]{
+  --bg:#0b1218; --card:#121d26; --ink:#e5eaef; --ink2:#c3ccd4; --muted:#8b97a2;
+  --line:#233440; --gold:#d3ab60; --gold-2:#c49a4b; --gold-soft:rgba(211,171,96,.13);
+  --code-bg:#1d2c38; --code-fg:#e6c383; --code-bd:#2b3f4d;
+  --quote-bg:linear-gradient(90deg,#17242f,#131f29); --quote-fg:#b6c0ca;
+  --strong:#e0bd77; --tbl-hover:#1a2833;
+  --tbl-head:linear-gradient(135deg,#243a4c,#2f4e63);
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 18px 50px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;color:var(--ink);font-size:15.5px;line-height:1.9;letter-spacing:.1px;
+  background:var(--bg);
+  background-image:radial-gradient(1200px 600px at 85% -5%,rgba(207,165,83,.08),transparent 60%),radial-gradient(900px 500px at -10% 100%,rgba(41,66,83,.06),transparent 55%);
+  background-attachment:fixed;
+  transition:background .3s,color .3s;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+::selection{background:rgba(207,165,83,.32);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:#c9c2b0;border-radius:6px;border:2px solid var(--bg);}
+::-webkit-scrollbar-thumb:hover{background:#a89f88;}
+[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#2c3e4c;border-color:var(--bg);}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#3d5568;}
+
+.progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:2000;background:var(--grad);transition:width .12s ease-out;}
+
+/* ===== 侧边栏（墨色 + 金，始终深色） ===== */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:308px;z-index:1000;color:#dbe3ea;
+  background:linear-gradient(175deg,#0c1821 0%,#12242f 52%,#173039 100%);
+  display:flex;flex-direction:column;box-shadow:6px 0 32px rgba(10,20,28,.35);overflow:hidden;}
+.sidebar::before{content:"";position:absolute;top:-120px;right:-120px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(207,165,83,.16),transparent 68%);pointer-events:none;}
+.brand{position:relative;padding:24px 24px 16px;display:flex;gap:14px;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.07);}
+.brand .logo{width:46px;height:46px;flex:none;border-radius:13px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-size:23px;
+  box-shadow:0 8px 20px rgba(207,165,83,.35),inset 0 1px 0 rgba(255,255,255,.35);}
+.brand .t{font-family:"Noto Serif SC","Source Han Serif SC","STSong","SimSun",serif;
+  font-weight:800;font-size:20px;letter-spacing:3px;color:#f3e9d0;line-height:1.2;}
+.brand .s{font-size:11.5px;color:#93a3b0;margin-top:4px;letter-spacing:.6px;transition:color .2s;}
+
+.lib-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 16px 8px;position:relative;}
+.lib-tab{position:relative;padding:12px 12px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);color:#c3ccd4;cursor:pointer;text-align:left;
+  transition:transform .18s,background .18s,border-color .18s,box-shadow .18s;font-family:inherit;}
+.lib-tab .ic{font-size:18px;line-height:1;}
+.lib-tab .nm{display:block;font-size:13px;font-weight:700;margin-top:7px;letter-spacing:.3px;}
+.lib-tab .ct{display:block;font-size:11px;color:#8494a1;margin-top:2px;}
+.lib-tab:hover{background:rgba(255,255,255,.09);color:#fff;transform:translateY(-2px);}
+.lib-tab.active{background:linear-gradient(160deg,rgba(207,165,83,.26),rgba(207,165,83,.07));
+  border-color:rgba(222,184,110,.6);color:#f6e8c6;
+  box-shadow:0 8px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.10);}
+.lib-tab.active .ct{color:#cdb27c;}
+.lib-tab .del{position:absolute;top:5px;right:6px;width:17px;height:17px;border:none;border-radius:50%;
+  background:rgba(255,255,255,.14);color:#b6c2cd;font-size:11px;line-height:17px;text-align:center;
+  cursor:pointer;opacity:0;transition:.15s;padding:0;}
+.lib-tab:hover .del{opacity:1;}
+.lib-tab .del:hover{background:#c0453a;color:#fff;}
+.lib-add{grid-column:1 / -1;padding:9px;border:1px dashed rgba(255,255,255,.28);border-radius:12px;
+  background:transparent;color:#9fb0bc;font-size:12.5px;cursor:pointer;transition:.16s;font-family:inherit;}
+.lib-add:hover{border-color:var(--gold-2);color:#e8d5a4;background:rgba(207,165,83,.08);}
+
+/* ===== 新建知识库弹窗 ===== */
+.modal-mask{position:fixed;inset:0;z-index:3000;background:rgba(10,18,25,.55);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:18px;}
+.modal-mask.show{display:flex;}
+.modal{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.35);
+  padding:26px 28px;animation:pageIn .25s ease;}
+.modal h3{margin:0 0 4px;font-size:18px;color:var(--ink);}
+.modal .tip{font-size:12.5px;color:var(--muted);margin:0 0 16px;}
+.modal label{display:block;font-size:12.5px;font-weight:700;color:var(--ink2);margin:12px 0 5px;}
+.modal input[type=text]{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--bg);color:var(--ink);font-size:13.5px;outline:none;font-family:inherit;}
+.modal input[type=text]:focus,.modal textarea:focus{border-color:var(--gold-2);box-shadow:0 0 0 3px var(--gold-soft);}
+.modal textarea{width:100%;min-height:220px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--bg);color:var(--ink);font-size:13px;line-height:1.7;outline:none;resize:vertical;
+  font-family:"SFMono-Regular",Consolas,Menlo,monospace;}
+.modal .row{display:flex;gap:10px;}
+.modal .row > div{flex:1;}
+.modal .icon-opts{display:flex;gap:6px;flex-wrap:wrap;}
+.modal .icon-opts span{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;display:flex;
+  align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:.13s;background:var(--bg);}
+.modal .icon-opts span:hover{border-color:var(--gold-2);}
+.modal .icon-opts span.sel{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 0 0 2px var(--gold-soft);}
+.modal .actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;}
+.modal .actions .right{display:flex;gap:10px;}
+.m-btn{border:none;border-radius:11px;padding:10px 22px;font-size:13.5px;font-weight:700;cursor:pointer;
+  transition:.16s;font-family:inherit;}
+.m-btn.primary{background:var(--grad);color:#2a1f08;}
+.m-btn.primary:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(168,124,42,.35);}
+.m-btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);}
+.m-btn.ghost:hover{color:var(--ink);border-color:var(--muted);}
+.m-btn.danger-ghost{background:transparent;border:1px solid var(--line);color:#b04a40;font-size:12px;padding:7px 12px;}
+.m-btn.danger-ghost:hover{border-color:#c0453a;}
+.empty-tip{padding:60px 20px;text-align:center;color:var(--muted);font-size:14px;display:none;}
+
+.search{padding:10px 16px 4px;position:relative;}
+.search input{width:100%;padding:10px 13px;border:1px solid rgba(255,255,255,.14);border-radius:11px;
+  background:rgba(255,255,255,.07);color:#fff;font-size:13px;outline:none;transition:.18s;font-family:inherit;}
+.search input::placeholder{color:rgba(255,255,255,.5);}
+.search input:focus{border-color:var(--gold-2);background:rgba(255,255,255,.12);box-shadow:0 0 0 3px rgba(207,165,83,.18);}
+.search-hint{margin:6px 2px 0;font-size:11.5px;color:var(--gold-2);cursor:pointer;display:none;}
+.search-hint:hover{text-decoration:underline;}
+.tools{display:flex;gap:8px;padding:8px 16px 12px;}
+.tools button{flex:1;padding:8px 6px;border:1px solid rgba(255,255,255,.16);border-radius:11px;
+  background:rgba(255,255,255,.05);color:#dbe3ea;font-size:12.5px;cursor:pointer;transition:.16s;
+  display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;}
+.tools button:hover{background:rgba(255,255,255,.13);}
+.tools button.on{background:var(--grad);border-color:transparent;color:#2a1f08;font-weight:700;}
+
+.nav-scroll{padding:6px 12px 44px;overflow-y:auto;flex:1;position:relative;}
+.nav-scroll::-webkit-scrollbar{width:6px;}
+.nav-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border:none;border-radius:4px;}
+.nav-list{display:none;}
+.nav-list.show{display:block;animation:navIn .3s ease;}
+@keyframes navIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:none;}}
+.nav-group{margin-bottom:4px;}
+.nav-h1{color:#d8b96f;font-weight:700;font-size:11.5px;margin:18px 10px 7px;letter-spacing:1.2px;
+  text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.nav-h1::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(216,185,111,.4),transparent);}
+.nav-h2{display:block;padding:6px 26px 6px 10px;margin:2px 0;color:#dbe3ea;text-decoration:none;font-size:13.5px;border-radius:9px;transition:.15s;position:relative;}
+.nav-h2 .tick{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.32);color:transparent;font-size:10px;line-height:14px;text-align:center;
+  cursor:pointer;opacity:0;transition:.15s;}
+.nav-h2:hover .tick{opacity:.75;}
+.nav-h2 .tick:hover{border-color:var(--gold-2);}
+.nav-h2.done .tick{opacity:1;background:var(--gold-2);border-color:var(--gold-2);color:#2a1f08;font-weight:700;}
+.nav-h2.done{color:#9fb0bc;}
+.lib-tab .pbar{display:block;height:3px;background:rgba(255,255,255,.13);border-radius:2px;margin-top:8px;overflow:hidden;}
+.lib-tab .pbar i{display:block;height:100%;width:0;background:var(--grad);border-radius:2px;transition:width .35s ease;}
+.nav-h3{display:block;padding:5px 10px 5px 24px;color:#93a3b0;text-decoration:none;font-size:12.5px;border-radius:9px;transition:.15s;}
+.nav-h2:hover,.nav-h3:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-h2.active,.nav-h3.active{background:linear-gradient(90deg,rgba(207,165,83,.34),rgba(207,165,83,.06));
+  color:#f6e8c6;font-weight:600;box-shadow:inset 3px 0 0 var(--gold-2);}
+
+/* ===== 主区域 ===== */
+.main{margin-left:308px;padding:48px 32px 80px;}
+.content{max-width:880px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--shadow);padding:56px 64px;transition:background .3s,border-color .3s;
+  position:relative;overflow:hidden;}
+.content::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad);}
+
+.page{display:none;}
+.page.show{display:block;animation:pageIn .38s cubic-bezier(.22,.8,.3,1);}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+h1,h2,h3,h4{scroll-margin-top:28px;position:relative;}
+.page > h1{font-family:"Noto Serif SC","Source Han Serif SC","STSong","SimSun",serif;
+  font-size:29px;line-height:1.35;font-weight:800;margin:40px 0 22px;color:var(--ink);
+  letter-spacing:.5px;padding-bottom:16px;}
+.page > h1::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:4px;border-radius:3px;background:var(--grad);}
+.page > h1:first-of-type{margin-top:2px;}
+h2{font-size:21px;font-weight:700;margin:38px 0 14px;padding-left:14px;color:var(--ink);
+  border-left:4px solid var(--gold-2);line-height:1.4;}
+h3{font-size:16.5px;font-weight:700;margin:26px 0 10px;color:var(--ink2);}
+.h3-prac{display:inline-block;margin-left:12px;font-size:11.5px;font-weight:700;color:var(--gold);
+  background:var(--gold-soft);border:1px solid var(--code-bd);border-radius:8px;padding:2px 10px;
+  cursor:pointer;vertical-align:middle;transition:.15s;user-select:none;}
+.h3-prac:hover{background:var(--grad);color:#2a1f08;border-color:transparent;}
+.h3-prac.active{background:var(--gold);color:#fff;border-color:transparent;}
+h4{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--muted);}
+p{margin:12px 0;}
+a{color:var(--gold);text-decoration:none;}
+a:hover{text-decoration:underline;}
+strong{color:var(--strong);}
+ul,ol{margin:10px 0;padding-left:22px;}
+li{margin:6px 0;}
+li::marker{color:var(--gold-2);}
+
+hr.sep{border:none;height:1px;margin:30px 0;
+  background:linear-gradient(90deg,transparent,var(--gold-2) 30%,var(--gold-2) 70%,transparent);opacity:.5;}
+
+code{background:var(--code-bg);color:var(--code-fg);padding:2px 7px;border-radius:6px;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px;border:1px solid var(--code-bd);}
+
+.code-block{margin:20px 0;border-radius:14px;overflow:hidden;background:#0d141b;border:1px solid #1e2a35;
+  box-shadow:0 8px 24px rgba(10,16,22,.25);}
+.code-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;
+  background:linear-gradient(180deg,#17222c,#131d26);border-bottom:1px solid #202d39;}
+.code-lang{color:#c8a55e;font-size:11.5px;letter-spacing:1px;font-family:"SFMono-Regular",Consolas,monospace;text-transform:uppercase;}
+.code-dots{display:inline-flex;gap:7px;}
+.code-dots i{width:11px;height:11px;border-radius:50%;display:block;}
+.code-dots i:nth-child(1){background:#ff5f56;}
+.code-dots i:nth-child(2){background:#e6b93d;}
+.code-dots i:nth-child(3){background:#27c93f;}
+.code-block code{display:block;background:none;border:none;color:#cfd8e0;padding:16px 18px;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px;line-height:1.65;
+  overflow-x:auto;white-space:pre;}
+.tok-kw{color:#ff7b72;}
+.tok-type{color:#e6b93d;}
+.tok-str{color:#a5d6ff;}
+.tok-num{color:#79c0ff;}
+.tok-cmt{color:#7d8b97;font-style:italic;}
+
+table{border-collapse:separate;border-spacing:0;width:100%;margin:22px 0;font-size:14px;
+  border-radius:13px;overflow:hidden;box-shadow:0 2px 12px rgba(35,42,50,.08);border:1px solid var(--line);}
+th,td{border-bottom:1px solid var(--line);padding:11px 14px;text-align:left;}
+th{background:var(--tbl-head);color:#ecd9a4;font-weight:600;letter-spacing:.3px;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:.12s;}
+tbody tr:hover{background:var(--tbl-hover);}
+
+blockquote{margin:18px 0;padding:14px 20px 14px 46px;border-left:4px solid var(--gold-2);
+  background:var(--quote-bg);border-radius:4px 14px 14px 4px;color:var(--quote-fg);position:relative;}
+blockquote::before{content:"\201C";position:absolute;left:14px;top:6px;font-size:30px;line-height:1;
+  color:var(--gold-2);font-family:Georgia,serif;}
+
+.fold.collapsed{display:none;}
+body.review h3{cursor:pointer;user-select:none;}
+body.review h3::before{content:"\25B8  ";color:var(--gold-2);font-weight:700;}
+body.review h3.open::before{content:"\25BE  ";}
+
+.page-foot{display:flex;justify-content:space-between;margin-top:44px;padding-top:22px;border-top:1px dashed var(--line);}
+.pf-btn{border:1px solid var(--line);background:var(--gold-soft);color:var(--strong);border-radius:12px;
+  padding:11px 20px;font-size:13.5px;font-weight:700;cursor:pointer;transition:.18s;font-family:inherit;}
+.pf-btn:hover{background:var(--grad);color:#2a1f08;border-color:transparent;transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(168,124,42,.3);}
+
+.to-top{position:fixed;right:26px;bottom:26px;width:46px;height:46px;border:none;border-radius:50%;
+  background:var(--grad);color:#2a1f08;font-size:19px;font-weight:700;cursor:pointer;z-index:1500;
+  box-shadow:0 10px 24px rgba(168,124,42,.45);opacity:0;pointer-events:none;transition:.3s;}
+.to-top.show{opacity:1;pointer-events:auto;}
+.to-top:hover{transform:translateY(-3px);}
+
+/* ===== AI 学习助手 ===== */
+.ai-fab{position:fixed;right:26px;bottom:84px;width:52px;height:52px;border:none;border-radius:16px;z-index:1600;
+  background:linear-gradient(160deg,#12242f,#1d3a47);color:#ecd9a4;font-size:22px;cursor:pointer;
+  box-shadow:0 12px 28px rgba(13,26,35,.4),inset 0 1px 0 rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:center;transition:.22s;}
+.ai-fab:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 16px 34px rgba(13,26,35,.5),0 0 0 3px rgba(207,165,83,.25);}
+.ai-panel{position:fixed;right:26px;bottom:150px;width:400px;max-width:calc(100vw - 32px);height:min(620px,calc(100vh - 180px));
+  z-index:1600;background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 24px 70px rgba(13,26,35,.35);display:none;flex-direction:column;overflow:hidden;}
+.ai-panel.show{display:flex;animation:pageIn .25s ease;}
+.ai-head{display:flex;align-items:center;gap:10px;padding:13px 16px;color:#f3e9d0;flex:none;cursor:move;user-select:none;-webkit-user-select:none;touch-action:none;
+  background:linear-gradient(160deg,#0f1e29,#1a303d);}
+.ai-panel.dragging{box-shadow:0 32px 90px rgba(13,26,35,.5);transition:none;}
+.ai-panel.dragging .ai-head{background:linear-gradient(160deg,#16283a,#23404f);}
+.ai-head .dot{width:8px;height:8px;border-radius:50%;background:#5fd68a;box-shadow:0 0 8px #5fd68a;}
+.ai-head .t{font-weight:700;font-size:14px;letter-spacing:.5px;flex:1;}
+.ai-head .s{font-size:11px;color:#93a3b0;}
+.ai-head button{background:rgba(255,255,255,.1);border:none;color:#dbe3ea;width:26px;height:26px;border-radius:8px;cursor:pointer;font-size:14px;}
+.ai-head button:hover{background:rgba(255,255,255,.2);}
+.ai-cfg{padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg);display:none;flex:none;}
+.ai-cfg.show{display:block;}
+.ai-cfg input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);
+  color:var(--ink);font-size:12px;margin-bottom:7px;outline:none;font-family:inherit;}
+.ai-cfg input:focus{border-color:var(--gold-2);}
+.ai-cfg .row{display:flex;gap:8px;align-items:center;}
+.ai-cfg .hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.ai-cfg .m-btn{padding:6px 14px;font-size:12px;}
+.ai-msgs{flex:1;overflow-y:auto;padding:16px 16px 8px;}
+.ai-msg{margin-bottom:14px;display:flex;gap:9px;animation:pageIn .25s ease;}
+.ai-msg .av{width:28px;height:28px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.ai-msg.user{flex-direction:row-reverse;}
+.ai-msg.user .av{background:var(--grad);color:#2a1f08;}
+.ai-msg.bot .av{background:linear-gradient(160deg,#12242f,#1d3a47);color:#ecd9a4;}
+.ai-msg .bub{max-width:82%;padding:10px 13px;border-radius:13px;font-size:13.5px;line-height:1.75;}
+.ai-msg.user .bub{background:var(--gold-soft);color:var(--ink);border:1px solid var(--code-bd);border-top-right-radius:4px;}
+.ai-msg.bot .bub{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-top-left-radius:4px;}
+.ai-msg .bub .ref{display:block;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:12px;}
+.ai-msg .bub .ref a{color:var(--gold);cursor:pointer;font-weight:600;}
+.ai-msg .bub code{font-size:12px;}
+.ai-msg .bub p{margin:6px 0;}
+.ai-msg .bub ul{margin:6px 0;padding-left:18px;}
+/* 实践题卡片 */
+.prac{border:1px solid var(--gold-2);border-radius:13px;overflow:hidden;margin:4px 0 10px;background:var(--bg);}
+.prac .ph{padding:9px 12px;background:var(--gold-soft);border-bottom:1px solid var(--code-bd);}
+.prac .ph .pt{font-weight:800;color:var(--strong);font-size:13.5px;}
+.prac .ph .pm{font-size:11px;color:var(--muted);margin-top:2px;}
+.prac .pd{padding:10px 12px;font-size:13px;line-height:1.7;color:var(--ink2);}
+.prac .pd .lab{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.5px;margin:8px 0 3px;text-transform:uppercase;}
+.prac .pd ul{margin:3px 0;padding-left:18px;font-size:12.5px;}
+.prac .ed .lh{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#161b22;border-bottom:1px solid #202d39;font-size:11px;color:#c8a55e;font-family:"SFMono-Regular",Consolas,monospace;}
+.prac .ed textarea{width:100%;min-height:170px;padding:11px 13px;border:none;background:#0d141b;color:#cfd8e0;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:12.5px;line-height:1.6;
+  resize:vertical;outline:none;white-space:pre;tab-size:4;}
+.prac .ed textarea:focus{box-shadow:inset 0 0 0 2px var(--gold-2);}
+.prac .acts{display:flex;gap:8px;padding:9px 12px;background:var(--card);border-top:1px solid var(--line);}
+.prac .acts button{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--ink2);border-radius:9px;
+  padding:8px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
+.prac .acts .sub{background:var(--grad);color:#2a1f08;border-color:transparent;}
+.prac .acts button:hover{transform:translateY(-1px);}
+.prac .acts .sub:hover{box-shadow:0 6px 14px rgba(168,124,42,.35);}
+.prac .verdict{padding:10px 12px;font-size:13px;border-top:1px solid var(--line);line-height:1.7;}
+.prac .verdict.pass{background:rgba(34,197,94,.08);color:#15803d;}
+.prac .verdict.fail{background:rgba(194,69,58,.08);color:#b04a40;}
+.ai-input{flex:none;display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:var(--card);}
+.ai-input textarea{flex:1;resize:none;height:42px;max-height:110px;padding:10px 12px;border:1px solid var(--line);
+  border-radius:11px;background:var(--bg);color:var(--ink);font-size:13px;outline:none;font-family:inherit;line-height:1.5;}
+.ai-input textarea:focus{border-color:var(--gold-2);box-shadow:0 0 0 3px var(--gold-soft);}
+.ai-input button{border:none;border-radius:11px;padding:0 16px;background:var(--grad);color:#2a1f08;
+  font-weight:700;font-size:13px;cursor:pointer;transition:.16s;font-family:inherit;}
+.ai-input button:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(168,124,42,.35);}
+.ai-input button:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none;}
+.ai-typing{display:inline-flex;gap:4px;padding:4px 2px;}
+.ai-typing i{width:6px;height:6px;border-radius:50%;background:var(--gold-2);animation:aiBlink 1s infinite;}
+.ai-typing i:nth-child(2){animation-delay:.18s;}
+.ai-typing i:nth-child(3){animation-delay:.36s;}
+@keyframes aiBlink{0%,100%{opacity:.25;transform:translateY(0);}50%{opacity:1;transform:translateY(-3px);}}
+
+/* ===== 工具角标 ===== */
+.tools button{position:relative;}
+.tools .badge{position:absolute;top:-6px;right:-5px;min-width:17px;height:17px;border-radius:9px;
+  background:#c0453a;color:#fff;font-size:10px;line-height:17px;text-align:center;padding:0 4px;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);}
+
+/* ===== 继续阅读提示条 ===== */
+.resume-tip{position:fixed;top:16px;left:calc(50% + 154px);transform:translateX(-50%) translateY(-10px);z-index:1700;
+  background:var(--card);border:1px solid var(--gold-2);color:var(--ink);border-radius:12px;
+  padding:9px 16px;font-size:13px;box-shadow:0 12px 34px rgba(13,26,35,.28);
+  opacity:0;pointer-events:none;transition:.25s;max-width:80vw;}
+.resume-tip.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+.resume-tip a{color:var(--gold);font-weight:700;cursor:pointer;}
+.resume-tip .x{margin-left:10px;cursor:pointer;color:var(--muted);font-weight:700;}
+.resume-tip .x:hover{color:var(--ink);}
+
+/* ===== 跨域/异常源 警告横幅 ===== */
+.origin-warn{position:fixed;top:0;left:0;right:0;z-index:1900;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:center;
+  background:linear-gradient(90deg,#7a2e16,#a8431f);color:#fff;border-bottom:1px solid rgba(255,255,255,.18);
+  padding:9px 16px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+.origin-warn span{line-height:1.5;}
+.origin-warn a{color:#ffe9c2;font-weight:700;text-decoration:underline;cursor:pointer;}
+.origin-warn .ow-url{width:min(48vw,440px);border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.2);color:#fff;border-radius:8px;padding:5px 9px;font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace;flex:0 1 auto;min-width:200px;}
+.origin-warn button{background:#fff;color:#7a2e16;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto;}
+
+
+/* ===== 复习清单 ===== */
+.rv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);
+  border-radius:11px;margin-bottom:8px;background:var(--bg);}
+.rv-item .tt{flex:1;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;}
+.rv-item .tt:hover{color:var(--gold);}
+.rv-item .lb{font-size:11px;color:var(--muted);flex:none;}
+.rv-item .ok{flex:none;border:1px solid var(--gold-2);background:var(--gold-soft);color:var(--strong);
+  border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;transition:.15s;}
+.rv-item .ok:hover{background:var(--grad);color:#2a1f08;}
+.rv-empty{text-align:center;color:var(--muted);padding:30px 0;font-size:14px;}
+
+/* ===== 闪卡模式 ===== */
+.fc-mask{position:fixed;inset:0;z-index:2800;background:rgba(9,17,24,.72);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:18px;}
+.fc-mask.show{display:flex;}
+.fc-box{width:min(580px,94vw);}
+.fc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;color:#c3ccd4;font-size:13px;}
+.fc-top button{background:rgba(255,255,255,.12);border:none;color:#fff;width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:16px;}
+.fc-top button:hover{background:rgba(255,255,255,.22);}
+.fc-top .warm{width:auto;padding:0 12px;font-size:12px;font-weight:700;color:#ecd9a4;}
+.fc-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:2900;
+  background:linear-gradient(160deg,#0f1e29,#1a303d);color:#ecd9a4;border:1px solid rgba(207,165,83,.4);
+  border-radius:12px;padding:11px 20px;font-size:13px;box-shadow:0 14px 36px rgba(0,0,0,.45);
+  opacity:0;pointer-events:none;transition:.25s;min-width:220px;text-align:center;}
+.fc-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.fc-toast .bar{display:block;height:3px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:8px;overflow:hidden;}
+.fc-toast .bar i{display:block;height:100%;width:0;background:var(--grad);transition:width .3s;}
+.fc-card{background:var(--card);border:1px solid var(--gold-2);border-radius:20px;min-height:200px;max-height:62vh;
+  padding:30px 36px 28px;cursor:pointer;box-shadow:0 26px 70px rgba(0,0,0,.4),0 0 0 4px rgba(207,165,83,.08);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;}
+.fc-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);}
+.fc-card:hover{transform:translateY(-3px);box-shadow:0 32px 80px rgba(0,0,0,.45),0 0 0 4px rgba(207,165,83,.18);}
+.fc-front .bc{display:block;max-width:90%;font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:18px;opacity:.85;}
+.fc-front .q{font-size:24px;font-weight:800;color:var(--ink);line-height:1.55;font-family:"Noto Serif SC","Source Han Serif SC","STSong",serif;max-width:520px;}
+.fc-front .q::before{content:"思考：";display:block;font-size:12px;font-weight:600;color:var(--muted);font-family:inherit;margin-bottom:8px;letter-spacing:1px;}
+.fc-front .h{margin-top:18px;font-size:12px;color:var(--muted);opacity:.75;}
+.fc-back{display:none;text-align:left;font-size:14.5px;line-height:1.85;color:var(--ink2);max-height:48vh;overflow-y:auto;width:100%;white-space:pre-wrap;padding:6px 4px;}
+.fc-back::before{content:"参考答案";display:block;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;opacity:.7;}
+.fc-card.flipped .fc-front{display:none;}
+.fc-card.flipped .fc-back{display:block;}
+.fc-actions{display:flex;gap:12px;margin-top:16px;}
+.fc-actions button{flex:1;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;transition:.16s;font-family:inherit;}
+.fc-actions .again{background:rgba(255,255,255,.12);color:#e2e8f0;}
+.fc-actions .again:hover{background:rgba(255,255,255,.22);}
+.fc-actions .know{background:var(--grad);color:#2a1f08;}
+.fc-actions .know:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(207,165,83,.4);}
+
+/* ===== 学习计划 ===== */
+.plan-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 6px;}
+.plan-form label{font-size:12px;font-weight:700;color:var(--ink2);display:block;margin-bottom:5px;}
+.plan-form select,.plan-form input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:13px;outline:none;font-family:inherit;}
+.plan-form select:focus,.plan-form input:focus{border-color:var(--gold-2);}
+.plan-form .full{grid-column:1 / -1;}
+.plan-gen{width:100%;margin-top:6px;}
+.plan-out{max-height:50vh;overflow-y:auto;margin-top:14px;}
+.plan-day{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--bg);}
+.plan-day .dh{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;border-bottom:1px dashed var(--line);padding-bottom:7px;}
+.plan-day .dn{font-weight:800;color:var(--gold);font-size:14px;}
+.plan-day .dd{font-size:12px;color:var(--muted);}
+.plan-day .row{font-size:13px;margin:4px 0;line-height:1.7;}
+.plan-day .row b{font-size:12px;color:var(--ink2);margin-right:6px;}
+.plan-day .tag{display:inline-block;margin:2px 4px 2px 0;padding:3px 9px;border-radius:8px;font-size:12px;cursor:pointer;transition:.13s;}
+.plan-day .tag.l{background:var(--gold-soft);color:var(--strong);border:1px solid var(--code-bd);}
+.plan-day .tag.r{background:rgba(41,66,83,.08);color:var(--ink2);border:1px solid var(--line);}
+.plan-day .tag:hover{background:var(--grad);color:#2a1f08;border-color:transparent;}
+.plan-day .tag.done{text-decoration:line-through;opacity:.6;}
+.plan-day .empty{font-size:12px;color:var(--muted);font-style:italic;}
+
+.topbar{display:none;}
+.menu-btn{display:none;}
+.overlay{display:none;}
+@media (max-width:920px){
+  .sidebar{transform:translateX(-100%);width:84%;max-width:340px;transition:transform .25s ease;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:66px 14px 44px;}
+  .content{padding:28px 20px;border-radius:16px;}
+  .topbar{display:flex;align-items:center;position:fixed;top:0;left:0;right:0;z-index:900;
+    background:rgba(255,253,248,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:11px 15px;}
+  [data-theme="dark"] .topbar{background:rgba(18,29,38,.88);}
+  .menu-btn{display:inline-block;font-size:21px;background:none;border:none;cursor:pointer;margin-right:12px;color:var(--ink);}
+  .topbar .title{font-weight:700;font-size:15px;}
+  .overlay{position:fixed;inset:0;background:rgba(10,20,28,.5);z-index:990;}
+  .overlay.show{display:block;}
+  .page > h1{font-size:23px;}
+  h1,h2,h3,h4{scroll-margin-top:70px;}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  th,td{white-space:nowrap;}
+  th:first-child,td:first-child{white-space:normal;min-width:72px;}
+  .ai-panel{left:14px;right:14px;width:auto;bottom:150px;height:min(560px,calc(100vh - 170px));}
+  .ai-fab{right:16px;bottom:84px;}
+  .to-top{right:16px;}
+  .resume-tip{left:50%;top:64px;}
+}
+</style></head><body>
+<div class="progress" id="progress"></div>
+<div class="topbar"><button class="menu-btn" onclick="toggleMenu()">☰</button><span class="title" id="topTitle">知识库</span></div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">📚</div><div><div class="t">知识库</div><div class="s" id="brandSub">Java 面试八股</div></div></div>
+  <div class="lib-tabs" id="libTabs">
+    <button type="button" class="lib-tab active" data-lib="0" onclick="switchLib('0')"><span class="ic">☕</span><span class="nm">Java 八股</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'0')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="1" onclick="switchLib('1')"><span class="ic">🤖</span><span class="nm">Ragent 项目</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'1')">×</span></button>
+    <button type="button" class="lib-add" onclick="openLibModal()">＋ 新建知识库</button>
+  </div>
+  <div class="search"><input id="search" type="text" placeholder="🔍 搜索当前知识库…" oninput="onSearch(this.value)"><div class="search-hint" id="searchHint" onclick="jumpOtherLib()"></div></div>
+  <div class="tools"><button id="themeBtn" onclick="toggleTheme()">🌙 暗色</button><button id="planBtn" onclick="openPlan()" title="AI 生成学习计划">📋 计划</button><button id="cardsBtn" onclick="startCards()" title="闪卡速记">🃏 闪卡</button><button id="dueBtn" onclick="openReview()" title="今日待复习">📅 复习<span class="badge" id="dueBadge" style="display:none"></span></button><button id="progBtn" onclick="resetProgress()" title="清空当前库的学习进度">↺ 重置</button></div>
+  <div class="nav-scroll">
+    <div class="nav-list show" data-lib="0"><div class="nav-group"><div class="nav-h1">Java 面试八股完整知识库（概念 + 业务实战）</div><a class="nav-h2" href="#sec-2">总目录</a></div><div class="nav-group"><div class="nav-h1">第一部分：核心知识点（八股速查）</div><a class="nav-h2" href="#sec-4">1. Java 基础</a><a class="nav-h3" href="#sec-5">1.1 谈谈 Java 的跨平台原理</a><a class="nav-h3" href="#sec-6">1.2 JDK、JRE、JVM 的关系</a><a class="nav-h3" href="#sec-7">1.3 基本数据类型 vs 包装类</a><a class="nav-h3" href="#sec-8">1.4 == 与 equals 的区别</a><a class="nav-h3" href="#sec-9">1.5 String、StringBuffer、StringBuilder</a><a class="nav-h3" href="#sec-10">1.6 String 为什么不可变？好处是什么？</a><a class="nav-h3" href="#sec-11">1.7 重写（Override）与重载（Overload）</a><a class="nav-h3" href="#sec-12">1.8 异常体系</a><a class="nav-h3" href="#sec-13">1.9 final、finally、finalize</a><a class="nav-h3" href="#sec-14">1.10 什么是反射？优缺点？</a><a class="nav-h2" href="#sec-15">2. 面向对象</a><a class="nav-h3" href="#sec-16">2.1 三大特性</a><a class="nav-h3" href="#sec-17">2.2 面向对象 vs 面向过程</a><a class="nav-h3" href="#sec-18">2.3 接口与抽象类的区别</a><a class="nav-h3" href="#sec-19">2.4 深拷贝 vs 浅拷贝</a><a class="nav-h2" href="#sec-20">3. 集合框架</a><a class="nav-h3" href="#sec-21">3.1 整体结构</a><a class="nav-h3" href="#sec-22">3.2 ArrayList vs LinkedList</a><a class="nav-h3" href="#sec-23">3.3 HashMap 原理（重点）</a><a class="nav-h3" href="#sec-24">3.4 ConcurrentHashMap</a><a class="nav-h3" href="#sec-25">3.5 HashSet 如何保证不重复</a><a class="nav-h3" href="#sec-26">3.6 fail-fast 与 fail-safe</a><a class="nav-h2" href="#sec-27">4. 并发与多线程（JUC）</a><a class="nav-h3" href="#sec-28">4.1 进程与线程</a><a class="nav-h3" href="#sec-29">4.2 创建线程的方式</a><a class="nav-h3" href="#sec-30">4.3 线程的生命周期</a><a class="nav-h3" href="#sec-31">4.4 synchronized 关键字</a><a class="nav-h3" href="#sec-32">4.5 volatile</a><a class="nav-h3" href="#sec-33">4.6 synchronized vs volatile</a><a class="nav-h3" href="#sec-34">4.7 锁分类</a><a class="nav-h3" href="#sec-35">4.8 CAS 是什么？有什么问题？</a><a class="nav-h3" href="#sec-36">4.9 线程池</a><a class="nav-h3" href="#sec-37">4.10 ThreadLocal</a><a class="nav-h2" href="#sec-38">5. JVM</a><a class="nav-h3" href="#sec-39">5.1 运行时数据区</a><a class="nav-h3" href="#sec-40">5.2 堆内存划分</a><a class="nav-h3" href="#sec-41">5.3 垃圾回收算法</a><a class="nav-h3" href="#sec-42">5.4 垃圾收集器</a><a class="nav-h3" href="#sec-43">5.5 如何判断对象可回收？</a><a class="nav-h3" href="#sec-44">5.6 双亲委派模型</a><a class="nav-h3" href="#sec-45">5.7 常见 OOM / 调优参数</a><a class="nav-h2" href="#sec-46">6. Java 8+ 新特性</a><a class="nav-h3" href="#sec-47">6.1 Lambda 表达式</a><a class="nav-h3" href="#sec-48">6.2 函数式接口</a><a class="nav-h3" href="#sec-49">6.3 Stream API</a><a class="nav-h3" href="#sec-50">6.4 新日期时间 API</a><a class="nav-h3" href="#sec-51">6.5 接口的 default / static 方法</a><a class="nav-h3" href="#sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</a><a class="nav-h2" href="#sec-53">7. I/O 与 NIO</a><a class="nav-h3" href="#sec-54">7.1 BIO / NIO / AIO</a><a class="nav-h3" href="#sec-55">7.2 NIO 核心组件</a><a class="nav-h2" href="#sec-56">8. 常见设计模式</a><a class="nav-h3" href="#sec-57">8.1 单例模式（双重检查锁）</a><a class="nav-h3" href="#sec-58">8.2 工厂 / 抽象工厂</a><a class="nav-h3" href="#sec-59">8.3 策略模式</a><a class="nav-h3" href="#sec-60">8.4 观察者模式</a><a class="nav-h3" href="#sec-61">8.5 代理模式</a><a class="nav-h3" href="#sec-62">8.6 装饰器模式</a><a class="nav-h2" href="#sec-63">9. MySQL 基础</a><a class="nav-h3" href="#sec-64">9.1 索引</a><a class="nav-h3" href="#sec-65">9.2 事务四大特性（ACID）</a><a class="nav-h3" href="#sec-66">9.3 事务隔离级别</a><a class="nav-h3" href="#sec-67">9.4 慢查询优化思路</a><a class="nav-h3" href="#sec-68">9.5 分库分表</a><a class="nav-h2" href="#sec-69">10. Redis 基础</a><a class="nav-h3" href="#sec-70">10.1 数据类型</a><a class="nav-h3" href="#sec-71">10.2 持久化</a><a class="nav-h3" href="#sec-72">10.3 缓存问题</a><a class="nav-h3" href="#sec-73">10.4 内存淘汰策略</a><a class="nav-h3" href="#sec-74">10.5 常见用途</a><a class="nav-h2" href="#sec-75">11. Spring / Spring Boot</a><a class="nav-h3" href="#sec-76">11.1 控制反转（IoC）与依赖注入（DI）</a><a class="nav-h3" href="#sec-77">11.2 Bean 作用域</a><a class="nav-h3" href="#sec-78">11.3 Bean 生命周期</a><a class="nav-h3" href="#sec-79">11.4 AOP</a><a class="nav-h3" href="#sec-80">11.5 Spring 事务</a><a class="nav-h3" href="#sec-81">11.6 Spring Boot 自动配置原理</a><a class="nav-h2" href="#sec-82">12. 计算机网络</a><a class="nav-h3" href="#sec-83">12.1 TCP 三次握手 / 四次挥手</a><a class="nav-h3" href="#sec-84">12.2 TCP 与 UDP 区别</a><a class="nav-h3" href="#sec-85">12.3 HTTP 与 HTTPS</a><a class="nav-h3" href="#sec-86">12.4 常见状态码</a><a class="nav-h3" href="#sec-87">12.5 浏览器输入 URL 到页面显示的过程</a><a class="nav-h2" href="#sec-88">13. 常见算法与数据结构</a><a class="nav-h3" href="#sec-89">13.1 数据结构</a><a class="nav-h3" href="#sec-90">13.2 排序算法速记</a><a class="nav-h3" href="#sec-91">13.3 刷题套路</a></div><div class="nav-group"><div class="nav-h1">第二部分：业务场景实战</div><a class="nav-h2" href="#sec-93">1. 集合：购物车与商品去重</a><a class="nav-h2" href="#sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</a><a class="nav-h2" href="#sec-95">3. synchronized / 锁：秒杀库存扣减</a><a class="nav-h2" href="#sec-96">4. volatile：系统开关与单例配置中心</a><a class="nav-h2" href="#sec-97">5. 线程池：异步通知与批量任务</a><a class="nav-h2" href="#sec-98">6. ThreadLocal：用户上下文与链路追踪</a><a class="nav-h2" href="#sec-99">7. JVM / GC：大促接口超时排查</a><a class="nav-h2" href="#sec-100">8. String：订单号与金额拼接</a><a class="nav-h2" href="#sec-101">9. 设计模式：支付与促销策略</a><a class="nav-h2" href="#sec-102">10. MySQL 索引：订单查询慢 SQL</a><a class="nav-h2" href="#sec-103">11. 事务：下单扣库存与转账</a><a class="nav-h2" href="#sec-104">12. Redis：缓存与分布式锁</a><a class="nav-h2" href="#sec-105">13. Spring：循环依赖 / AOP / 事务失效</a><a class="nav-h2" href="#sec-106">14. 网络：接口超时与 HTTPS</a><a class="nav-h2" href="#sec-107">15. 消息队列：下单异步解耦</a></div><div class="nav-group"><div class="nav-h1">第三部分：分布式与微服务专项</div><a class="nav-h2" href="#sec-109">1. 微服务与 Spring Cloud 生态</a><a class="nav-h3" href="#sec-110">1.1 微服务核心组件</a><a class="nav-h3" href="#sec-111">1.2 服务注册与发现原理</a><a class="nav-h3" href="#sec-112">1.3 网关（Gateway）作用</a><a class="nav-h3" href="#sec-113">1.4 负载均衡：Ribbon vs Nginx</a><a class="nav-h3" href="#sec-114">1.5 熔断、降级、限流</a><a class="nav-h2" href="#sec-115">2. 消息队列（MQ）</a><a class="nav-h3" href="#sec-116">2.1 为什么用 MQ</a><a class="nav-h3" href="#sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</a><a class="nav-h3" href="#sec-118">2.3 消息可靠性（不丢）</a><a class="nav-h3" href="#sec-119">2.4 重复消费与幂等</a><a class="nav-h3" href="#sec-120">2.5 消息积压处理</a><a class="nav-h3" href="#sec-121">2.6 顺序消息</a><a class="nav-h2" href="#sec-122">3. 分布式事务</a><a class="nav-h3" href="#sec-123">3.1 2PC / 3PC</a><a class="nav-h3" href="#sec-124">3.2 TCC（Try-Confirm-Cancel）</a><a class="nav-h3" href="#sec-125">3.3 消息最终一致性（常用）</a><a class="nav-h3" href="#sec-126">3.4 Seata</a><a class="nav-h3" href="#sec-127">3.5 最大努力通知</a><a class="nav-h2" href="#sec-128">4. 分布式锁与缓存一致性</a><a class="nav-h3" href="#sec-129">4.1 分布式锁方案</a><a class="nav-h3" href="#sec-130">4.2 缓存与 DB 一致性</a><a class="nav-h2" href="#sec-131">5. 分布式 ID 与分库分表</a><a class="nav-h3" href="#sec-132">5.1 分布式 ID 方案</a><a class="nav-h3" href="#sec-133">5.2 分库分表</a></div><div class="nav-group"><div class="nav-h1">附录 A：高频追问清单（自查）</div></div><div class="nav-group"><div class="nav-h1">附录 B：八股 → 业务的回答套路</div></div><div class="nav-group"><div class="nav-h1">第四部分：进阶高频补充（2026 新版考点）</div><a class="nav-h2" href="#sec-201">1. JDK 17 / 21 新特性（T0 必考）</a><a class="nav-h3" href="#sec-202">1.1 虚拟线程（Virtual Threads，Project Loom）★</a><a class="nav-h3" href="#sec-203">1.2 Sealed Classes / Records / Pattern Matching</a><a class="nav-h3" href="#sec-204">1.3 Structured Concurrency 与 Scoped Values</a><a class="nav-h2" href="#sec-205">2. 并发进阶（手写 AQS 是高频要求）</a><a class="nav-h3" href="#sec-206">2.1 AQS 原理 ★</a><a class="nav-h3" href="#sec-207">2.2 ReentrantLock vs synchronized</a><a class="nav-h3" href="#sec-208">2.3 CountDownLatch / CyclicBarrier / Semaphore</a><a class="nav-h3" href="#sec-209">2.4 原子类、LongAdder 与 StampedLock</a><a class="nav-h3" href="#sec-210">2.5 CompletableFuture 编排</a><a class="nav-h2" href="#sec-211">3. JVM 深入</a><a class="nav-h3" href="#sec-212">3.1 类加载过程与对象创建细节</a><a class="nav-h3" href="#sec-213">3.2 CMS / G1 / ZGC 对比与选型</a><a class="nav-h3" href="#sec-214">3.3 线上问题排查四板斧 ★</a><a class="nav-h2" href="#sec-215">4. MySQL 深入</a><a class="nav-h3" href="#sec-216">4.1 MVCC 原理 ★</a><a class="nav-h3" href="#sec-217">4.2 redo log / undo log / binlog 与两阶段提交</a><a class="nav-h3" href="#sec-218">4.3 行锁、间隙锁与死锁</a><a class="nav-h2" href="#sec-219">5. Redis 深入</a><a class="nav-h3" href="#sec-220">5.1 底层数据结构</a><a class="nav-h3" href="#sec-221">5.2 主从 / 哨兵 / Cluster</a><a class="nav-h3" href="#sec-222">5.3 bigkey 与 hotkey 治理</a><a class="nav-h3" href="#sec-223">5.4 分布式锁的正确姿势 ★</a><a class="nav-h2" href="#sec-224">6. Spring 深入</a><a class="nav-h3" href="#sec-225">6.1 循环依赖与三级缓存 ★</a><a class="nav-h3" href="#sec-226">6.2 Spring MVC 请求处理流程</a><a class="nav-h3" href="#sec-227">6.3 Spring Boot 3.x 变化（新版必问）</a><a class="nav-h3" href="#sec-228">6.4 AI 工程化趋势：Spring AI 与 RAG</a><a class="nav-h2" href="#sec-229">7. 高频场景题（设计思路模板）</a><a class="nav-h3" href="#sec-230">7.1 秒杀系统完整链路 ★</a><a class="nav-h3" href="#sec-231">7.2 短链系统</a><a class="nav-h3" href="#sec-232">7.3 排行榜与高并发计数</a><a class="nav-h3" href="#sec-233">7.4 百万数据导出</a><a class="nav-h3" href="#sec-234">7.5 接口幂等设计</a><a class="nav-h2" href="#sec-235">8. 2026 面试趋势与答题策略</a></div></div>
+    <div class="nav-list" data-lib="1"><div class="nav-group"><div class="nav-h1">Ragent 平台项目知识库（Agentic RAG 企业级实战）</div><a class="nav-h2" href="#sec-137">一、项目定位与技术栈</a><a class="nav-h3" href="#sec-138">1.1 它是什么</a><a class="nav-h3" href="#sec-139">1.2 技术栈全景</a><a class="nav-h3" href="#sec-140">1.3 四大 Maven 模块职责</a><a class="nav-h2" href="#sec-141">二、架构分层思想</a><a class="nav-h3" href="#sec-142">2.1 三层职责链路</a><a class="nav-h3" href="#sec-143">2.2 为什么这么分</a><a class="nav-h2" href="#sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</a><a class="nav-h3" href="#sec-145">3.1 总览（流水线阶段编排）</a><a class="nav-h3" href="#sec-146">3.2 阶段 1：会话记忆加载</a><a class="nav-h3" href="#sec-147">3.3 阶段 2：问题改写与子问题拆分</a><a class="nav-h3" href="#sec-148">3.4 阶段 3：意图识别（树形多级）</a><a class="nav-h3" href="#sec-149">3.5 阶段 4：歧义引导</a><a class="nav-h3" href="#sec-150">3.6 阶段 5：多路检索 ★</a><a class="nav-h3" href="#sec-151">3.7 阶段 6：Prompt 组装与流式输出</a><a class="nav-h3" href="#sec-152">3.8 一张图看懂调用链（文字时序）</a><a class="nav-h2" href="#sec-153">四、知识库入库链路（Ingestion Pipeline）</a><a class="nav-h3" href="#sec-154">4.1 五种节点类型（接口 IngestionNode）</a><a class="nav-h3" href="#sec-155">4.2 链式执行引擎</a><a class="nav-h3" href="#sec-156">4.3 切片策略与写入</a><a class="nav-h2" href="#sec-157">五、模型路由与故障转移</a><a class="nav-h2" href="#sec-158">六、多路检索深挖</a><a class="nav-h3" href="#sec-159">6.1 检索通道</a><a class="nav-h3" href="#sec-160">6.2 后处理责任链</a><a class="nav-h3" href="#sec-161">6.3 向量库双支持</a><a class="nav-h2" href="#sec-162">七、意图识别体系</a><a class="nav-h2" href="#sec-163">八、MCP 工具调用</a><a class="nav-h2" href="#sec-164">九、多租户与管理后台</a><a class="nav-h2" href="#sec-165">十、设计模式实战（对照表）</a><a class="nav-h2" href="#sec-166">十一、生产级工程特性</a><a class="nav-h3" href="#sec-167">11.1 队列式分布式限流</a><a class="nav-h3" href="#sec-168">11.2 8 线程池 + TTL 透传</a><a class="nav-h3" href="#sec-169">11.3 全链路 Trace（AOP）</a><a class="nav-h3" href="#sec-170">11.4 会话记忆压缩</a><a class="nav-h3" href="#sec-171">11.5 认证鉴权</a><a class="nav-h3" href="#sec-172">11.6 其他生产特性</a><a class="nav-h2" href="#sec-173">十二、可扩展性：新增 X 只需实现接口</a><a class="nav-h2" href="#sec-174">十三、学习路线与面试考点（自查）</a><a class="nav-h2" href="#sec-300">十四、源码导览：核心类速查表</a><a class="nav-h2" href="#sec-301">十五、关键机制深挖（源码级参数）</a><a class="nav-h3" href="#sec-302">15.1 队列式限流的完整实现 ★</a><a class="nav-h3" href="#sec-303">15.2 RRF 融合与后处理责任链（精确参数）</a><a class="nav-h3" href="#sec-304">15.3 模型熔断与首包探测（精确参数）</a><a class="nav-h3" href="#sec-305">15.4 意图识别阈值与缓存</a><a class="nav-h3" href="#sec-306">15.5 会话记忆压缩参数</a><a class="nav-h2" href="#sec-307">十六、数据模型：核心表速查（PostgreSQL，23 张）</a><a class="nav-h2" href="#sec-308">十七、线程池配置清单（面试可直接背）</a><a class="nav-h2" href="#sec-309">十八、本地跑起来：中间件与启动顺序</a><a class="nav-h2" href="#sec-310">十九、面试怎么讲这个项目（加分话术）</a></div></div>
+  </div>
+</aside>
+<main class="main"><div class="content" id="contentBox">
+  <section class="page show" data-page="0"><h1 id="sec-1">Java 面试八股完整知识库（概念 + 业务实战）</h1>
+<blockquote>整理：Java 后端高频面试知识点（八股文）+ 真实业务场景实战 适用：校招 / 社招 Java 开发岗复习 说明： - <strong>第一部分「核心知识点」</strong>：以「题目 + 要点」形式组织，便于背诵与速查。 - <strong>第二部分「业务场景实战」</strong>：把抽象知识点落到真实业务，每个场景给出「业务背景 → 用到的知识点 → 关键实现思路 → 面试追问」。 - 两者打通，既能背概念，又能在面试被问「项目里怎么用的」时张口就来。</blockquote>
+<hr class="sep">
+<h2 id="sec-2">总目录</h2>
+<ul><li>[第一部分：核心知识点（八股速查）](#第一部分核心知识点八股速查)</li><li>[1. Java 基础](#1-java-基础)</li><li>[2. 面向对象](#2-面向对象)</li><li>[3. 集合框架](#3-集合框架)</li><li>[4. 并发与多线程（JUC）](#4-并发与多线程juc)</li><li>[5. JVM](#5-jvm)</li><li>[6. Java 8+ 新特性](#6-java-8-新特性)</li><li>[7. I/O 与 NIO](#7-io-与-nio)</li><li>[8. 常见设计模式](#8-常见设计模式)</li><li>[9. MySQL 基础](#9-mysql-基础)</li><li>[10. Redis 基础](#10-redis-基础)</li><li>[11. Spring / Spring Boot](#11-spring--spring-boot)</li><li>[12. 计算机网络](#12-计算机网络)</li><li>[13. 常见算法与数据结构](#13-常见算法与数据结构)</li><li>[第二部分：业务场景实战](#第二部分业务场景实战)</li><li>[1. 集合：购物车与商品去重](#1-集合购物车与商品去重)</li><li>[2. HashMap / ConcurrentHashMap：本地缓存与热点计数](#2-hashmap--concurrenthashmap本地缓存与热点计数)</li><li>[3. synchronized / 锁：秒杀库存扣减](#3-synchronized--锁秒杀库存扣减)</li><li>[4. volatile：系统开关与单例配置中心](#4-volatile系统开关与单例配置中心)</li><li>[5. 线程池：异步通知与批量任务](#5-线程池异步通知与批量任务)</li><li>[6. ThreadLocal：用户上下文与链路追踪](#6-threadlocal用户上下文与链路追踪)</li><li>[7. JVM / GC：大促接口超时排查](#7-jvm--gc大促接口超时排查)</li><li>[8. String：订单号与金额拼接](#8-string订单号与金额拼接)</li><li>[9. 设计模式：支付与促销策略](#9-设计模式支付与促销策略)</li><li>[10. MySQL 索引：订单查询慢 SQL](#10-mysql-索引订单查询慢-sql)</li><li>[11. 事务：下单扣库存与转账](#11-事务下单扣库存与转账)</li><li>[12. Redis：缓存与分布式锁](#12-redis缓存与分布式锁)</li><li>[13. Spring：循环依赖 / AOP / 事务失效](#13-spring循环依赖--aop--事务失效)</li><li>[14. 网络：接口超时与 HTTPS](#14-网络接口超时与-https)</li><li>[15. 消息队列：下单异步解耦](#15-消息队列下单异步解耦)</li><li>[第三部分：分布式与微服务专项](#第三部分分布式与微服务专项)</li><li>[1. 微服务与 Spring Cloud 生态](#1-微服务与-spring-cloud-生态)</li><li>[2. 消息队列（MQ）](#2-消息队列mq)</li><li>[3. 分布式事务](#3-分布式事务)</li><li>[4. 分布式锁与缓存一致性](#4-分布式锁与缓存一致性)</li><li>[5. 分布式 ID 与分库分表](#5-分布式-id-与分库分表)</li><li>[附录 A：高频追问清单（自查）](#附录-a高频追问清单自查)</li><li>[附录 B：八股 → 业务的回答套路](#附录-b八股--业务的回答套路)</li></ul>
+<hr class="sep">
+<h1 id="sec-3">第一部分：核心知识点（八股速查）</h1>
+<h2 id="sec-4">1. Java 基础</h2>
+<h3 id="sec-5">1.1 谈谈 Java 的跨平台原理</h3>
+<p>Java 源码编译为字节码（<code>.class</code>），由 JVM 解释/编译执行。不同操作系统安装对应 JVM，字节码无需重新编译即可运行，实现「一次编写，到处运行（Write Once, Run Anywhere）」。</p>
+<h3 id="sec-6">1.2 JDK、JRE、JVM 的关系</h3>
+<ul><li><strong>JVM</strong>：Java 虚拟机，负责执行字节码。</li><li><strong>JRE</strong>：Java 运行时环境，包含 JVM + 核心类库，用于运行程序。</li><li><strong>JDK</strong>：Java 开发工具包，包含 JRE + 编译器（javac）、调试工具等，用于开发。</li><li>关系：<code>JDK ⊃ JRE ⊃ JVM</code>。</li></ul>
+<h3 id="sec-7">1.3 基本数据类型 vs 包装类</h3>
+<table><thead><tr><th>基本类型</th><th>大小</th><th>默认值</th><th>包装类</th></tr></thead><tbody><tr><td>byte</td><td>8 bit</td><td>0</td><td>Byte</td></tr><tr><td>short</td><td>16 bit</td><td>0</td><td>Short</td></tr><tr><td>int</td><td>32 bit</td><td>0</td><td>Integer</td></tr><tr><td>long</td><td>64 bit</td><td>0L</td><td>Long</td></tr><tr><td>float</td><td>32 bit</td><td>0.0f</td><td>Float</td></tr><tr><td>double</td><td>64 bit</td><td>0.0d</td><td>Double</td></tr><tr><td>char</td><td>16 bit</td><td>'\u0000'</td><td>Character</td></tr><tr><td>boolean</td><td>—</td><td>false</td><td>Boolean</td></tr></tbody></table>
+<p>要点：</p>
+<ul><li>基本类型存栈/对象内，包装类存堆（引用）。</li><li><strong>自动装箱/拆箱</strong>是编译期语法糖（<code>Integer a = 1</code> 实际调用 <code>Integer.valueOf(1)</code>）。</li><li><code>Integer</code> 缓存 <code>-128 ~ 127</code>，该区间内 <code>==</code> 比较为 true，区间外为 false（new 出来的除外）。</li></ul>
+<h3 id="sec-8">1.4 == 与 equals 的区别</h3>
+<ul><li><code>==</code>：比较基本类型的值；比较引用类型的地址。</li><li><code>equals</code>：Object 默认等价于 <code>==</code>，但多数类（如 String、Integer）重写了它来比较内容。</li><li>重写 <code>equals</code> 必须重写 <code>hashCode</code>（否则 HashMap 等行为异常）。</li></ul>
+<h3 id="sec-9">1.5 String、StringBuffer、StringBuilder</h3>
+<ul><li><strong>String</strong>：不可变（final char[]），每次拼接产生新对象，线程安全。</li><li><strong>StringBuffer</strong>：可变，方法加 <code>synchronized</code>，线程安全，效率低。</li><li><strong>StringBuilder</strong>：可变，非线程安全，效率高（单线程首选）。</li><li>字符串拼接建议：少量用 <code>+</code>（编译优化为 StringBuilder）；循环内必须用 StringBuilder。</li></ul>
+<h3 id="sec-10">1.6 String 为什么不可变？好处是什么？</h3>
+<ul><li>底层 <code>private final char[]</code>（Java 9 后为 byte[] + coder），final 保证引用不变，private 且无修改方法。</li><li>好处：字符串常量池可复用、线程安全、适合做 HashMap 的 key、类加载安全。</li></ul>
+<h3 id="sec-11">1.7 重写（Override）与重载（Overload）</h3>
+<ul><li><strong>重载</strong>：同一类中，方法名相同、参数列表不同（类型/个数/顺序），与返回值无关。编译期多态。</li><li><strong>重写</strong>：子类重写父类方法，方法签名相同，访问修饰符不能更严格，抛出的异常不能更宽泛。运行期多态。</li></ul>
+<h3 id="sec-12">1.8 异常体系</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Throwable</span>
+ ├── <span class="tok-type">Error</span>（程序无法处理的严重错误，如 OOM、StackOverflow）
+ └── <span class="tok-type">Exception</span>
+      ├── <span class="tok-type">RuntimeException</span>（非受检，如 NPE、除零、下标越界）
+      └── 其他 <span class="tok-type">Exception</span>（受检，如 IOException，必须 <span class="tok-kw">try</span> 或 <span class="tok-kw">throws</span>）</code></pre>
+<ul><li><code>finally</code> 一定执行（除非 <code>System.exit</code>）。<code>try</code> 中有 <code>return</code>，<code>finally</code> 仍先执行；若 finally 也有 return，覆盖前者。</li></ul>
+<h3 id="sec-13">1.9 final、finally、finalize</h3>
+<ul><li><code>final</code>：修饰类不可继承、方法不可重写、变量不可变（引用不可变，对象内容可变）。</li><li><code>finally</code>：异常处理的必定执行块。</li><li><code>finalize</code>：Object 的方法，GC 前调用，已废弃（Java 9+ 标记 deprecated），不要用。</li></ul>
+<h3 id="sec-14">1.10 什么是反射？优缺点？</h3>
+<ul><li>运行时获取类信息并操作对象（Class、Method、Field）。框架（Spring、MyBatis）大量使用。</li><li>优点：解耦、动态加载、提高灵活性。</li><li>缺点：破坏封装、性能略低、安全受限。</li></ul>
+<hr class="sep">
+<h2 id="sec-15">2. 面向对象</h2>
+<h3 id="sec-16">2.1 三大特性</h3>
+<ul><li><strong>封装</strong>：隐藏实现细节，暴露接口，提高安全性与可维护性。</li><li><strong>继承</strong>：子类复用父类代码，单继承（类）/ 多实现（接口）。</li><li><strong>多态</strong>：同一接口不同实现，父类引用指向子类对象，运行期绑定。</li></ul>
+<h3 id="sec-17">2.2 面向对象 vs 面向过程</h3>
+<ul><li>面向过程：以函数/步骤为中心，性能略高，适合简单场景。</li><li>面向对象：以对象为中心，易扩展、易维护，适合大型系统。</li></ul>
+<h3 id="sec-18">2.3 接口与抽象类的区别</h3>
+<table><thead><tr><th>维度</th><th>抽象类</th><th>接口</th></tr></thead><tbody><tr><td>关键字</td><td>abstract</td><td>interface</td></tr><tr><td>方法</td><td>可有具体方法</td><td>Java 8+ 可有 default/static</td></tr><tr><td>变量</td><td>普通变量</td><td>默认 public static final</td></tr><tr><td>继承</td><td>单继承</td><td>多实现</td></tr><tr><td>构造器</td><td>有</td><td>无</td></tr></tbody></table>
+<h3 id="sec-19">2.4 深拷贝 vs 浅拷贝</h3>
+<ul><li><strong>浅拷贝</strong>：复制引用，原对象与副本共享内部对象。</li><li><strong>深拷贝</strong>：递归复制所有引用对象，彼此独立。</li><li>实现：实现 <code>Cloneable</code> 重写 <code>clone()</code>；或序列化；或手动 new。</li></ul>
+<hr class="sep">
+<h2 id="sec-20">3. 集合框架</h2>
+<h3 id="sec-21">3.1 整体结构</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Collection</span>
+ ├── <span class="tok-type">List</span>（有序、可重复）：<span class="tok-type">ArrayList</span>、<span class="tok-type">LinkedList</span>、Vector、Stack
+ ├── <span class="tok-type">Set</span>（不可重复）：<span class="tok-type">HashSet</span>、LinkedHashSet、TreeSet
+ └── <span class="tok-type">Queue</span>：<span class="tok-type">ArrayDeque</span>、<span class="tok-type">PriorityQueue</span>、BlockingQueue
+<span class="tok-type">Map</span>（键值对）：<span class="tok-type">HashMap</span>、<span class="tok-type">LinkedHashMap</span>、<span class="tok-type">TreeMap</span>、<span class="tok-type">Hashtable</span>、<span class="tok-type">ConcurrentHashMap</span></code></pre>
+<h3 id="sec-22">3.2 ArrayList vs LinkedList</h3>
+<ul><li><strong>ArrayList</strong>：基于动态数组，随机访问 O(1)，插入删除（非尾部）需移动元素 O(n)，扩容 1.5 倍。</li><li><strong>LinkedList</strong>：基于双向链表，插入删除 O(1)（已知节点），随机访问 O(n)，额外内存开销（前后指针）。</li></ul>
+<h3 id="sec-23">3.3 HashMap 原理（重点）</h3>
+<ul><li><strong>JDK 1.7</strong>：数组 + 链表，头插法（多线程易成环）。</li><li><strong>JDK 1.8</strong>：数组 + 链表 + 红黑树。</li><li>默认容量 16，负载因子 0.75，阈值 = 容量 × 负载因子。</li><li>链表长度 ≥ 8 且数组容量 ≥ 64 时转红黑树；树节点 ≤ 6 退化为链表。</li><li>计算下标：<code>(n - 1) &amp; hash</code>，hash 经 <code>hashCode ^ (h &gt;&gt;&gt; 16)</code> 扰动。</li><li>扩容 2 倍，重新分布（低位/高位链表）。</li><li><strong>线程不安全</strong>：并发 put 可能导致数据覆盖、死循环（1.7）。并发场景用 <code>ConcurrentHashMap</code>。</li></ul>
+<h3 id="sec-24">3.4 ConcurrentHashMap</h3>
+<ul><li><strong>JDK 1.7</strong>：Segment 分段锁（ReentrantLock），默认 16 段。</li><li><strong>JDK 1.8</strong>：取消 Segment，使用 <code>Node + CAS + synchronized</code>（锁链表头节点），粒度更细，效率更高。</li></ul>
+<h3 id="sec-25">3.5 HashSet 如何保证不重复</h3>
+<ul><li>基于 HashMap 实现，元素作为 key，value 为固定 Object。靠 <code>hashCode()</code> + <code>equals()</code> 判断重复。</li></ul>
+<h3 id="sec-26">3.6 fail-fast 与 fail-safe</h3>
+<ul><li><strong>fail-fast</strong>：遍历时若集合被修改（非迭代器自身），抛出 <code>ConcurrentModificationException</code>。ArrayList 等默认。</li><li><strong>fail-safe</strong>：基于副本遍历，不抛异常，但读到的是旧数据。CopyOnWriteArrayList、ConcurrentHashMap 迭代器。</li></ul>
+<hr class="sep">
+<h2 id="sec-27">4. 并发与多线程（JUC）</h2>
+<h3 id="sec-28">4.1 进程与线程</h3>
+<ul><li>进程：资源分配的最小单位，独立内存空间。</li><li>线程：CPU 调度的最小单位，同进程内线程共享内存。</li></ul>
+<h3 id="sec-29">4.2 创建线程的方式</h3>
+<ol><li>继承 <code>Thread</code> 重写 run。</li><li>实现 <code>Runnable</code>（无返回值）。</li><li>实现 <code>Callable</code>（有返回值，配合 FutureTask）。</li><li>线程池 <code>ExecutorService</code>。</li></ol>
+<h3 id="sec-30">4.3 线程的生命周期</h3>
+<p>新建 → 就绪 → 运行 → 阻塞（wait/sleep/IO/锁）→ 死亡。</p>
+<ul><li><code>sleep</code>：不释放锁，Thread 静态方法。</li><li><code>wait</code>：释放锁，Object 方法，需配合 <code>notify/notifyAll</code>，在 synchronized 内调用。</li></ul>
+<h3 id="sec-31">4.4 synchronized 关键字</h3>
+<ul><li>修饰方法/代码块，保证原子性、可见性、有序性。</li><li>底层：对象头 Mark Word + Monitor（管程）。JDK 1.6 后引入<strong>锁升级</strong>：无锁 → 偏向锁 → 轻量级锁（CAS 自旋）→ 重量级锁（操作系统互斥）。</li></ul>
+<h3 id="sec-32">4.5 volatile</h3>
+<ul><li>保证<strong>可见性</strong>（写立即刷主存，读从主存取）与<strong>有序性</strong>（禁止指令重排）。</li><li><strong>不保证原子性</strong>（如 i++ 仍是三步操作）。</li><li>经典用法：状态标志位、双重检查单例。</li></ul>
+<h3 id="sec-33">4.6 synchronized vs volatile</h3>
+<table><thead><tr><th>维度</th><th>synchronized</th><th>volatile</th></tr></thead><tbody><tr><td>原子性</td><td>保证</td><td>不保证</td></tr><tr><td>可见性</td><td>保证</td><td>保证</td></tr><tr><td>有序性</td><td>保证（锁）</td><td>保证（屏障）</td></tr><tr><td>阻塞</td><td>会</td><td>不会</td></tr></tbody></table>
+<h3 id="sec-34">4.7 锁分类</h3>
+<ul><li><strong>公平/非公平锁</strong>：是否按申请顺序获取（ReentrantLock 可设置，默认非公平）。</li><li><strong>可重入锁</strong>：同一线程可重复获取（synchronized、ReentrantLock）。</li><li><strong>悲观锁/乐观锁</strong>：synchronized 是悲观；CAS 是乐观。</li><li><strong>自旋锁</strong>：失败后忙等一段时间，避免线程切换开销。</li><li><strong>读写锁</strong>：ReadWriteLock，读共享、写独占。</li></ul>
+<h3 id="sec-35">4.8 CAS 是什么？有什么问题？</h3>
+<ul><li>Compare And Swap：比较并交换，无锁原子操作（CPU 指令级）。</li><li>问题：<strong>ABA 问题</strong>（加版本号/时间戳解决，如 AtomicStampedReference）、<strong>自旋开销大</strong>、<strong>只能保证一个变量原子性</strong>。</li></ul>
+<h3 id="sec-36">4.9 线程池</h3>
+<ul><li>核心参数（ThreadPoolExecutor）：</li><li>corePoolSize：核心线程数</li><li>maximumPoolSize：最大线程数</li><li>keepAliveTime：空闲线程存活时间</li><li>workQueue：任务队列（ArrayBlockingQueue、LinkedBlockingQueue、SynchronousQueue）</li><li>threadFactory：线程工厂</li><li>handler：拒绝策略</li><li><strong>执行流程</strong>：核心线程满 → 入队列 → 队列满 → 开非核心线程 → 达最大线程数 → 触发拒绝策略。</li><li><strong>拒绝策略</strong>：AbortPolicy（抛异常，默认）、CallerRunsPolicy（调用者线程执行）、DiscardPolicy（丢弃）、DiscardOldestPolicy（丢弃最老）。</li><li><strong>Executors 的隐患</strong>：FixedThreadPool / SingleThreadPool 用无界队列易 OOM；CachedThreadPool 最大线程数无界易 OOM。建议手动 new ThreadPoolExecutor。</li></ul>
+<h3 id="sec-37">4.10 ThreadLocal</h3>
+<ul><li>线程本地变量，每个线程有独立副本，避免共享。</li><li>原理：Thread 内有 ThreadLocalMap，key 为 ThreadLocal 弱引用。</li><li><strong>内存泄漏</strong>：key 弱引用被 GC 后 value 仍是强引用，需手动 <code>remove()</code>。</li></ul>
+<hr class="sep">
+<h2 id="sec-38">5. JVM</h2>
+<h3 id="sec-39">5.1 运行时数据区</h3>
+<ul><li><strong>线程私有</strong>：程序计数器、虚拟机栈、本地方法栈。</li><li><strong>线程共享</strong>：堆、方法区（元空间 Metaspace，JDK 8 取代永久代）。</li></ul>
+<h3 id="sec-40">5.2 堆内存划分</h3>
+<ul><li>新生代（Eden + 两个 Survivor S0/S1）、老年代。</li><li>对象优先在 Eden 分配，Minor GC 后存活的进入 Survivor，年龄达阈值（默认 15）进入老年代。</li></ul>
+<h3 id="sec-41">5.3 垃圾回收算法</h3>
+<ul><li><strong>标记-清除</strong>：简单但有碎片。</li><li><strong>标记-整理</strong>：无碎片，移动对象开销大（老年代）。</li><li><strong>复制算法</strong>：无碎片，浪费一半空间（新生代）。</li><li><strong>分代收集</strong>：新生代用复制，老年代用标记-整理/清除。</li></ul>
+<h3 id="sec-42">5.4 垃圾收集器</h3>
+<ul><li><strong>Serial / Serial Old</strong>：单线程，简单。</li><li><strong>ParNew</strong>：Serial 多线程版，配合 CMS。</li><li><strong>Parallel Scavenge / Parallel Old</strong>：吞吐量优先。</li><li><strong>CMS</strong>：并发标记清除，低停顿，但碎片、CPU 敏感、Concurrent Mode Failure。</li><li><strong>G1</strong>：分 Region，可预测停顿，兼顾吞吐与延迟（JDK 9+ 默认）。</li><li><strong>ZGC / Shenandoah</strong>：超低停顿（毫秒级）。</li></ul>
+<h3 id="sec-43">5.5 如何判断对象可回收？</h3>
+<ul><li><strong>引用计数</strong>：简单但有循环引用问题。</li><li><strong>可达性分析</strong>：GC Roots（栈引用、静态变量、常量、JNI）不可达即为可回收。至少两次标记（finalize 自救一次）。</li></ul>
+<h3 id="sec-44">5.6 双亲委派模型</h3>
+<ul><li>类加载器层级：Bootstrap → Extension → Application → 自定义。</li><li>加载时先委派父加载器，父无法加载才自己加载。</li><li><strong>好处</strong>：避免重复加载、防止核心类被篡改。</li><li><strong>破坏场景</strong>：SPI（JDBC）、热部署、Tomcat WebAppClassLoader。</li></ul>
+<h3 id="sec-45">5.7 常见 OOM / 调优参数</h3>
+<ul><li><code>-Xms</code> / <code>-Xmx</code>：堆初始/最大。</li><li><code>-Xmn</code>：新生代大小。</li><li><code>-XX:MetaspaceSize</code>：元空间。</li><li>排查工具：jps、jstat、jmap、jstack、jvisualvm、Arthas。</li></ul>
+<hr class="sep">
+<h2 id="sec-46">6. Java 8+ 新特性</h2>
+<h3 id="sec-47">6.1 Lambda 表达式</h3>
+<ul><li>函数式编程，<code>(参数) -&gt; 表达式/语句块</code>。</li><li>本质是匿名内部类的语法糖 + invokedynamic。</li></ul>
+<h3 id="sec-48">6.2 函数式接口</h3>
+<ul><li>只有一个抽象方法的接口（@FunctionalInterface），如 Runnable、Comparator、Predicate、Function、Supplier、Consumer。</li></ul>
+<h3 id="sec-49">6.3 Stream API</h3>
+<ul><li>流式处理集合：<code>filter</code>、<code>map</code>、<code>sorted</code>、<code>collect</code>、<code>reduce</code>、<code>forEach</code>。</li><li>惰性求值（中间操作）+ 及早求值（终止操作）。</li></ul>
+<h3 id="sec-50">6.4 新日期时间 API</h3>
+<ul><li><code>LocalDate / LocalTime / LocalDateTime / DateTimeFormatter</code>（线程安全，取代 SimpleDateFormat）。</li><li><code>Optional</code> 解决 NPE。</li></ul>
+<h3 id="sec-51">6.5 接口的 default / static 方法</h3>
+<ul><li>default 方法允许接口演进而不破坏实现类；static 提供工具方法。</li></ul>
+<h3 id="sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</h3>
+<ul><li>Record：不可变数据类语法糖（自动生成构造器、getter、equals、hashCode）。</li></ul>
+<hr class="sep">
+<h2 id="sec-53">7. I/O 与 NIO</h2>
+<h3 id="sec-54">7.1 BIO / NIO / AIO</h3>
+<ul><li><strong>BIO</strong>：同步阻塞，一连接一线程。</li><li><strong>NIO</strong>：同步非阻塞，基于 Channel + Buffer + Selector（多路复用），一个线程管多个连接。</li><li><strong>AIO</strong>：异步非阻塞（NIO.2），回调通知。</li></ul>
+<h3 id="sec-55">7.2 NIO 核心组件</h3>
+<ul><li><strong>Channel</strong>：双向通道（读写）。</li><li><strong>Buffer</strong>：数据容器（position、limit、capacity）。</li><li><strong>Selector</strong>：多路复用器，监听多个 Channel 事件。</li></ul>
+<hr class="sep">
+<h2 id="sec-56">8. 常见设计模式</h2>
+<h3 id="sec-57">8.1 单例模式（双重检查锁）</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> Singleton {
+    <span class="tok-kw">private</span> <span class="tok-kw">static</span> <span class="tok-kw">volatile</span> Singleton instance;
+    <span class="tok-kw">private</span> Singleton() {}
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> Singleton getInstance() {
+        <span class="tok-kw">if</span> (instance == <span class="tok-kw">null</span>) {
+            <span class="tok-kw">synchronized</span> (Singleton.<span class="tok-kw">class</span>) {
+                <span class="tok-kw">if</span> (instance == <span class="tok-kw">null</span>) {
+                    instance = <span class="tok-kw">new</span> Singleton();
+                }
+            }
+        }
+        <span class="tok-kw">return</span> instance;
+    }
+}</code></pre>
+<ul><li>枚举单例最安全（防止反射、序列化破坏）。</li></ul>
+<h3 id="sec-58">8.2 工厂 / 抽象工厂</h3>
+<ul><li>工厂：创建对象不暴露逻辑。</li><li>抽象工厂：创建一组相关对象。</li></ul>
+<h3 id="sec-59">8.3 策略模式</h3>
+<ul><li>定义算法族，封装可互换的行为（如 Comparator、排序策略）。</li></ul>
+<h3 id="sec-60">8.4 观察者模式</h3>
+<ul><li>一对多依赖，状态变化通知所有观察者（Spring 事件、消息订阅）。</li></ul>
+<h3 id="sec-61">8.5 代理模式</h3>
+<ul><li>静态代理、JDK 动态代理（基于接口）、CGLIB（基于继承，asm 字节码）。</li></ul>
+<h3 id="sec-62">8.6 装饰器模式</h3>
+<ul><li>动态给对象加职责（Java I/O 流、Collections.synchronizedXxx）。</li></ul>
+<hr class="sep">
+<h2 id="sec-63">9. MySQL 基础</h2>
+<h3 id="sec-64">9.1 索引</h3>
+<ul><li><strong>B+ 树索引</strong>：叶子节点存数据/指针且有序链表，范围查询友好，三层即可存千万级。</li><li><strong>聚簇索引</strong>：叶子存整行（InnoDB 主键），二级索引叶子存主键值（回表）。</li><li><strong>覆盖索引</strong>：查询字段在索引中，无需回表。</li><li><strong>最左前缀原则</strong>：联合索引 (a,b,c) 命中需从左开始。</li><li><strong>不适合索引</strong>：低区分度字段、频繁更新的字段、小表。</li></ul>
+<h3 id="sec-65">9.2 事务四大特性（ACID）</h3>
+<ul><li>原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）。</li></ul>
+<h3 id="sec-66">9.3 事务隔离级别</h3>
+<table><thead><tr><th>级别</th><th>脏读</th><th>不可重复读</th><th>幻读</th></tr></thead><tbody><tr><td>读未提交</td><td>✗</td><td>✗</td><td>✗</td></tr><tr><td>读已提交 RC</td><td>✓</td><td>✗</td><td>✗</td></tr><tr><td>可重复读 RR（默认）</td><td>✓</td><td>✓</td><td>⚠ 部分</td></tr><tr><td>串行化</td><td>✓</td><td>✓</td><td>✓</td></tr></tbody></table>
+<h3 id="sec-67">9.4 慢查询优化思路</h3>
+<ul><li>加合适索引、避免 <code>SELECT *</code>、减少 <code>COUNT(*)</code>、分页优化（延迟关联）、避免索引失效（函数、<code>%</code> 前缀、隐式转换、OR）。</li></ul>
+<h3 id="sec-68">9.5 分库分表</h3>
+<ul><li>垂直：按业务拆库/表。</li><li>水平：按范围/哈希/时间分片（ShardingSphere）。</li></ul>
+<hr class="sep">
+<h2 id="sec-69">10. Redis 基础</h2>
+<h3 id="sec-70">10.1 数据类型</h3>
+<ul><li>String、Hash、List、Set、ZSet（有序集合），及 Bitmap、HyperLogLog、Geo、Stream。</li></ul>
+<h3 id="sec-71">10.2 持久化</h3>
+<ul><li><strong>RDB</strong>：快照，恢复快，可能丢数据。</li><li><strong>AOF</strong>：命令日志，数据更安全，文件大。</li></ul>
+<h3 id="sec-72">10.3 缓存问题</h3>
+<ul><li><strong>缓存穿透</strong>：查不存在的数据 → 布隆过滤器 / 空值缓存。</li><li><strong>缓存击穿</strong>：热点 key 过期 → 互斥锁 / 逻辑过期。</li><li><strong>缓存雪崩</strong>：大量 key 同时过期 → 过期时间加随机 / 多级缓存 / 高可用。</li></ul>
+<h3 id="sec-73">10.4 内存淘汰策略</h3>
+<ul><li>LRU、LFU、random、ttl、noeviction（默认不淘汰，写报错）。</li></ul>
+<h3 id="sec-74">10.5 常见用途</h3>
+<ul><li>缓存、分布式锁（SETNX / Redisson）、计数器、排行榜（ZSet）、消息队列（List/Stream）。</li></ul>
+<hr class="sep">
+<h2 id="sec-75">11. Spring / Spring Boot</h2>
+<h3 id="sec-76">11.1 控制反转（IoC）与依赖注入（DI）</h3>
+<ul><li>IoC：对象的创建与管理交给容器，而非手动 new。</li><li>DI：容器把依赖注入到对象（构造器、setter、字段）。</li></ul>
+<h3 id="sec-77">11.2 Bean 作用域</h3>
+<ul><li>singleton（默认，单例）、prototype（多例）、request、session、application。</li></ul>
+<h3 id="sec-78">11.3 Bean 生命周期</h3>
+<ul><li>实例化 → 属性填充 → Aware 接口 → BeanPostProcessor 前置 → 初始化（@PostConstruct / init-method）→ BeanPostProcessor 后置 → 就绪 → 销毁（@PreDestroy / destroy-method）。</li></ul>
+<h3 id="sec-79">11.4 AOP</h3>
+<ul><li>面向切面，基于动态代理。核心概念：切点（Pointcut）、通知（Advice：前置/后置/环绕/异常/最终）、切面（Aspect）、连接点（JoinPoint）。</li><li>应用：日志、事务、权限。</li></ul>
+<h3 id="sec-80">11.5 Spring 事务</h3>
+<ul><li>声明式（<code>@Transactional</code>），基于 AOP + 代理。</li><li>失效场景：自调用（同类方法调用）、非 public、异常被 catch、数据库引擎不支持。</li></ul>
+<h3 id="sec-81">11.6 Spring Boot 自动配置原理</h3>
+<ul><li><code>@SpringBootApplication</code> = <code>@SpringBootConfiguration</code> + <code>@EnableAutoConfiguration</code> + <code>@ComponentScan</code>。</li><li><code>EnableAutoConfiguration</code> 通过 <code>spring.factories</code> / <code>AutoConfiguration.imports</code> 加载自动配置类，按条件（<code>@Conditional</code>）装配。</li></ul>
+<hr class="sep">
+<h2 id="sec-82">12. 计算机网络</h2>
+<h3 id="sec-83">12.1 TCP 三次握手 / 四次挥手</h3>
+<ul><li>握手：SYN → SYN+ACK → ACK，确认双方收发能力。</li><li>挥手：FIN → ACK → FIN → ACK，因全双工需分别关闭。</li></ul>
+<h3 id="sec-84">12.2 TCP 与 UDP 区别</h3>
+<ul><li>TCP：可靠、面向连接、有序、流量/拥塞控制；UDP：不可靠、无连接、快、适合实时。</li></ul>
+<h3 id="sec-85">12.3 HTTP 与 HTTPS</h3>
+<ul><li>HTTPS = HTTP + TLS/SSL，加密 + 身份认证。</li><li>握手：非对称加密协商对称密钥，后续用对称加密传输。</li></ul>
+<h3 id="sec-86">12.4 常见状态码</h3>
+<ul><li>2xx 成功、3xx 重定向、4xx 客户端错误（400/401/403/404）、5xx 服务端错误（500/502/503）。</li></ul>
+<h3 id="sec-87">12.5 浏览器输入 URL 到页面显示的过程</h3>
+<ul><li>DNS 解析 → TCP 连接 → 发送 HTTP 请求 → 服务器响应 → 浏览器解析渲染 → 断开连接。</li></ul>
+<hr class="sep">
+<h2 id="sec-88">13. 常见算法与数据结构</h2>
+<h3 id="sec-89">13.1 数据结构</h3>
+<ul><li>数组、链表、栈、队列、哈希表、二叉树（含 BST、AVL、红黑树）、堆、图、Trie。</li></ul>
+<h3 id="sec-90">13.2 排序算法速记</h3>
+<table><thead><tr><th>算法</th><th>平均</th><th>稳定</th><th>备注</th></tr></thead><tbody><tr><td>冒泡</td><td>O(n²)</td><td>✓</td><td>简单</td></tr><tr><td>快排</td><td>O(n log n)</td><td>✗</td><td>最坏 n²，常用</td></tr><tr><td>归并</td><td>O(n log n)</td><td>✓</td><td>需额外空间</td></tr><tr><td>堆排</td><td>O(n log n)</td><td>✗</td><td>原地</td></tr><tr><td>插入</td><td>O(n²)</td><td>✓</td><td>近乎有序高效</td></tr></tbody></table>
+<h3 id="sec-91">13.3 刷题套路</h3>
+<ul><li>数组/双指针、滑动窗口、哈希表计数、二叉树递归、DFS/BFS、回溯、动态规划、贪心、二分查找。</li></ul>
+<hr class="sep">
+<h1 id="sec-92">第二部分：业务场景实战</h1>
+<blockquote>本部分把第一部分抽象知识点落到<strong>真实业务场景</strong>，每个场景给出：业务背景 → 用到的知识点 → 关键实现思路 → 面试追问。 目标：面试被问「这个东西你在项目里怎么用的？」时能张口就来。</blockquote>
+<hr class="sep">
+<h2 id="sec-93">1. 集合：购物车与商品去重</h2>
+<p><strong>业务背景</strong> 用户加购同一商品多次，前端可能重复提交；购物车需要展示「不重复的商品 + 各自数量」。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>HashMap</code>：以 <code>skuId</code> 为 key，<code>数量</code> 为 value，天然去重。</li><li><code>LinkedHashMap</code>：需要保持加购顺序时选用。</li><li><code>HashSet</code>：批量校验「已存在的 skuId 集合」。</li><li>不可变对象做 key 时必须正确重写 <code>equals</code> + <code>hashCode</code>（SKU 用 id 即可）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Map</span>&lt;<span class="tok-type">Long</span>, <span class="tok-type">Integer</span>&gt; cart = <span class="tok-kw">new</span> <span class="tok-type">LinkedHashMap</span>&lt;&gt;();
+<span class="tok-kw">for</span> (SkuItem item : items) {
+    cart.merge(item.getSkuId(), item.getCount(), <span class="tok-type">Integer</span>::sum); <span class="tok-cmt">// 合并数量</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么购物车不用 <code>List</code> 而用 <code>Map</code>？（O(1) 查重 vs O(n)）</li><li>如果 skuId 是对象，hashCode 冲突会怎样？（退化成链表/红黑树，性能下降）</li><li>并发加购怎么办？（用 <code>ConcurrentHashMap</code>，或用数据库唯一约束兜底）</li></ul>
+<hr class="sep">
+<h2 id="sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</h2>
+<p><strong>业务背景</strong> 商品详情页高频访问，DB 扛不住，加一层本地缓存；同时实时统计「商品被浏览次数」做热门榜单。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>ConcurrentHashMap</code> 做本地缓存（Caffeine 底层也是它 + 近似 LRU）。</li><li>并发计数用 <code>ConcurrentHashMap</code> + <code>LongAdder</code>（分段 CAS，比 AtomicLong 高并发更优）。</li><li>缓存与 Redis 的层级关系（本地缓存 → Redis → DB）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">private</span> <span class="tok-kw">final</span> <span class="tok-type">Map</span>&lt;<span class="tok-type">Long</span>, ProductVO&gt; cache = <span class="tok-kw">new</span> <span class="tok-type">ConcurrentHashMap</span>&lt;&gt;();
+<span class="tok-kw">private</span> <span class="tok-kw">final</span> <span class="tok-type">Map</span>&lt;<span class="tok-type">Long</span>, LongAdder&gt; viewCount = <span class="tok-kw">new</span> <span class="tok-type">ConcurrentHashMap</span>&lt;&gt;();
+
+<span class="tok-kw">public</span> ProductVO getProduct(<span class="tok-type">Long</span> id) {
+    <span class="tok-kw">return</span> cache.computeIfAbsent(id, <span class="tok-kw">this</span>::loadFromDb);
+}
+<span class="tok-kw">public</span> <span class="tok-kw">void</span> incrView(<span class="tok-type">Long</span> id) {
+    viewCount.computeIfAbsent(id, k -&gt; <span class="tok-kw">new</span> LongAdder()).increment();
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>本地缓存和 Redis 缓存各自优缺点？（本地最快但各节点不一致，Redis 集中但有网络开销）</li><li>为什么热点计数用 LongAdder 而不是 AtomicLong？（高并发下 AtomicLong CAS 竞争激烈，LongAdder 分 cell 分散竞争）</li><li>缓存一致性怎么保证？（更新 DB 后删本地缓存 + 发广播/消息让其他节点失效）</li></ul>
+<hr class="sep">
+<h2 id="sec-95">3. synchronized / 锁：秒杀库存扣减</h2>
+<p><strong>业务背景</strong> 秒杀活动，1 万人在同一秒抢 100 件商品，必须保证「不超卖、不超扣」。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>单机：<code>synchronized</code> / <code>ReentrantLock</code> 保护库存扣减临界区。</li><li>分布式：必须上分布式锁（Redis <code>SETNX</code> / Redisson）或数据库乐观锁（<code>UPDATE ... WHERE stock &gt; 0</code>）。</li><li>CAS / 原子类在单体场景的替代。</li></ul>
+<p><strong>关键实现思路（单体 + 数据库乐观锁兜底）</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 先 Redis 预扣（Lua 原子脚本保证原子性）</span>
+<span class="tok-type">Long</span> remain = redisTemplate.execute(decrScript, <span class="tok-type">List</span>.of(stockKey));
+<span class="tok-kw">if</span> (remain &lt; <span class="tok-num">0</span>) { redisTemplate.incr(stockKey); <span class="tok-kw">return</span> <span class="tok-str">&quot;售罄&quot;</span>; }
+<span class="tok-cmt">// 异步落库，数据库再 WHERE stock&gt;0 兜底防超卖</span>
+int rows = itemMapper.decrStock(itemId);
+<span class="tok-kw">if</span> (rows == <span class="tok-num">0</span>) { redisTemplate.incr(stockKey); <span class="tok-kw">return</span> <span class="tok-str">&quot;售罄&quot;</span>; }</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>只靠 synchronized 为什么扛不住秒杀？（单机锁，集群多实例各自扣自己的，照样超卖）</li><li>为什么用 Lua 脚本做 Redis 预扣？（保证「判断+扣减」原子，避免 check-then-act 竞态）</li><li>库存扣成负数怎么防？（Lua 返回后判断 + 数据库 WHERE 条件双重保险）</li></ul>
+<hr class="sep">
+<h2 id="sec-96">4. volatile：系统开关与单例配置中心</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>运营要临时关闭某个营销活动（如「双11预热」），不想发版就能即时生效。</li><li>配置中心（如 Nacos/Apollo）推送配置后，应用要立刻读到新值。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>volatile</code> 保证可见性：一个线程改了，其他线程立刻可见。</li><li>典型用法：布尔开关 <code>private volatile boolean activityOn;</code>。</li><li>不能保证原子性：开关只是赋值 OK，但 <code>i++</code> 类的计数不行。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>@Component
+<span class="tok-kw">public</span> <span class="tok-kw">class</span> ActivitySwitch {
+    <span class="tok-kw">private</span> <span class="tok-kw">volatile</span> boolean open = <span class="tok-kw">false</span>;
+    @Value(<span class="tok-str">&quot;${activity.open:false}&quot;</span>) <span class="tok-kw">public</span> <span class="tok-kw">void</span> setOpen(boolean v){ <span class="tok-kw">this</span>.open = v; }
+    <span class="tok-kw">public</span> boolean isOpen(){ <span class="tok-kw">return</span> open; }
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么开关用 volatile 而不是 synchronized？（开关只是写读布尔值，volatile 无锁更轻量）</li><li>配置中心推送后为什么能立刻生效？（监听器 set 新值 + volatile 保证可见）</li><li>单例 DCL 为什么必须 volatile？（防止指令重排导致返回半初始化对象）</li></ul>
+<hr class="sep">
+<h2 id="sec-97">5. 线程池：异步通知与批量任务</h2>
+<p><strong>业务背景</strong> 用户下单成功后，要发短信、推 App、记积分、写流水——这些不能阻塞下单主流程，且是大批量任务。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>自定义 <code>ThreadPoolExecutor</code>，不用 <code>Executors</code>（防 OOM）。</li><li>核心/最大线程数、队列、拒绝策略选型。</li><li><code>CompletableFuture</code> 编排多个异步任务。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">ExecutorService</span> notifyPool = <span class="tok-kw">new</span> <span class="tok-type">ThreadPoolExecutor</span>(
+    <span class="tok-num">8</span>, <span class="tok-num">32</span>, 60L, <span class="tok-type">TimeUnit</span>.SECONDS,
+    <span class="tok-kw">new</span> ArrayBlockingQueue&lt;&gt;(<span class="tok-num">1024</span>),
+    <span class="tok-kw">new</span> ThreadFactoryBuilder().setNameFormat(<span class="tok-str">&quot;notify-%d&quot;</span>).build(),
+    <span class="tok-kw">new</span> <span class="tok-type">ThreadPoolExecutor</span>.CallerRunsPolicy()); <span class="tok-cmt">// 拒绝时由调用方线程执行，不丢任务</span>
+
+<span class="tok-type">CompletableFuture</span>.runAsync(() -&gt; smsService.send(order), notifyPool)
+    .thenRunAsync(() -&gt; pointService.add(order), notifyPool);</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么不用 <code>newCachedThreadPool</code>？（最大线程数无界，瞬时洪峰直接 OOM）</li><li>拒绝策略为什么选 CallerRunsPolicy？（不下单主链路、不丢通知，压力回灌调用方限流）</li><li>任务执行异常怎么感知？（重写 afterExecute 或 Future.get 捕获）</li></ul>
+<hr class="sep">
+<h2 id="sec-98">6. ThreadLocal：用户上下文与链路追踪</h2>
+<p><strong>业务背景</strong> 一次请求里多处需要「当前登录用户」「TraceId」，不想每层方法都传参；同时要避免用户信息串号。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>ThreadLocal</code> 存请求级上下文（UserContext、MDC TraceId）。</li><li>必须 <code>remove()</code>，否则线程池复用导致串数据（内存泄漏 + 串号）。</li><li>Spring MVC 拦截器 <code>preHandle</code> 设值、<code>afterCompletion</code> 清理。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> UserContext {
+    <span class="tok-kw">private</span> <span class="tok-kw">static</span> <span class="tok-kw">final</span> <span class="tok-type">ThreadLocal</span>&lt;User&gt; TL = <span class="tok-kw">new</span> <span class="tok-type">ThreadLocal</span>&lt;&gt;();
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> <span class="tok-kw">void</span> set(User u){ TL.set(u); }
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> User get(){ <span class="tok-kw">return</span> TL.get(); }
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> <span class="tok-kw">void</span> clear(){ TL.remove(); } <span class="tok-cmt">// 关键！</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么线程池里不 remove 会串号？（线程复用，下次请求读到上次的 user）</li><li>ThreadLocal 内存泄漏原因？（key 弱引用被 GC，value 强引用残留，remove 清理）</li><li>TraceId 怎么跨线程传递？（InheritableThreadLocal 或 TransmittableThreadLocal 解决线程池透传）</li></ul>
+<hr class="sep">
+<h2 id="sec-99">7. JVM / GC：大促接口超时排查</h2>
+<p><strong>业务背景</strong> 大促期间，订单接口每隔几分钟就出现一波 1~2 秒超时，平时正常。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>GC 日志分析（<code>-Xlog:gc*</code> / <code>-XX:+PrintGCDetails</code>）。</li><li>频繁 Full GC 导致 Stop-The-World，请求被「冻结」。</li><li>排查链路：监控告警 → 看 GC 频次/耗时 → 堆 dump 分析大对象 → 定位内存泄漏/缓存无上限。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code># 抓现场
+jstat -gcutil &lt;pid&gt; <span class="tok-num">1000</span>      # 看各区占用与 GC 次数
+jmap -dump:live,format=b,file=heap.hprof &lt;pid&gt;  # 堆转储
+# 用 MAT / VisualVM / Arthas 分析：谁占了多少</code></pre>
+<ul><li>常见根因：本地缓存 <code>HashMap</code> 无上限、ThreadLocal 未 remove、大对象（一次性读全表）。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>Full GC 和 Young GC 区别？（回收范围、触发条件、停顿时长）</li><li>为什么大促才出问题平时没事？（流量翻倍触发缓存膨胀 / 对象分配速率陡增）</li><li>怎么预防？（缓存加容量上限+过期、压测、监控 GC 告警）</li></ul>
+<hr class="sep">
+<h2 id="sec-100">8. String：订单号与金额拼接</h2>
+<p><strong>业务背景</strong> 生成订单号、拼接用户地址、格式化金额展示——字符串处理到处都是。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>循环内拼接用 <code>StringBuilder</code>（不用 <code>+</code>，避免产生大量临时对象）。</li><li>金额绝不用 <code>double</code>（精度丢失），用 <code>BigDecimal</code> + <code>String</code> 构造。</li><li><code>String.format</code> / <code>DecimalFormat</code> 做展示。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 订单号：时间戳 + 用户ID + 随机</span>
+<span class="tok-type">StringBuilder</span> sb = <span class="tok-kw">new</span> <span class="tok-type">StringBuilder</span>();
+sb.append(<span class="tok-type">System</span>.currentTimeMillis()).append(userId).append(ThreadLocalRandom.current().nextInt(<span class="tok-num">1000</span>));
+<span class="tok-cmt">// 金额</span>
+<span class="tok-type">BigDecimal</span> amount = <span class="tok-kw">new</span> <span class="tok-type">BigDecimal</span>(<span class="tok-str">&quot;19.99&quot;</span>); <span class="tok-cmt">// 用字符串构造，避免 0.1+0.2 误差</span>
+<span class="tok-type">String</span> show = amount.setScale(<span class="tok-num">2</span>, RoundingMode.HALF_UP).toString();</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么 <code>0.1 + 0.2 != 0.3</code>？（二进制浮点无法精确表示）</li><li>循环拼接用 + 会怎样？（每次产生新 String，O(n²) 临时对象，GC 压力）</li><li>BigDecimal 的坑？（用 double 构造仍有误差，必须用 String 构造）</li></ul>
+<hr class="sep">
+<h2 id="sec-101">9. 设计模式：支付与促销策略</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>支付方式有多种（微信、支付宝、银行卡），新增方式不想改老代码。</li><li>促销活动有多种（满减、折扣、立减券），规则可组合。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li><strong>策略模式</strong>：<code>PayStrategy</code> 接口 + 多个实现，按类型路由（<code>Map&lt;Type, Strategy&gt;</code>）。</li><li><strong>工厂模式</strong>：根据渠道创建对应支付 SDK 实例。</li><li><strong>观察者模式</strong>：订单支付成功后，发消息通知积分、物流、风控（解耦）。</li><li><strong>责任链模式</strong>：风控校验多道关卡串行。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Map</span>&lt;PayType, PayStrategy&gt; strategies = ...; <span class="tok-cmt">// Spring 自动注入所有实现</span>
+<span class="tok-kw">public</span> <span class="tok-type">String</span> pay(PayType type, Order o){
+    <span class="tok-kw">return</span> strategies.get(type).pay(o); <span class="tok-cmt">// 新增支付方式只加实现类</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>策略模式和 if-else 相比好在哪？（开闭原则，免改老逻辑）</li><li>Spring 怎么自动收集所有策略实现？（@Autowired List&lt;PayStrategy&gt; 或 Map 注入）</li><li>观察者模式在这里解决了什么？（支付核心与积分/物流解耦，互不影响）</li></ul>
+<hr class="sep">
+<h2 id="sec-102">10. MySQL 索引：订单查询慢 SQL</h2>
+<p><strong>业务背景</strong> 运营后台「查某用户最近 3 个月订单」，未加索引时全表扫描，接口 5 秒。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>联合索引 <code>(user_id, create_time)</code> 命中<strong>最左前缀</strong>，既能按用户又能按时间范围。</li><li>避免索引失效：不要在字段上套函数（<code>WHERE DATE(create_time)=...</code> 会失效）、避免 <code>%前缀</code> 模糊。</li><li>覆盖索引避免回表（<code>SELECT</code> 只取索引列）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>-- 建联合索引
+ALTER TABLE orders ADD INDEX idx_user_time (user_id, create_time);
+-- 查询（走索引，范围在右列）
+SELECT id, amount FROM orders
+WHERE user_id = <span class="tok-num">123</span> AND create_time &gt;= <span class="tok-str">&#x27;2026-05-01&#x27;</span>
+ORDER BY create_time DESC LIMIT <span class="tok-num">20</span>;</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么联合索引顺序是 user_id 在前？（高频等值查询在前，范围在后，否则索引失效）</li><li>怎么验证走没走索引？（<code>EXPLAIN</code> 看 type/key/rows/extra）</li><li>回表是什么？（二级索引存主键，需再用主键查整行；覆盖索引可免）</li></ul>
+<hr class="sep">
+<h2 id="sec-103">11. 事务：下单扣库存与转账</h2>
+<p><strong>业务背景</strong> 下单要「扣库存 + 创建订单 + 扣余额」要么全成功要么全失败；银行转账 A 减 B 加必须原子。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>@Transactional</code> 声明式事务（AOP 代理）。</li><li>事务隔离级别解决脏读/不可重复读/幻读。</li><li>事务失效场景：同类自调用、非 public、异常被吞。</li><li>跨服务用分布式事务（Seata TCC / 消息最终一致性）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>@Transactional(rollbackFor = <span class="tok-type">Exception</span>.<span class="tok-kw">class</span>, isolation = Isolation.REPEATABLE_READ)
+<span class="tok-kw">public</span> <span class="tok-kw">void</span> createOrder(OrderCmd cmd){
+    stockMapper.decr(cmd.getSkuId(), cmd.getCount()); <span class="tok-cmt">// 扣库存</span>
+    orderMapper.insert(cmd.toOrder());                <span class="tok-cmt">// 建订单</span>
+    accountMapper.decr(cmd.getUserId(), cmd.getAmount()); <span class="tok-cmt">// 扣款</span>
+    <span class="tok-cmt">// 任一异常整体回滚</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么自调用事务不生效？（Spring 走代理，内部调用没过代理，没织入事务）</li><li>扣库存和扣款不在同一个库怎么办？（跨库 → 分布式事务 / 最终一致 + 补偿）</li><li>大事务有什么危害？（锁久、连接占用、回滚慢，应拆解 + 异步）</li></ul>
+<hr class="sep">
+<h2 id="sec-104">12. Redis：缓存与分布式锁</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>商品详情缓存，扛读流量。</li><li>秒杀 / 定时任务防止集群多节点重复执行。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li>缓存三大坑：穿透（布隆过滤器）、击穿（互斥锁/逻辑过期）、雪崩（过期时间加随机）。</li><li>分布式锁：<code>SET key value NX EX</code> 原子加锁 + Lua 释放（防误删）+ Redisson 看门狗自动续期。</li><li>缓存与 DB 一致性：先更新 DB 再删缓存（Cache-Aside）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 加锁（Redisson 简化写法）</span>
+RLock lock = redissonClient.getLock(<span class="tok-str">&quot;task:sync&quot;</span>);
+<span class="tok-kw">if</span> (lock.tryLock(<span class="tok-num">0</span>, <span class="tok-num">30</span>, <span class="tok-type">TimeUnit</span>.SECONDS)) {
+    <span class="tok-kw">try</span> { doSync(); } <span class="tok-kw">finally</span> { lock.unlock(); }
+}
+<span class="tok-cmt">// 缓存读取</span>
+Product p = redis.get(key);
+<span class="tok-kw">if</span> (p == <span class="tok-kw">null</span>) {
+    p = db.load(id);
+    redis.setex(key, <span class="tok-num">300</span> + RandomUtil.randomInt(<span class="tok-num">60</span>), p); <span class="tok-cmt">// 过期加随机防雪崩</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么释放锁要用 Lua？（判断+删除必须原子，否则可能删掉别人的锁）</li><li>缓存和数据库不一致怎么解决？（更新 DB 后删缓存；延迟双删兜底）</li><li>Redisson 看门狗做什么？（锁快过期时自动续期，防止业务没跑完锁没了）</li></ul>
+<hr class="sep">
+<h2 id="sec-105">13. Spring：循环依赖 / AOP / 事务失效</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>支付服务 A 依赖风控服务 B，B 又依赖 A（循环依赖）。</li><li>统一记录接口耗时、统一登录校验。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li><strong>循环依赖</strong>：Spring 用<strong>三级缓存</strong>解决（singletonObjects / earlySingletonObjects / singletonFactories），允许「提前暴露半成品 bean」注入。</li><li><strong>AOP</strong>：用动态代理织入日志、鉴权、事务（JDK 代理基于接口，CGLIB 基于继承）。</li><li><strong>事务失效</strong>：自调用、异常被 catch、非 public、数据库引擎不支持。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>@Aspect @Component
+<span class="tok-kw">public</span> <span class="tok-kw">class</span> LogAspect {
+    @Around(<span class="tok-str">&quot;execution(* com.x..service..*(..))&quot;</span>)
+    <span class="tok-kw">public</span> <span class="tok-type">Object</span> log(ProceedingJoinPoint pjp) <span class="tok-kw">throws</span> <span class="tok-type">Throwable</span> {
+        long s = <span class="tok-type">System</span>.currentTimeMillis();
+        <span class="tok-kw">try</span> { <span class="tok-kw">return</span> pjp.proceed(); }
+        <span class="tok-kw">finally</span> { log.info(<span class="tok-str">&quot;{} 耗时{}ms&quot;</span>, pjp.getSignature(), <span class="tok-type">System</span>.currentTimeMillis()-s); }
+    }
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>三级缓存具体怎么破循环依赖？（一二三级分别存成品/早期引用/工厂，提前曝光解决）</li><li>构造器注入的循环依赖能解决吗？（不能，需 @Lazy 或改设计）</li><li>为什么 CGLIB 能代理类而 JDK 只能代理接口？（CGLIB 生成子类，JDK 用 InvocationHandler）</li></ul>
+<hr class="sep">
+<h2 id="sec-106">14. 网络：接口超时与 HTTPS</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>调用第三方支付接口偶发超时，需要合理设置连接/读超时。</li><li>用户登录、支付走 HTTPS 防中间人。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li>TCP 三次握手 / 四次挥手（连接建立与关闭成本）。</li><li>HTTP 超时：connectTimeout、readTimeout 必须设，不然线程一直挂起。</li><li>HTTPS = HTTP + TLS，非对称加密协商对称密钥，后续对称加密传输。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>RequestConfig cfg = RequestConfig.custom()
+    .setConnectTimeout(<span class="tok-num">1000</span>)   <span class="tok-cmt">// 建连最多 1s</span>
+    .setSocketTimeout(<span class="tok-num">3000</span>)    <span class="tok-cmt">// 读响应最多 3s</span>
+    .build();</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>不设超时会有什么后果？（第三方卡死，线程池打满，雪崩）</li><li>为什么 HTTPS 握手后用对称加密？（非对称慢，对称快，握手阶段用非对称安全协商密钥）</li><li>TIME_WAIT 太多怎么处理？（连接复用、调内核参数、短连接改长连接）</li></ul>
+<hr class="sep">
+<h2 id="sec-107">15. 消息队列：下单异步解耦</h2>
+<p><strong>业务背景</strong> 下单成功后要做 5 件周边事（发券、积分、通知、风控、对账）。若同步做，任一失败则下单失败，且慢。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>消息队列解耦 + 异步 + 削峰（Kafka / RabbitMQ / RocketMQ）。</li><li>可靠投递：本地消息表 / 事务消息，保证「下单成功必发消息」。</li><li>消费幂等：用业务唯一键（订单号）防重复消费。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 事务消息 / 本地消息表，确保下单与发消息一致</span>
+orderTx.execute(() -&gt; {
+    orderMapper.insert(order);
+    messageMapper.insert(order.toMessage()); <span class="tok-cmt">// 同库事务</span>
+});
+<span class="tok-cmt">// 异步任务把 message 发到 MQ，下游各自消费（幂等：按 orderId 去重）</span></code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>下单和发消息怎么保证都不丢？（本地消息表 / RocketMQ 事务消息）</li><li>消费者重复收到消息怎么办？（幂等：唯一键 / 状态机，重复处理无副作用）</li><li>MQ 挂了订单还能下吗？（降级：消息落本地表，恢复后补偿发送）</li></ul>
+<hr class="sep">
+<h1 id="sec-108">第三部分：分布式与微服务专项</h1>
+<blockquote>校招 / 社招中高级岗必考。本部分覆盖微服务治理、消息队列、分布式事务、分布式锁与一致性、分布式 ID 与分库分表。每个主题给出「核心概念 + 对比 + 高频追问」。</blockquote>
+<hr class="sep">
+<h2 id="sec-109">1. 微服务与 Spring Cloud 生态</h2>
+<h3 id="sec-110">1.1 微服务核心组件</h3>
+<ul><li><strong>注册中心</strong>：Eureka（AP，CAP 中保证可用）、Nacos（AP/CP 可切换，集注册+配置）、Consul、ZooKeeper（CP）。</li><li><strong>配置中心</strong>：Nacos、Apollo（携程）、Spring Cloud Config。</li><li><strong>网关</strong>：Spring Cloud Gateway（WebFlux、断言+过滤器）、Zuul（1.x 阻塞，已淘汰）。</li><li><strong>负载均衡</strong>：Spring Cloud LoadBalancer / Ribbon（轮询、随机、加权、一致性哈希）。</li><li><strong>熔断降级限流</strong>：Sentinel（滑动窗口、熔断规则、热点限流）、Hystrix（已停更）。</li><li><strong>链路追踪</strong>：Sleuth + Zipkin / SkyWalking（无侵入字节码插桩）。</li></ul>
+<h3 id="sec-111">1.2 服务注册与发现原理</h3>
+<ul><li>服务启动时向注册中心<strong>注册</strong>元数据（IP、端口、服务名）。</li><li>消费者<strong>拉取/订阅</strong>服务列表（推拉结合 + 心跳续约）。</li><li>注册中心通过<strong>心跳</strong>判断实例存活，剔除失效节点。</li><li>客户端缓存服务列表，注册中心宕机仍可短期调用（最终一致）。</li></ul>
+<h3 id="sec-112">1.3 网关（Gateway）作用</h3>
+<ul><li><strong>路由</strong>：根据断言（Path、Header、Cookie）转发到对应服务。</li><li><strong>鉴权</strong>：统一 JWT / OAuth2 校验，拦截非法请求。</li><li><strong>限流</strong>：基于令牌桶 / 计数器，保护后端。</li><li><strong>灰度 / 熔断</strong>：按版本路由、集成 Sentinel 熔断。</li></ul>
+<h3 id="sec-113">1.4 负载均衡：Ribbon vs Nginx</h3>
+<ul><li><strong>Ribbon</strong>：客户端负载均衡（进程内，知道所有实例，选一个再调）。</li><li><strong>Nginx</strong>：服务端负载均衡（独立节点，集中转发）。</li><li>区别：Ribbon 减少一跳、支持更细策略；Nginx 与语言无关、可做 L4/L7。</li></ul>
+<h3 id="sec-114">1.5 熔断、降级、限流</h3>
+<ul><li><strong>熔断</strong>：错误率/慢调用超阈值，打开熔断器，一段时间后半开探测（Sentinel 三种状态）。</li><li><strong>降级</strong>：流量激增或依赖故障时，返回兜底（默认值 / 缓存 / 静态页）。</li><li><strong>限流算法</strong>：</li><li>计数器（固定窗口，有临界突刺问题）。</li><li>滑动窗口（细分时间片，更平滑）。</li><li>漏桶（恒定速率流出，整形）。</li><li>令牌桶（恒定速率发令牌，允许突发，最常用）。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>Eureka 与 Nacos 在 CAP 上的取舍？（Eureka 选 AP 保证可用；Nacos 可切 CP 保证强一致）</li><li>Sentinel 和 Hystrix 区别？（Hystrix 线程池隔离资源占用大；Sentinel 信号量 + 滑动窗口，更轻量）</li><li>网关为什么要做限流而不是只靠服务自身？（边缘拦截，避免无效流量打到内网）</li></ul>
+<hr class="sep">
+<h2 id="sec-115">2. 消息队列（MQ）</h2>
+<h3 id="sec-116">2.1 为什么用 MQ</h3>
+<ul><li><strong>解耦</strong>：生产者不关心谁消费（如下单后发券、积分、通知各自订阅）。</li><li><strong>异步</strong>：非核心链路异步化，主流程快返回。</li><li><strong>削峰</strong>：突发流量先入队，消费者按能力平稳处理（如秒杀）。</li></ul>
+<h3 id="sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</h3>
+<table><thead><tr><th>维度</th><th>Kafka</th><th>RabbitMQ</th><th>RocketMQ</th></tr></thead><tbody><tr><td>定位</td><td>高吞吐日志/流</td><td>低延迟、路由灵活</td><td>业务消息、事务</td></tr><tr><td>吞吐量</td><td>极高</td><td>中</td><td>高</td></tr><tr><td>延迟</td><td>低（批）</td><td>极低</td><td>低</td></tr><tr><td>事务消息</td><td>无（0.11+ 有幂等）</td><td>无</td><td>有（半事务）</td></tr><tr><td>顺序消息</td><td>分区有序</td><td>队列有序</td><td>队列有序</td></tr><tr><td>典型场景</td><td>日志、大数据</td><td>企业总线、任务</td><td>电商交易</td></tr></tbody></table>
+<h3 id="sec-118">2.3 消息可靠性（不丢）</h3>
+<ul><li><strong>生产端</strong>：confirm 机制（RabbitMQ）、acks=all + 重试（Kafka）。</li><li><strong>服务端</strong>：刷盘（同步/异步）+ 主从复制。</li><li><strong>消费端</strong>：先处理业务再手动 ack，处理失败不 ack（重回队列 / 死信）。</li></ul>
+<h3 id="sec-119">2.4 重复消费与幂等</h3>
+<ul><li>原因：网络重试、rebalance、消费超时。</li><li>幂等方案：业务唯一键（订单号）去重表、Redis <code>SETNX</code>、状态机（已处理则跳过）、数据库唯一索引。</li></ul>
+<h3 id="sec-120">2.5 消息积压处理</h3>
+<ul><li>临时扩容消费者实例 + 提升消费并发。</li><li>如果消费慢：开启多线程消费 / 批量消费。</li><li>极端：新建临时 Topic，把积压消息转发后快速消费。</li></ul>
+<h3 id="sec-121">2.6 顺序消息</h3>
+<ul><li>Kafka：同一业务 key 发到同一 partition，单 partition 内有序。</li><li>RocketMQ：同一 MessageQueue 有序，用顺序发送 + 加锁消费。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>如何保证消息不丢失？（三端确认：生产 confirm + 服务端持久化 + 消费手动 ack）</li><li>RocketMQ 事务消息原理？（Half Message → 执行本地事务 → Commit/Rollback，回查保证最终一致）</li><li>Kafka 为什么快？（顺序写磁盘、零拷贝 sendfile、批量压缩、页缓存）</li></ul>
+<hr class="sep">
+<h2 id="sec-122">3. 分布式事务</h2>
+<h3 id="sec-123">3.1 2PC / 3PC</h3>
+<ul><li><strong>2PC（两阶段提交）</strong>：准备阶段（各参与者锁资源投票）+ 提交阶段（协调者统一提交/回滚）。缺点：同步阻塞、单点、数据不一致（协调者宕机）。</li><li><strong>3PC</strong>：引入超时与预询问，降低阻塞，但网络分区仍可能不一致，工业界少用。</li></ul>
+<h3 id="sec-124">3.2 TCC（Try-Confirm-Cancel）</h3>
+<ul><li><strong>Try</strong>：预留资源（如冻结库存）。</li><li><strong>Confirm</strong>：真正提交（幂等）。</li><li><strong>Cancel</strong>：释放预留（幂等）。</li><li>优点：无长事务锁，性能好；缺点：业务侵入强，需手写三阶段。</li></ul>
+<h3 id="sec-125">3.3 消息最终一致性（常用）</h3>
+<ul><li><strong>本地消息表</strong>：业务与消息同库事务，后台任务投递到 MQ，消费者幂等处理。</li><li><strong>事务消息</strong>（RocketMQ）：Half Message + 本地事务 + 回查，保证「本地成功必发消息」。</li><li>特点：最终一致、性能好、容忍短暂不一致。</li></ul>
+<h3 id="sec-126">3.4 Seata</h3>
+<ul><li><strong>AT 模式</strong>：自动生成回滚日志（undo_log），两阶段：一阶段提交本地事务+写undo，二阶段异步清理或回滚（无侵入，最常用）。</li><li><strong>TCC / SAGA / XA</strong> 模式按需选择。</li></ul>
+<h3 id="sec-127">3.5 最大努力通知</h3>
+<ul><li>多次重试通知 + 对账，适用于跨系统（如支付结果通知），不保证强一致，但尽力送达。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>你们项目用哪种分布式事务？为什么？（电商常用 消息最终一致 / Seata AT，避免 2PC 长锁）</li><li>TCC 的空回滚 / 防悬挂是什么？（Try 未收到但收到 Cancel → 记录空回滚；防悬挂：Cancel 先于 Try 到达要拒绝）</li><li>Seata AT 为什么无侵入？（代理数据源，自动解析 SQL 生成前后镜像）</li></ul>
+<hr class="sep">
+<h2 id="sec-128">4. 分布式锁与缓存一致性</h2>
+<h3 id="sec-129">4.1 分布式锁方案</h3>
+<ul><li><strong>Redis 实现</strong>：<code>SET key value NX EX</code> 原子加锁；Lua 脚本释放（防误删）；Redisson 看门狗自动续期。</li><li>优点：高性能；缺点：主从切换可能丢锁（RedLock 争议大）。</li><li><strong>ZooKeeper 实现</strong>：临时有序节点 + 最小节点获锁 + watch 下一节点。</li><li>优点：强一致、锁一定不丢；缺点：性能较低、依赖 ZK 集群。</li><li><strong>数据库实现</strong>：唯一索引 / <code>SELECT ... FOR UPDATE</code>。</li><li>优点：简单；缺点：性能差、连接占用。</li></ul>
+<h3 id="sec-130">4.2 缓存与 DB 一致性</h3>
+<ul><li><strong>Cache-Aside（旁路）</strong>：读时回填，写时「先更新 DB 再删缓存」。</li><li><strong>延迟双删</strong>：更新 DB → 删缓存 → 延迟再删一次（防更新期间旧值回填）。</li><li><strong>binlog 订阅（Canal）</strong>：监听 binlog 异步删/更新缓存，解耦业务。</li><li>取舍：强一致几乎不可能，追求「最终一致 + 缩短不一致窗口」。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>Redis 锁和 ZK 锁怎么选？（高并发选 Redis；强一致选 ZK）</li><li>为什么「先更新 DB 再删缓存」仍可能不一致？（删缓存后、DB 提交前读请求回填旧值 → 延迟双删/订阅 binlog 兜底）</li><li>Redisson 看门狗原理？（加锁后定时续期，业务完成才释放，防止锁提前过期）</li></ul>
+<hr class="sep">
+<h2 id="sec-131">5. 分布式 ID 与分库分表</h2>
+<h3 id="sec-132">5.1 分布式 ID 方案</h3>
+<ul><li><strong>UUID</strong>：简单无序，作为 DB 主键导致索引碎片化，不推荐。</li><li><strong>雪花算法（Snowflake）</strong>：时间戳+机器ID+序列号，趋势递增、高性能；依赖时钟（时钟回拨问题）。</li><li><strong>号段模式（Leaf-segment）</strong>：DB 批量取号段，内存发号，性能好。</li><li><strong>Leaf-snowflake</strong>：解决时钟回拨的雪花改进。</li><li>要求：全局唯一、趋势递增（利 B+ 树）、高可用、高性能。</li></ul>
+<h3 id="sec-133">5.2 分库分表</h3>
+<ul><li><strong>垂直分库</strong>：按业务（订单库、用户库）拆分，解耦。</li><li><strong>水平分表</strong>：单表数据过大，按 <strong>分片键</strong>（用户ID、订单ID）哈希/范围/时间分片。</li><li><strong>中间件</strong>：ShardingSphere（JDBC 层 / Proxy）。</li><li><strong>带来的问题</strong>：</li><li>分布式事务（跨库）。</li><li>跨分片查询 / 分页 / 排序困难（需归并）。</li><li>分片键选择不慎导致数据倾斜。</li><li>扩容需迁移数据（一致性哈希可缓解）。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>分片键怎么选？（高频查询字段、区分度高、避免热点，如订单表用 user_id 或 order_id）</li><li>雪花算法时钟回拨怎么办？（等待、记录上次时间、或切换机器位）</li><li>分库分表后怎么做跨片分页？（各分片查 TopN 后在应用层归并排序）</li></ul>
+<hr class="sep">
+<h1 id="sec-134">附录 A：高频追问清单（自查）</h1>
+<ul><li>HashMap 1.7 与 1.8 的区别？为什么转红黑树阈值是 8？</li><li>synchronized 锁升级全过程？</li><li>volatile 为什么不能保证原子性？DCL 单例为什么要 volatile？</li><li>JVM 为什么分代？G1 与 CMS 的区别？</li><li>MySQL 为什么用 B+ 树而不是 B 树 / 红黑树？</li><li>可重复读如何解决的幻读（MVCC + 间隙锁）？</li><li>Redis 分布式锁如何防止误删？Redisson 看门狗原理？</li><li>Spring 循环依赖如何解决（三级缓存）？</li><li>线程池为什么不建议用 Executors？</li><li>TCP 为什么是三次握手而不是两次？</li><li>RocketMQ 事务消息 / 本地消息表如何保证「下单必发消息」？</li><li>分布式锁 Redis 与 ZK 怎么选？Redisson 看门狗原理？</li><li>缓存与 DB 一致性怎么保证（Cache-Aside / 延迟双删 / binlog）？</li><li>分布式事务 2PC、TCC、消息最终一致各自适用什么场景？</li><li>雪花算法时钟回拨怎么办？分库分表分片键怎么选？</li></ul>
+<hr class="sep">
+<h1 id="sec-135">附录 B：八股 → 业务的回答套路</h1>
+<p>被问到任何知识点，按这个结构答，立刻显得有实战经验：</p>
+<ol><li><strong>概念一句话讲清</strong>（是什么）。</li><li><strong>我项目中哪里用过</strong>（真实场景）。</li><li><strong>当时怎么实现的</strong>（关键代码/方案）。</li><li><strong>踩过什么坑 / 为什么这么选</strong>（深度）。</li><li><strong>如果换成 XX 场景会怎样</strong>（举一反三）。</li></ol>
+<hr class="sep">
+<blockquote>本文档整合「核心知识点速查」与「业务场景实战」于一体，建议结合源码与实战加深理解。祝面试顺利 🚀</blockquote>
+<h1 id="sec-200">第四部分：进阶高频补充（2026 新版考点）</h1>
+<blockquote>结合 2025–2026 最新面经整理：场景题占比已超过 50%，<strong>虚拟线程、AQS、MVCC、Spring Boot 3.x</strong> 成为新的 T0 必考点。本部分在原有八股基础上补充深度与新版内容，答法同样遵循「概念 → 原理 → 项目实战 → 坑点」的套路。</blockquote>
+<hr class="sep">
+<h2 id="sec-201">1. JDK 17 / 21 新特性（T0 必考）</h2>
+<h3 id="sec-202">1.1 虚拟线程（Virtual Threads，Project Loom）★</h3>
+<ul><li><strong>是什么</strong>：JDK 21 正式发布的轻量级线程，由 <strong>JVM 调度</strong>而非操作系统，运行在少量「载体线程（Carrier Thread）」之上。</li>
+<li><strong>为什么需要</strong>：平台线程栈约 1–2MB，1 万并发连接就要 10–20GB 内存；虚拟线程栈仅约 1KB，可轻松创建百万级。</li>
+<li><strong>核心原理</strong>：虚拟线程阻塞在 I/O 上时被 <strong>park 挂起</strong>，载体线程立即去跑其他虚拟线程；I/O 就绪后在任意可用载体上恢复。用同步写法获得异步性能。</li>
+<li><strong>不适用场景</strong>：CPU 密集型任务（无法 park，白占载体）；大量使用 <code>synchronized</code> 的代码（<strong>pinning 问题</strong>——synchronized 块内挂起会把载体线程一起钉住，JDK 24 已改进；改造方案是换 <code>ReentrantLock</code>）。</li></ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 三种创建方式</span>
+<span class="tok-type">Thread</span>.startVirtualThread(() -&gt; doWork());
+<span class="tok-type">Thread</span>.ofVirtual().name(<span class="tok-str">&quot;vt-&quot;</span>).start(() -&gt; doWork());
+<span class="tok-kw">try</span> (<span class="tok-kw">var</span> exec = <span class="tok-type">Executors</span>.newVirtualThreadPerTaskExecutor()) {
+    exec.submit(() -&gt; doWork()); <span class="tok-cmt">// 一任务一虚拟线程，不要池化复用！</span>
+}
+<span class="tok-cmt">// Spring Boot 3.2+ 一行开启：spring.threads.virtual.enabled=true</span></code></pre>
+<ul><li><strong>面试话术</strong>：「线程池的存在是为了复用昂贵的平台线程；虚拟线程足够便宜，<strong>不需要池化</strong>，一任务一线程即可。限流改用信号量 Semaphore。」</li></ul>
+<h3 id="sec-203">1.2 Sealed Classes / Records / Pattern Matching</h3>
+<ul><li><strong>Record（16+）</strong>：不可变数据载体，自动生成构造器、getter、equals/hashCode/toString，替代 DTO 样板代码；类与字段均 final。</li>
+<li><strong>Sealed（17+）</strong>：<code>sealed</code> + <code>permits</code> 限定谁能继承/实现，配合模式匹配可实现<strong>穷尽性 switch</strong>（编译器校验，无需 default）。</li>
+<li><strong>Pattern Matching for switch（21+）</strong>：<code>case Circle c -&gt; ...</code> 类型模式 + 解构，替代 instanceof 链与访问者模式。</li>
+<li><strong>文本块（15+）</strong>：<code>&quot;&quot;&quot;</code> 多行字符串，写 JSON/SQL 不再需要转义。</li></ul>
+<h3 id="sec-204">1.3 Structured Concurrency 与 Scoped Values</h3>
+<ul><li><strong>Structured Concurrency（21 预览）</strong>：<code>StructuredTaskScope</code> 把一组并发子任务当作一个单元——任一失败整体取消、全部完成才返回，杜绝线程泄漏。</li>
+<li><strong>Scoped Values</strong>：虚拟线程时代替代 <code>ThreadLocal</code> 的方案，不可变、有明确作用域、内存友好。</li></ul>
+<hr class="sep">
+<h2 id="sec-205">2. 并发进阶（手写 AQS 是高频要求）</h2>
+<h3 id="sec-206">2.1 AQS 原理 ★</h3>
+<ul><li>全称 AbstractQueuedSynchronizer，JUC 锁与同步器的基座：<code>ReentrantLock</code>、<code>CountDownLatch</code>、<code>Semaphore</code>、<code>ReentrantReadWriteLock</code> 都基于它。</li>
+<li>核心三件套：<strong>volatile int state</strong>（同步状态）+ <strong>CLH 变体双向队列</strong>（排队等待线程）+ <strong>CAS</strong>（无锁修改 state）。</li>
+<li>独占模式流程：tryAcquire CAS 抢 state → 失败入队（Node 封装线程）→ LockSupport.park 挂起 → 前驱释放时 unpark 后继。</li>
+<li>共享模式：state 表示许可数，获取成功后<strong>传播唤醒</strong>后续共享节点（CountDownLatch、Semaphore）。</li></ul>
+<h3 id="sec-207">2.2 ReentrantLock vs synchronized</h3>
+<table><thead><tr><th>维度</th><th>synchronized</th><th>ReentrantLock</th></tr></thead><tbody><tr><td>实现</td><td>JVM 层面，Monitor</td><td>JDK 层面，AQS</td></tr><tr><td>锁释放</td><td>自动</td><td>必须 finally 中 unlock</td></tr><tr><td>可中断</td><td>否</td><td>lockInterruptibly()</td></tr><tr><td>超时获取</td><td>否</td><td>tryLock(timeout)</td></tr><tr><td>公平锁</td><td>非公平</td><td>可选（默认非公平）</td></tr><tr><td>条件队列</td><td>一个 wait/notify</td><td>多个 Condition</td></tr><tr><td>虚拟线程 pinning</td><td>有（JDK 24 前）</td><td>无，推荐替代</td></tr></tbody></table>
+<h3 id="sec-208">2.3 CountDownLatch / CyclicBarrier / Semaphore</h3>
+<table><thead><tr><th>工具</th><th>语义</th><th>能否复用</th><th>典型场景</th></tr></thead><tbody><tr><td>CountDownLatch</td><td>一个或多个线程等 N 个事件完成</td><td>否</td><td>主线程等多个子任务加载完</td></tr><tr><td>CyclicBarrier</td><td>N 个线程互相等到齐再一起走</td><td>可循环</td><td>多线程分阶段计算汇合</td></tr><tr><td>Semaphore</td><td>许可信号量，控制并发数</td><td>许可归还即可</td><td>限流、连接池、虚拟线程限流</td></tr></tbody></table>
+<h3 id="sec-209">2.4 原子类、LongAdder 与 StampedLock</h3>
+<ul><li><code>AtomicInteger</code> 等基于 CAS 自旋；高并发下大量线程自旋失败，CPU 空转。</li>
+<li><strong>LongAdder</strong>：分段思想——base + Cell[] 分散热点，最终 sum 求和；高并发计数首选（缺点：sum 非强一致快照）。</li>
+<li><strong>StampedLock</strong>：读写锁升级版，支持<strong>乐观读</strong>（tryOptimisticRead 不阻塞写，读后 validate 校验票据），读多写少场景吞吐更高；不可重入。</li></ul>
+<h3 id="sec-210">2.5 CompletableFuture 编排</h3>
+<ul><li>串行 <code>thenApply/thenCompose</code>、并行汇聚 <code>thenCombine/allOf</code>、任一完成 <code>anyOf/acceptEither</code>。</li><li>异常处理 <code>exceptionally/handle</code>；超时 <code>orTimeout/completeOnTimeout</code>（JDK 9+）。</li><li>默认用 ForkJoinPool 公共池，<strong>生产环境务必指定业务线程池</strong>，避免被公共池拖累。</li></ul>
+<hr class="sep">
+<h2 id="sec-211">3. JVM 深入</h2>
+<h3 id="sec-212">3.1 类加载过程与对象创建细节</h3>
+<ul><li>类加载五阶段：<strong>加载 → 验证 → 准备（静态变量赋零值）→ 解析（符号引用转直接引用）→ 初始化（执行 clinit）</strong>。</li>
+<li>对象创建：类加载检查 → 分配内存（<strong>指针碰撞</strong>-内存规整 / <strong>空闲列表</strong>-内存交错；并发安全靠 CAS+失败重试 或 <strong>TLAB</strong> 本地线程分配缓冲）→ 零值初始化 → 设置对象头（Mark Word、类型指针）→ 执行 init。</li>
+<li>逃逸分析：对象未逃逸出方法可<strong>栈上分配 + 标量替换</strong>，随栈帧销毁，减轻 GC 压力。</li></ul>
+<h3 id="sec-213">3.2 CMS / G1 / ZGC 对比与选型</h3>
+<table><thead><tr><th>收集器</th><th>目标</th><th>停顿</th><th>关键机制</th><th>短板</th></tr></thead><tbody><tr><td>CMS</td><td>低停顿</td><td>两次短 STW</td><td>并发标记清除</td><td>碎片、CPU 敏感、JDK 14 移除</td></tr><tr><td>G1（JDK9+ 默认）</td><td>可预测停顿</td><td>-XX:MaxGCPauseMillis 可控</td><td>Region 分区 + 回收价值排序</td><td>大堆下仍有百 ms 级停顿</td></tr><tr><td>ZGC</td><td>超低停顿</td><td>&lt;1ms（与堆大小无关）</td><td>染色指针 + 读屏障 + 并发整理</td><td>吞吐略降、内存占用高</td></tr></tbody></table>
+<ul><li>选型：常规微服务 G1 即可；大堆（16G+）、延迟敏感（交易、网关）选 ZGC（JDK 21 分代 ZGC 进一步降低分配压力）。</li></ul>
+<h3 id="sec-214">3.3 线上问题排查四板斧 ★</h3>
+<ul><li><strong>CPU 飙高</strong>：<code>top</code> 找进程 → <code>top -Hp pid</code> 找线程 → <code>printf %x</code> 转 16 进制 → <code>jstack pid | grep nid</code> 定位代码行。常见原因：死循环、正则灾难回溯、频繁 GC。</li>
+<li><strong>Full GC 频繁</strong>：<code>jstat -gcutil pid 1s</code> 看各区占用 → <code>jmap -histo</code> 或 dump 后用 MAT 查支配树。常见原因：大对象、内存泄漏（ThreadLocal/静态集合/连接未关）、元空间不足。</li>
+<li><strong>接口超时/抖动</strong>：Arthas <code>trace</code> 看方法耗时、<code>watch</code> 看入参出参；结合 GC 日志排除 STW。</li>
+<li><strong>死锁</strong>：<code>jstack</code> 直接报 Found deadlock；或 Arthas <code>thread -b</code> 一键定位。</li></ul>
+<hr class="sep">
+<h2 id="sec-215">4. MySQL 深入</h2>
+<h3 id="sec-216">4.1 MVCC 原理 ★</h3>
+<ul><li>三要素：每行隐藏字段 <code>DB_TRX_ID</code>（最近修改事务 ID）、<code>DB_ROLL_PTR</code>（回滚指针，串起 <strong>undo log 版本链</strong>）、ReadView（读视图，含活跃事务列表 m_ids、min_trx_id、max_trx_id、creator_trx_id）。</li>
+<li>可见性判断：版本 trx_id &lt; min_trx_id → 可见；&ge; max_trx_id → 不可见；在 m_ids 中（仍活跃）→ 不可见，沿版本链继续找。</li>
+<li><strong>RC 与 RR 的区别</strong>：RC 每次 SELECT 生成新 ReadView；RR 只在事务第一次 SELECT 时生成一次——这就是 RR 可重复读的原因。</li>
+<li>当前读 vs 快照读：<code>SELECT ... FOR UPDATE / LOCK IN SHARE MODE</code>、增删改是当前读，读最新版本并加锁。</li></ul>
+<h3 id="sec-217">4.2 redo log / undo log / binlog 与两阶段提交</h3>
+<ul><li><strong>redo log</strong>（InnoDB，物理日志）：保证持久性，WAL 先写日志再刷盘，crash 后重放。</li>
+<li><strong>undo log</strong>：保证原子性 + 支撑 MVCC 版本链。</li>
+<li><strong>binlog</strong>（Server 层，逻辑日志）：主从复制与数据恢复。</li>
+<li><strong>两阶段提交</strong>：redo prepare → 写 binlog → redo commit，保证崩溃恢复时两份日志一致，否则主从数据会不一致。</li></ul>
+<h3 id="sec-218">4.3 行锁、间隙锁与死锁</h3>
+<ul><li><strong>Record Lock</strong> 锁记录、<strong>Gap Lock</strong> 锁区间、<strong>Next-Key Lock</strong>（临键锁，左开右闭）= 记录 + 区间，RR 下默认，用于防幻读。</li>
+<li>加锁规则核心：<strong>锁加在索引上</strong>；没走索引的 UPDATE/DELETE 会锁全表（全记录 + 全间隙）。</li>
+<li>死锁排查：<code>SHOW ENGINE INNODB STATUS</code> 看 LATEST DETECTED DEADLOCK；开启 <code>innodb_print_all_deadlocks</code> 记录全部死锁。</li>
+<li>避免死锁：固定加锁顺序、缩小事务、合理建索引、热点行拆分。</li></ul>
+<hr class="sep">
+<h2 id="sec-219">5. Redis 深入</h2>
+<h3 id="sec-220">5.1 底层数据结构</h3>
+<ul><li><strong>SDS</strong>：O(1) 取长度、二进制安全、预分配 + 惰性释放。</li>
+<li><strong>listpack（7.0 取代 ziplist）</strong>：紧凑存储小元素，解决连锁更新问题。</li>
+<li><strong>跳表（ZSet）</strong>：多层索引，平均 O(log n) 查找，范围查询高效；不用红黑树是因为实现简单 + 范围遍历友好。</li>
+<li><strong>渐进式 rehash</strong>：两个哈希表并存，每次增删改查顺带迁移一个桶，避免一次性迁移卡顿。</li></ul>
+<h3 id="sec-221">5.2 主从 / 哨兵 / Cluster</h3>
+<ul><li>主从复制：全量（RDB）+ 增量（repl_backlog 缓冲区）+ 命令传播。</li>
+<li>哨兵：监控、主观/客观下线、Raft 选 leader、故障转移、通知客户端。</li>
+<li><strong>Cluster</strong>：<strong>16384 个槽</strong>按 CRC16 分片，节点间 Gossip 交换信息；key 不在本节点返回 MOVED/ASK 重定向；槽位选择 16384 是心跳包大小与节点规模的权衡。</li></ul>
+<h3 id="sec-222">5.3 bigkey 与 hotkey 治理</h3>
+<ul><li>发现：<code>--bigkeys</code> 扫描、<code>MEMORY USAGE</code>、monitor 采样、代理层统计。</li>
+<li>bigkey 危害：阻塞主线程（删除用 <code>UNLINK</code> 异步）、网卡打满、集群迁移慢。治理：拆分成多个小 key、压缩、避免大集合全量读取（HGETALL → HSCAN）。</li>
+<li>hotkey 治理：本地缓存（Caffeine）兜底、key 打散加随机后缀读多份、读写分离。</li></ul>
+<h3 id="sec-223">5.4 分布式锁的正确姿势 ★</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// ❌ 面经常见反例：SETNX 和 EXPIRE 分两步，加锁后宕机 = 死锁</span>
+<span class="tok-kw">if</span> (redis.setnx(key, <span class="tok-str">&quot;1&quot;</span>)) { redis.expire(key, <span class="tok-num">30</span>); }
+<span class="tok-cmt">// ✅ 正确：原子加锁（value 存唯一标识）+ Lua 原子解锁</span>
+<span class="tok-type">SET</span> lock_key uuid <span class="tok-type">NX</span> <span class="tok-type">PX</span> <span class="tok-num">30000</span>
+<span class="tok-cmt">// 解锁 Lua：先 GET 比对 uuid 再 DEL，防止误删别人的锁</span></code></pre>
+<ul><li>业务超时锁到期怎么办：<strong>Redisson 看门狗</strong>——默认 30s 租约，每 10s 自动续期，直到显式 unlock 或宕机（宕机则自然过期）。</li>
+<li>可重入：Redisson 用 Hash 结构（field=线程标识，value=重入次数）。</li>
+<li>主从切换丢锁问题：官方红锁（RedLock）争议大，多数业务「Redis 锁 + DB 约束兜底」即可，金融级强一致再考虑 ZooKeeper/etcd。</li></ul>
+<hr class="sep">
+<h2 id="sec-224">6. Spring 深入</h2>
+<h3 id="sec-225">6.1 循环依赖与三级缓存 ★</h3>
+<ul><li>三级缓存：<code>singletonObjects</code>（成品 Bean）、<code>earlySingletonObjects</code>（提前暴露的半成品）、<code>singletonFactories</code>（ObjectFactory 工厂）。</li>
+<li>A 依赖 B、B 依赖 A：A 实例化后先把 ObjectFactory 放入三级缓存 → 填充属性时发现依赖 B → 创建 B，B 填充属性时从三级缓存拿到 A 的<strong>早期引用</strong> → B 完成 → A 完成。</li>
+<li><strong>为什么需要三级而不是两级</strong>：ObjectFactory 可在获取时执行 AOP 代理逻辑，保证注入的是<strong>代理对象</strong>而非原始对象；两级缓存无法在「需要代理」和「不需要代理」间统一。</li>
+<li>无法解决：构造器注入循环依赖（实例化阶段就卡住）、prototype 循环依赖。</li></ul>
+<h3 id="sec-226">6.2 Spring MVC 请求处理流程</h3>
+<ul><li>请求 → <code>DispatcherServlet</code> → HandlerMapping 找 Handler → HandlerAdapter 适配执行 → 拦截器 preHandle → 参数解析（HandlerMethodArgumentResolver）→ 调用 Controller → 返回值处理（HandlerMethodReturnValueHandler / HttpMessageConverter）→ 拦截器 postHandle → 视图渲染或直接写响应。</li></ul>
+<h3 id="sec-227">6.3 Spring Boot 3.x 变化（新版必问）</h3>
+<ul><li>最低 JDK 17；<code>javax.*</code> → <code>jakarta.*</code> 命名空间迁移（老项目升级最大坑点）。</li>
+<li>自动配置注册文件从 <code>spring.factories</code> 迁移到 <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>。</li>
+<li>支持<strong>虚拟线程</strong>（3.2+ 一行配置开启）与 <strong>GraalVM Native Image AOT 编译</strong>（启动毫秒级、内存大幅降低，代价是反射/动态代理需显式声明）。</li>
+<li>观测性一体化：Micrometer + OpenTelemetry 内置 Tracing/Metrics。</li></ul>
+<h3 id="sec-228">6.4 AI 工程化趋势：Spring AI 与 RAG</h3>
+<ul><li>2026 面试新风向：面试官越来越爱问「项目里有没有 AI 落地」。要点：Spring AI 的 <code>ChatClient</code> 抽象、Embedding/向量库集成、Tool Calling（函数调用）、RAG 检索增强。</li>
+<li>有真实 RAG 项目（如本知识库的 Ragent）时，重点讲<strong>检索质量与工程容错</strong>（多路召回、Rerank、意图识别、模型降级），而不是「我调了哪个大模型」。</li></ul>
+<hr class="sep">
+<h2 id="sec-229">7. 高频场景题（设计思路模板）</h2>
+<h3 id="sec-230">7.1 秒杀系统完整链路 ★</h3>
+<ul><li>逐级削峰：<strong>页面静态化/CDN → 网关限流（令牌桶）→ 验证码/答题防刷 → MQ 削峰异步下单 → Redis Lua 预减库存 → DB 乐观锁兜底（WHERE stock&gt;0）→ 定时关单回滚库存</strong>。</li>
+<li>防超卖三板斧：Lua 原子扣减 + DB 条件更新 + 唯一索引防重复下单。</li>
+<li>扩展回答：库存预热、热点商品库存分片、排队结果异步通知（WebSocket/SSE）。</li></ul>
+<h3 id="sec-231">7.2 短链系统</h3>
+<ul><li>长链 → 发号器（自增 ID / 雪花）→ <strong>62 进制</strong>（0-9a-zA-Z）转短码 → 存映射（缓存 + DB）。</li>
+<li>跳转用 <strong>301（永久重定向，浏览器缓存，减轻服务器压力）还是 302（可统计点击数）</strong>——按是否需要统计选择。</li>
+<li>防缓存穿透：不存在的短码走布隆过滤器。</li></ul>
+<h3 id="sec-232">7.3 排行榜与高并发计数</h3>
+<ul><li>排行榜：Redis <strong>ZSet</strong>（score=分数，member=用户），ZADD/ZREVRANGE 天然支持；同分按时间先后可把时间戳拼进 score 小数位。</li>
+<li>亿级计数：Redis 单 key 会成热key → <strong>分片计数</strong>（count:key:0~99 随机写、汇总读）或本地 LongAdder 定时批量上报。</li></ul>
+<h3 id="sec-233">7.4 百万数据导出</h3>
+<ul><li>禁止一次性查出全部（OOM）：<strong>流式查询</strong>（MyBatis Cursor / fetchSize）+ EasyExcel 分批写。</li>
+<li>异步化：提交导出任务 → MQ/线程池处理 → 文件上传 OSS → 通知用户下载；页面轮询任务状态。</li></ul>
+<h3 id="sec-234">7.5 接口幂等设计</h3>
+<ul><li>方案梯度：唯一索引（最硬）→ 防重 token（先取 token，提交时 Redis 原子删除）→ 状态机（仅允许合法状态流转）→ 分布式锁。</li>
+<li>MQ 消费端幂等：业务唯一键 + 去重表 / Redis SETNX。</li></ul>
+<hr class="sep">
+<h2 id="sec-235">8. 2026 面试趋势与答题策略</h2>
+<ul><li><strong>T0（必背零容错）</strong>：HashMap/ConcurrentHashMap、JVM 内存与 GC、锁机制/线程池/AQS、Spring IoC/AOP/循环依赖、MySQL 索引/事务/MVCC、Redis 数据结构/缓存三兄弟、<strong>JDK 21 虚拟线程</strong>。</li>
+<li><strong>T1（高薪分水岭）</strong>：Spring Boot 3.x 原理、微服务治理、分布式事务、MQ、分库分表、分布式锁、ZGC。</li>
+<li><strong>T2（加分项）</strong>：GraalVM、云原生、Spring AI/RAG 落地、Service Mesh。</li>
+<li><strong>八股 + 项目绑定法</strong>：每个知识点都准备一个项目里的真实场景；问原理先答核心，再讲「我在项目里怎么用的、踩过什么坑」。</li>
+<li><strong>不会的问题应对公式</strong>：坦诚承认 + 讲出现有认知（相关经验）+ 给出学习思路，切忌不懂装懂。</li></ul>
+<blockquote>至此 Java 八股部分覆盖「基础概念 → 业务实战 → 分布式专项 → 2026 新版进阶」四层，建议按 T0 → T1 → T2 顺序滚动复习。</blockquote>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('1')">下一个知识库：Ragent 项目实战 →</button></div>
+  </section>
+  <section class="page" data-page="1"><h1 id="sec-136">Ragent 平台项目知识库（Agentic RAG 企业级实战）</h1>
+<blockquote>整理自 <code>ragent-main</code> 开源项目（nageoffer/ragent）：Java 17 + Spring Boot 3 + React 18 的企业级 <strong>Agentic RAG</strong> 平台。 定位：「后端程序员转型 AI 工程师的第一站」。覆盖从<strong>文档入库 → 智能问答 → 工具调用</strong>的完整链路。 学习理念：<strong>源码即文档</strong>——下面每个知识点都对应真实可调试的类与方法，建议配合断点跟一次请求走完整条链路。</blockquote>
+<hr class="sep">
+<h2 id="sec-137">一、项目定位与技术栈</h2>
+<h3 id="sec-138">1.1 它是什么</h3>
+<p>Ragent 是一个面向 <strong>Agentic RAG 演进</strong>的企业级 RAG 平台，核心能力：</p>
+<ul><li><strong>多路检索</strong>：多渠道并行检索，去重重排兼顾精准与召回。</li><li><strong>意图识别</strong>：树形多级分类，置信度不足主动引导澄清；节点区分「知识库 / 系统应答 / 工具调用」三类。</li><li><strong>模型引擎</strong>：模型调度、首包探测、健康检查、自动降级，模型故障不影响服务。</li><li><strong>MCP 集成</strong>：非知识类意图自动提参调用业务工具，检索与工具无缝融合。</li></ul>
+<blockquote>它解决的不是「调个 API 就叫 RAG」，而是企业落地 RAG 真实会踩的坑：文档解析、分块策略、召回率、多路融合、幻觉控制、限流熔断、多租户隔离、可观测性。</blockquote>
+<h3 id="sec-139">1.2 技术栈全景</h3>
+<table><thead><tr><th>层</th><th>选型</th></tr></thead><tbody><tr><td>语言 / 框架</td><td><strong>Java 17 + Spring Boot 3.5.7</strong>；前端 <strong>React 18 + TypeScript 5 + Vite 5</strong></td></tr><tr><td>向量库</td><td><strong>Milvus 2.6.6（默认）</strong> 与 <strong>PGVector（PostgreSQL 扩展）</strong> 双支持；关键词检索走 <strong>Elasticsearch</strong></td></tr><tr><td>ORM</td><td>MyBatis-Plus 3.5.14</td></tr><tr><td>LLM 接入</td><td><strong>自研 <code>infra-ai</code> 层</strong>，未用 Spring AI / LangChain4j（统一抽象 <code>ChatClient</code>/<code>EmbeddingClient</code>/<code>RerankClient</code>，自解析 OpenAI 风格 SSE）</td></tr><tr><td>模型供应商</td><td>通义百炼 <code>BaiLianChatClient</code>、硅基流动 <code>SiliconFlowChatClient</code>、<code>AIHubMixChatClient</code>、本地 <code>OllamaChatClient</code></td></tr><tr><td>MCP</td><td><code>io.modelcontextprotocol.sdk</code> 1.1.2（独立进程）</td></tr><tr><td>存储 / 消息</td><td>阿里云 OSS / AWS S3、RocketMQ、Redis / Redisson、Sa-Token 1.43</td></tr><tr><td>文档解析</td><td>Apache Tika 3.2.3、MinerU（API）、Apache POI、batik（SVG/图片）</td></tr><tr><td>并发</td><td><strong>8 个专用线程池</strong> + Transmittable-Thread-Local 2.14.5（上下文透传）</td></tr><tr><td>图谱</td><td>LightRAG 微服务（知识图谱检索通道）；前端 <code>@antv/g6</code> 可视化</td></tr><tr><td>数据库</td><td>PostgreSQL 主库，23 张 <code>t_</code> 业务表</td></tr></tbody></table>
+<h3 id="sec-140">1.3 四大 Maven 模块职责</h3>
+<table><thead><tr><th>模块</th><th>包根</th><th>职责</th></tr></thead><tbody><tr><td><code>framework</code></td><td><code>com.nageoffer.ai.ragent.framework</code></td><td>与业务无关的通用基建：统一响应、三级异常体系、分布式 ID（Snowflake）、双维度幂等、用户上下文、Trace 上下文、SSE 封装、Redis 键序列化、RocketMQ 封装</td></tr><tr><td><code>infra-ai</code></td><td><code>com.nageoffer.ai.ragent.infra</code></td><td>AI 基础设施层，屏蔽模型供应商差异：chat / embedding / rerank / vlm 客户端、模型路由与熔断、Token 计数</td></tr><tr><td><code>bootstrap</code></td><td><code>com.nageoffer.ai.ragent</code></td><td>业务装配与编排入口：RAG 检索 / 意图 / 记忆 / 提示词、知识库、入库流水线、权限、管理后台</td></tr><tr><td><code>mcp-server</code></td><td><code>com.nageoffer.ai.ragent.mcp</code></td><td>独立 MCP 服务进程，暴露业务工具给 Agent 调用</td></tr></tbody></table>
+<hr class="sep">
+<h2 id="sec-141">二、架构分层思想</h2>
+<h3 id="sec-142">2.1 三层职责链路</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>framework  →  infra-ai  →  bootstrap
+(横切能力)    (屏蔽供应商)   (业务逻辑)</code></pre>
+<ul><li><strong>framework</strong>：提供与业务无关的通用能力（异常、ID、幂等、上下文透传、SSE）。换业务逻辑不动它。</li><li><strong>infra-ai</strong>：把不同模型供应商的差异收敛到统一接口后面。换模型供应商不碰业务代码。</li><li><strong>bootstrap</strong>：专注业务编排（RAG 流水线、意图、知识库、入库、权限）。</li></ul>
+<h3 id="sec-143">2.2 为什么这么分</h3>
+<p>分层不是为了炫技，而是解决实际问题：<strong>换模型供应商不用改业务代码，换业务逻辑不用动基础设施</strong>。<code>infra-ai</code> 里实现 <code>ChatClient</code> 接口即可参与路由，<code>bootstrap</code> 完全无感知。</p>
+<hr class="sep">
+<h2 id="sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</h2>
+<h3 id="sec-145">3.1 总览（流水线阶段编排）</h3>
+<p>入口：<code>RAGChatController</code> → <code>RAGChatServiceImpl.streamChat()</code>，主流程由 <strong><code>StreamChatPipeline</code></strong>（<code>rag/service/pipeline/StreamChatPipeline.java</code>）按阶段串联，采用「私有阶段方法 + boolean 短路返回」的轻量编排：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>streamChat()
+ ├─ ChatQueueLimiter.enqueue()          <span class="tok-cmt">// 队列式分布式限流</span>
+ ├─ StreamChatTraceRunner.run()         <span class="tok-cmt">// 全链路 Trace 包裹</span>
+ └─ StreamChatPipeline.execute(ctx)     <span class="tok-cmt">// 流水线编排</span>
+     ├─ <span class="tok-num">1</span>. loadMemory(ctx)              <span class="tok-cmt">// 会话记忆加载</span>
+     ├─ <span class="tok-num">2</span>. rewriteQuery(ctx)            <span class="tok-cmt">// 问题改写 + 子问题拆分</span>
+     ├─ <span class="tok-num">3</span>. resolveIntents(ctx)          <span class="tok-cmt">// 意图识别</span>
+     ├─ <span class="tok-num">4</span>. handleGuidance(ctx)          <span class="tok-cmt">// 歧义引导（置信度不足追问）</span>
+     ├─ <span class="tok-num">5</span>. handleSystemOnly(ctx)        <span class="tok-cmt">// 纯 SYSTEM 意图：直连 LLM 回复</span>
+     ├─ <span class="tok-num">6</span>. retrieve(ctx)                <span class="tok-cmt">// 多路检索</span>
+     └─ <span class="tok-num">7</span>. streamRagResponse(ctx)       <span class="tok-cmt">// 组装 Prompt + 流式输出</span></code></pre>
+<h3 id="sec-146">3.2 阶段 1：会话记忆加载</h3>
+<p><code>ConversationMemoryService.loadAndAppend</code> 加载历史消息。难点不是「存」，而是<strong>记忆压缩</strong>：20 轮对话全塞给模型 Token 成本扛不住；只带最近几轮又可能丢关键信息。Ragent 用「滑动窗口 + 自动摘要压缩 + TTL 过期」平衡，避免长对话 OOM / Token 爆炸。</p>
+<h3 id="sec-147">3.3 阶段 2：问题改写与子问题拆分</h3>
+<p><code>QueryRewriteService.rewriteWithSplit</code>（及 <code>MultiQuestionRewriteService</code>）把用户口语 / 多轮上下文重写为规范子问题：</p>
+<ul><li>用户输入「报销咋整」→ 改写为规范查询；</li><li>多轮里说「怎么申请」→ 补上下文，否则系统不知道在问啥；</li><li>复杂问题拆分为多个子问题分别检索，再融合。</li><li>另有 <code>QueryTermMappingService</code> 做同义词 / 术语映射（如「墨盒」↔「墨盒更换」），提升召回。</li></ul>
+<h3 id="sec-148">3.4 阶段 3：意图识别（树形多级）</h3>
+<ul><li>意图节点 <code>IntentNode</code>：<code>id / parentId / children / level / description / examples / kind</code>，<code>kind</code> 分三类：</li><li><strong>KB</strong>：走知识库检索；</li><li><strong>SYSTEM</strong>：系统应答（直连 LLM，不走检索）；</li><li><strong>MCP</strong>：调用业务工具。</li><li>分类器 <code>DefaultIntentClassifier</code>：一次性把全部叶子节点喂给 LLM 打分（<code>temperature=0.1</code>），返回 <code>List&lt;NodeScore&gt;</code>，结果缓存于 Redis（<code>IntentTreeCacheManager</code>）。</li><li>解析器 <code>IntentResolver.resolve</code>：按子问题并发分类，过滤 <code>score &gt;= INTENT_MIN_SCORE</code>、上限 <code>MAX_INTENT_COUNT</code>，按 KB / MCP 拆成 <code>IntentGroup</code>。</li><li>新增意图节点只需建库，<code>IntentNodeRegistry</code> 自动注册。</li></ul>
+<h3 id="sec-149">3.5 阶段 4：歧义引导</h3>
+<p><code>IntentGuidanceService</code> + <code>AmbiguityLLMChecker</code>：当置信度不足时返回澄清提示，让用户补充信息，<strong>不直接检索</strong>。这是「RAG 常见误区」里强调的工程细节——走错路答案必错。</p>
+<h3 id="sec-150">3.6 阶段 5：多路检索 ★</h3>
+<p>引擎 <code>MultiChannelRetrievalEngine.retrieveKnowledgeChannels</code>：</p>
+<ul><li><strong>检索通道接口 <code>SearchChannel</code></strong>，实现类：</li><li><code>VectorSearchChannel</code>（向量，内部按意图置信度二选一：命中库 <code>IntentParallelRetriever</code> / 全库 <code>CollectionParallelRetriever</code>）</li><li><code>KeywordSearchChannel</code>（ES 关键词，精确匹配订单号等向量弱项）</li><li><code>WebSearchChannel</code>（联网检索）</li><li><code>GraphSearchChannel</code>（知识图谱，接 LightRAG）</li><li>所有通道通过 <code>CompletableFuture</code> + <code>ragRetrievalExecutor</code> 线程池<strong>并行</strong>执行。</li><li><strong>后处理责任链</strong>（接口 <code>SearchResultPostProcessor</code>，按 <code>getOrder()</code> 排序）：</li><li><code>DeduplicationPostProcessor</code>（去重）</li><li><code>FusionPostProcessor</code>（多通道融合，<strong>RRF 倒数排名融合</strong>）</li><li><code>RerankPostProcessor</code>（精排，调 <code>RerankClient</code>）</li><li><code>MetadataEnrichmentPostProcessor</code>（元数据富化，补文档标题等）</li></ul>
+<blockquote>纯向量检索对精确匹配很弱（用户问订单号找不到），所以必须<strong>混合检索 + 重排序</strong>。</blockquote>
+<h3 id="sec-151">3.7 阶段 6：Prompt 组装与流式输出</h3>
+<p><code>streamRagResponse</code> 把检索到的上下文 + 会话记忆 + 系统提示组装成 Prompt，通过 <code>SseEmitterSender</code>（framework 提供的线程安全 SSE 封装）实时推送。<code>RoutingLLMService</code> 流式调用时用 <code>ProbeStreamBridge</code> + <code>LlmFirstPacketProbe</code> 做<strong>首包探测</strong>——首个模型首包超时即切换下一个，用户无感知。</p>
+<h3 id="sec-152">3.8 一张图看懂调用链（文字时序）</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>用户 → Controller.streamChat
+     → ChatQueueLimiter 入队（Redis ZSET + Lua 原子判队头）
+     → StreamChatTraceRunner（AOP 全链路 Trace 开始）
+     → Pipeline:
+        记忆 ← MySQL
+        改写 ← LLM
+        意图 ← LLM（Redis 缓存意图树）
+        检索 ← 向量/关键词/联网/图谱 并行 → 去重→融合(RRF)→重排→富化
+        生成 ← LLM（首包探测 + 降级） → SSE 流式回前端
+     → Trace 落库（t_rag_trace_run / t_rag_trace_node）</code></pre>
+<hr class="sep">
+<h2 id="sec-153">四、知识库入库链路（Ingestion Pipeline）</h2>
+<p>文档从上传到可检索，经过一条<strong>基于节点编排的 Pipeline</strong>：</p>
+<h3 id="sec-154">4.1 五种节点类型（接口 <code>IngestionNode</code>）</h3>
+<table><thead><tr><th>节点</th><th>作用</th><th>关键类</th></tr></thead><tbody><tr><td><code>FetcherNode</code></td><td>拉取（本地 / HTTP / 飞书）</td><td><code>strategy/fetcher/</code></td></tr><tr><td><code>ParserNode</code></td><td>解析（Tika / Markdown / Excel / CSV / MinerU / 图片）</td><td><code>core/parser/</code></td></tr><tr><td><code>ChunkerNode</code></td><td>分块（固定长度 / 结构感知）</td><td><code>StructuredChunkingService</code></td></tr><tr><td><code>EnhancerNode</code></td><td>LLM 增强（如 QA 生成）</td><td>—</td></tr><tr><td><code>IndexerNode</code></td><td>生成 embedding → 写入向量库</td><td><code>VectorStoreAdmin</code> / <code>VectorStoreService</code></td></tr></tbody></table>
+<h3 id="sec-155">4.2 链式执行引擎</h3>
+<p><code>IngestionEngine</code> 基于「节点连线」链式执行（非 DAG）：<code>PipelineDefinition</code> 描述节点与 <code>nextNodeId</code>，从起始节点顺链执行；<code>validatePipeline</code> 检测环；支持 <code>ConditionEvaluator</code> 条件执行、<code>NodeOutputExtractor</code> 输出链式传递。<strong>每个节点和任务都有独立 <code>NodeLog</code></strong>，出问题能精确定位到哪一步。</p>
+<h3 id="sec-156">4.3 切片策略与写入</h3>
+<p><code>BlockAwareChunkerDispatcher</code> 按块类型（标题 / 段落 / 代码 / 表格 / 列表 / 图片）智能切分；<code>ChunkingStrategyFactory</code> 选择策略。Embedding 由 <code>ChunkEmbeddingService</code> 调用 <code>RoutingEmbeddingService</code> 生成，再写入 Milvus / PGVector（支持增量更新，不每次全量重建索引）。</p>
+<hr class="sep">
+<h2 id="sec-157">五、模型路由与故障转移</h2>
+<p>全部在 <code>infra-ai/.../model/</code> 与 <code>infra/chat/</code>：</p>
+<ul><li><strong>模型选择器 <code>ModelSelector</code></strong>：chat 组走<strong>档位（Tier）</strong>机制（<code>defaultTier</code> / <code>deepThinkingTier</code>，深度思考路由到支持 thinking 的模型）；embedding / rerank / vlm 走 <code>defaultModel + priority</code> 排序。</li><li><strong>三态断路器 <code>ModelHealthStore</code></strong>：<code>CLOSED → OPEN → HALF_OPEN</code>，<code>consecutiveFailures &gt;= failureThreshold</code> 自动熔断，冷却期后放行探测，成功恢复失败继续熔断。</li><li><strong>路由执行器 <code>ModelRoutingExecutor.executeWithFallback</code></strong>：遍历候选，调用前 <code>healthStore.allowCall</code>，失败 <code>markFailure</code> 切下一个，全失败抛 <code>RemoteException</code>。</li><li><strong>首包探测 <code>RoutingLLMService</code> + <code>LlmFirstPacketProbe</code></strong>：流式首个模型首包超时 / 无内容即 <code>markFailure</code> 并切换下一个，业务层无感知。</li></ul>
+<hr class="sep">
+<h2 id="sec-158">六、多路检索深挖</h2>
+<h3 id="sec-159">6.1 检索通道</h3>
+<table><thead><tr><th>通道</th><th>解决什么</th><th>实现</th></tr></thead><tbody><tr><td>向量检索</td><td>语义理解（「墨盒」≈「墨盒更换」）</td><td><code>VectorSearchChannel</code></td></tr><tr><td>关键词检索</td><td>精确匹配（订单号、专有名词）</td><td><code>KeywordSearchChannel</code>（ES）</td></tr><tr><td>联网检索</td><td>库外实时信息</td><td><code>WebSearchChannel</code></td></tr><tr><td>图谱检索</td><td>实体关系推理</td><td><code>GraphSearchChannel</code>（LightRAG）</td></tr></tbody></table>
+<h3 id="sec-160">6.2 后处理责任链</h3>
+<p>多通道结果通过责任链逐步精炼：<strong>去重 → RRF 倒数排名融合 → 重排（RerankClient）→ 元数据富化</strong>。<code>RerankClient</code> 有 <code>BaiLianRerankClient</code>（通义）与 <code>NoopRerankClient</code>（空操作）两种实现。</p>
+<h3 id="sec-161">6.3 向量库双支持</h3>
+<p><code>VectorStoreService</code> 两个实现 <code>MilvusVectorStoreService</code> / <code>PgVectorVectorStoreService</code>；门面 <code>VectorRetrieverService</code> 支持 <code>supportsGlobalRetrieval()</code>（PG 单 SQL 跨库，Milvus 逐库 fan-out）。</p>
+<hr class="sep">
+<h2 id="sec-162">七、意图识别体系</h2>
+<ul><li><strong>意图树</strong>：<code>IntentNode</code> 多级分类，<code>kind ∈ {KB, SYSTEM, MCP}</code>，数据来自 <code>IntentNodeMapper</code> → 组装成树 → Redis 缓存。</li><li><strong>分类器</strong>：<code>DefaultIntentClassifier</code> 一次性 LLM 打分（温度 0.1）。</li><li><strong>解析器</strong>：<code>IntentResolver.resolve</code> 按子问题并发分类、过滤低分、按类型分组。</li><li><strong>注册表</strong>：<code>IntentNodeRegistry</code> 自动发现，新增意图零配置。</li><li><code>init_intent_node.sql</code> 是意图树种子数据。</li></ul>
+<hr class="sep">
+<h2 id="sec-163">八、MCP 工具调用</h2>
+<p><code>mcp-server</code> 是<strong>独立 Spring Boot 进程</strong>，暴露的工具（<code>mcp/executor/</code>，均注册为 <code>McpServerFeatures.SyncToolSpecification</code>）：</p>
+<ul><li><code>WeatherMcpExecutor</code>（<code>weather_query</code>，城市天气）</li><li><code>SalesMcpExecutor</code>（销售类业务工具）</li><li><code>TicketMcpExecutor</code>（工单类工具）</li><li><code>YouComSearchMcpExecutor</code>（You.com 搜索）</li></ul>
+<p>Agent 侧（<code>bootstrap</code> 的 <code>rag/core/mcp/</code>）：</p>
+<ul><li><code>DefaultMcpToolRegistry</code>：注册表自动发现；</li><li><code>LLMMcpParameterExtractor</code>：用 LLM 从问题提取工具参数（缺必填参 → 注入澄清提示让 LLM 追问，不调用）；</li><li><code>RetrievalEngine.executeMcpTools</code> 按 <code>mcpBatchExecutor</code> 线程池并发调用，结果经 <code>ContextFormatter.formatMcpContext</code> 进入 Prompt。</li></ul>
+<p>意图树中 <code>kind=MCP</code> 节点绑定 <code>mcpToolId</code>，检索阶段筛选后自动提参调用，实现「检索与工具无缝融合」。</p>
+<hr class="sep">
+<h2 id="sec-164">九、多租户与管理后台</h2>
+<ul><li><strong>多租户隔离</strong>：知识库维度隔离——每个 KB 对应独立 <code>collectionName</code>（Milvus collection / PGVector 表），<code>IntentNode.kbId + collectionName</code> 绑定；<code>VectorSearchChannel</code> 按意图置信度收窄到命中库或全库兜底。</li><li><strong>知识库管理</strong>：<code>KnowledgeBaseController</code> / <code>KnowledgeDocumentController</code> / <code>KnowledgeChunkController</code>，实体 <code>t_knowledge_base</code> / <code>t_knowledge_document</code> / <code>t_knowledge_chunk</code> / <code>t_knowledge_vector</code>。</li><li><strong>全链路 Trace</strong>：AOP <code>@RagTraceNode</code>（<code>framework/trace/</code> + <code>rag/aop/RagTraceAspect.java</code>），运行记录落 <code>t_rag_trace_run</code> / <code>t_rag_trace_node</code>。</li><li><strong>管理后台（前端）</strong>：基于 React 18 + TypeScript + Vite 的管控台，覆盖仪表盘、知识库、意图树、入库流水线、Trace、用户与审计等页面（<code>frontend/src/pages/admin/</code>）。前端部分你已熟悉，此处不做展开，重点放在后端编排与数据模型上。</li><li><strong>鉴权</strong>：<code>user/</code> 包基于 <strong>Sa-Token</strong>，<code>UserRole</code> 区分普通 / 管理员用户。</li></ul>
+<hr class="sep">
+<h2 id="sec-165">十、设计模式实战（对照表）</h2>
+<p>Ragent 每个模式都对应一个具体工程问题：</p>
+<table><thead><tr><th>设计模式</th><th>应用场景</th><th>解决的问题</th></tr></thead><tbody><tr><td>策略模式</td><td><code>SearchChannel</code>、<code>SearchResultPostProcessor</code>、<code>MCPToolExecutor</code></td><td>检索通道 / 后处理器 / MCP 工具可插拔替换</td></tr><tr><td>工厂模式</td><td><code>IntentTreeFactory</code>、<code>StreamCallbackFactory</code></td><td>复杂对象创建逻辑集中管理</td></tr><tr><td>注册表模式</td><td><code>MCPToolRegistry</code>、<code>IntentNodeRegistry</code></td><td>组件自动发现与注册，新增工具零配置</td></tr><tr><td>模板方法</td><td><code>IngestionNode</code> 基类</td><td>入库节点统一执行流程，子类只关注核心逻辑</td></tr><tr><td>装饰器模式</td><td><code>ProbeBufferingCallback</code></td><td>不修改原有回调的前提下增加首包探测能力</td></tr><tr><td>责任链模式</td><td>后处理器链、模型降级链</td><td>多个处理步骤按顺序串联，灵活组合</td></tr><tr><td>观察者模式</td><td><code>StreamCallback</code></td><td>流式事件的异步通知</td></tr><tr><td>AOP</td><td><code>@RagTraceNode</code>、<code>@ChatRateLimit</code></td><td>链路追踪和限流逻辑与业务代码解耦</td></tr></tbody></table>
+<hr class="sep">
+<h2 id="sec-166">十一、生产级工程特性</h2>
+<h3 id="sec-167">11.1 队列式分布式限流</h3>
+<p><code>ChatQueueLimiter</code>：<strong>Redis 信号 + 有序集合（ZSET）+ Pub/Sub 通知</strong>。请求先入 ZSET 排队，通过 <strong>Lua 脚本原子判断是否在队头窗口内</strong>再出队，信号量控制最大并发数并支持许可自动过期（防死锁）。跨实例通过 Pub/Sub 广播唤醒，本地合并通知避免惊群；排队超时自动踢出，全程 SSE 推送排队状态。</p>
+<h3 id="sec-168">11.2 8 线程池 + TTL 透传</h3>
+<p>按工作负载特征配置 <strong>8 个独立线程池</strong>（MCP 批量调用、RAG 上下文组装、多路检索、内部检索、意图分类、记忆摘要、模型流式输出、对话入口），队列类型和拒绝策略各不相同。所有线程池用 <code>TtlExecutors</code> 包装，确保用户上下文和 Trace 信息在异步线程中不丢失。</p>
+<h3 id="sec-169">11.3 全链路 Trace（AOP）</h3>
+<p><code>@RagTraceNode</code> + <code>@RagTraceAspect</code>：每个环节的耗时、输入输出、异常信息都有记录，落 <code>t_rag_trace_run</code> / <code>t_rag_trace_node</code>，可视化排查。</p>
+<h3 id="sec-170">11.4 会话记忆压缩</h3>
+<p>滑动窗口 + 自动摘要压缩 + TTL 过期，避免长对话 OOM / Token 爆炸。</p>
+<h3 id="sec-171">11.5 认证鉴权</h3>
+<p>基于 <strong>Sa-Token</strong> 的用户认证体系，不是裸奔的 API；<code>UserRole</code> 区分普通 / 管理员。</p>
+<h3 id="sec-172">11.6 其他生产特性</h3>
+<table><thead><tr><th>特性</th><th>说明</th></tr></thead><tbody><tr><td>限流</td><td>全局并发限制 + 用户级限流，防模型调用被打爆</td></tr><tr><td>熔断</td><td>模型健康检查 + 失败计数，自动熔断不可用模型</td></tr><tr><td>流式输出</td><td>SSE 实时推送，首包探测保证模型切换用户无感知</td></tr><tr><td>可观测性</td><td>基于 AOP 的全链路 Trace</td></tr></tbody></table>
+<hr class="sep">
+<h2 id="sec-173">十二、可扩展性：新增 X 只需实现接口</h2>
+<p>核心模块都预留扩展点，<strong>不需要改框架代码、不需要改配置文件硬编码列表</strong>，加个实现类就完事：</p>
+<ul><li>新增检索通道：实现 <code>SearchChannel</code> 接口，注册为 Spring Bean，自动生效；</li><li>新增后处理器：实现 <code>SearchResultPostProcessor</code> 接口，自动加入处理链；</li><li>新增 MCP 工具：实现 <code>MCPToolExecutor</code> 接口，自动被 <code>DefaultMCPToolRegistry</code> 发现；</li><li>新增入库节点：实现 <code>IngestionNode</code> 接口，可插入 Pipeline 任意位置；</li><li>新增模型供应商：在 <code>infra-ai</code> 层实现 <code>ChatClient</code> 接口，配置候选列表即可参与路由。</li></ul>
+<hr class="sep">
+<h2 id="sec-174">十三、学习路线与面试考点（自查）</h2>
+<p><strong>建议学习顺序</strong>：先把 <code>StreamChatPipeline</code> 的 7 个阶段断点跟一遍（理解一次问答全链路）→ 再深入 <code>MultiChannelRetrievalEngine</code> 多路检索与后处理责任链 → 然后啃 <code>IngestionEngine</code> 入库流水线 → 最后补 <code>ModelHealthStore</code> 模型容错与 <code>ChatQueueLimiter</code> 限流。</p>
+<p><strong>高频面试考点</strong>：</p>
+<ul><li>RAG 的完整链路有哪些环节？为什么不能「检索 + 生成」两步走？</li><li>多路检索为什么要并行？融合排序用什么算法（RRF）？</li><li>向量检索和关键词检索各自短板是什么？怎么互补？</li><li>意图识别为什么用树形 + LLM 打分？置信度不足怎么处理？</li><li>模型故障怎么做到业务无感知？（三态熔断 + 首包探测 + 降级链）</li><li>分布式限流怎么实现？（Redis ZSET + Lua + Pub/Sub）</li><li>异步线程池怎么保证 Trace / 用户上下文不丢？（TTL 透传）</li><li>文档入库为什么要用可编排 Pipeline 而不是写死脚本？</li><li>为什么自研 <code>infra-ai</code> 而不用 Spring AI / LangChain4j？</li></ul>
+<blockquote>把上面这些讲清楚，比背「我用了 GPT-4」有说服力得多——面试官要的是工程深度，不是模型名字。</blockquote><h2 id="sec-300">十四、源码导览：核心类速查表</h2>
+<p>对照源码逐类断点，比看十篇博客都管用。以下为各环节的<strong>真实类名与位置</strong>（包根 <code>com.nageoffer.ai.ragent</code>）：</p>
+<table><thead><tr><th>环节</th><th>核心类</th><th>关键方法 / 说明</th></tr></thead><tbody>
+<tr><td>入口</td><td><code>RAGChatController</code>（rag/controller/）</td><td><code>GET /rag/v3/chat</code>（SSE，<code>@IdempotentSubmit</code> 按 userId 防重）、<code>POST /rag/v3/stop</code></td></tr>
+<tr><td>服务编排</td><td><code>RAGChatServiceImpl</code></td><td>雪花 ID → <code>ChatQueueLimiter.enqueue</code> 排队 → <code>StreamChatTraceRunner</code> Trace 包裹 → <code>StreamChatPipeline.execute</code></td></tr>
+<tr><td>流水线</td><td><code>StreamChatPipeline</code>（rag/service/pipeline/）</td><td>loadMemory → rewriteQuery → resolveIntents → handleGuidance → handleSystemOnly → retrieve → handleEmptyRetrieval → streamRagResponse</td></tr>
+<tr><td>SSE 推送</td><td><code>SseEmitterSender</code>（framework/web/）</td><td>线程安全封装；事件枚举 <code>SSEEventType</code>：META / MESSAGE / FINISH / DONE / CANCEL / REJECT</td></tr>
+<tr><td>限流</td><td><code>FairDistributedRateLimiter</code>（rag/service/ratelimit/）</td><td>装配于 <code>ChatRateLimiterConfig</code>，限流器名 <code>rag:global:chat</code></td></tr>
+<tr><td>多路检索</td><td><code>MultiChannelRetrievalEngine</code></td><td>通道按 <code>getType().ordinal()</code> 排序，<code>CompletableFuture</code> 并行</td></tr>
+<tr><td>意图分类</td><td><code>DefaultIntentClassifier</code> / <code>IntentResolver</code></td><td>Prompt 模板 <code>prompt/intent-classifier.st</code>；结果缓存 <code>IntentTreeCacheManager</code></td></tr>
+<tr><td>入库引擎</td><td><code>IngestionEngine</code>（ingestion/）</td><td>按 <code>NodeConfig</code> 连线执行，<code>validatePipeline</code> 校验环</td></tr>
+<tr><td>模型路由</td><td><code>RoutingLLMService</code>（@Primary，infra-ai）</td><td>候选遍历 + 首包探测；非流式走 <code>ModelRoutingExecutor.executeWithFallback</code></td></tr>
+<tr><td>熔断</td><td><code>ModelHealthStore</code>（infra/model/）</td><td>三态 CLOSED / OPEN / HALF_OPEN</td></tr>
+<tr><td>记忆</td><td><code>DefaultConversationMemoryService</code></td><td><code>memoryLoadExecutor</code> 并行加载摘要与历史</td></tr>
+<tr><td>认证</td><td><code>SaTokenConfig</code> / <code>UserContextInterceptor</code></td><td>Sa-Token 拦截 <code>/**</code>，排除 <code>/auth/**</code>；用户上下文走 TTL</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-301">十五、关键机制深挖（源码级参数）</h2>
+<h3 id="sec-302">15.1 队列式限流的完整实现 ★</h3>
+<ul><li>Redis 键族（前缀 <code>rag:global:chat</code>）：<code>:semaphore</code>（<code>RPermitExpirableSemaphore</code> 带租约许可）、<code>:queue</code>（ZSET，score=队列序号）、<code>:queue:seq</code>（RAtomicLong 发号器）、<code>:queue:notify</code>（Pub-Sub 唤醒）、<code>:entry:&lt;requestId&gt;</code>（存活标记，TTL=等待预算+5s 缓冲）。</li>
+<li>Lua 脚本 <code>resources/lua/queue_claim_atomic.lua</code>：取队头窗口（maxRank+16 冗余），遍历中 <code>EXISTS</code> 校验存活标记，<strong>僵尸请求就地 ZREM 清理</strong>；存活名次在窗口内则原子出队并返回原 score（支持按原位次重入队）。</li>
+<li>Ticket 状态机：<code>PENDING → GRANTED / TIMED_OUT / CANCELLED</code>，单 CAS 保证终态互斥；超时轮询间隔 200ms，<code>PollNotifier</code> 合并通知防惊群。</li>
+<li>默认参数（<code>RAGRateLimitProperties</code>）：<code>max-concurrent=50</code>、<code>max-wait-seconds=20</code>、permit 租约 <code>lease-seconds=600</code>（兜底防许可泄漏）。被拒时回写会话记忆并推送 <code>REJECT</code> 事件（文案「系统繁忙，请稍后再试」）。</li></ul>
+<h3 id="sec-303">15.2 RRF 融合与后处理责任链（精确参数）</h3>
+<ul><li>后处理器顺序（<code>getOrder()</code>）：去重 <code>DeduplicationPostProcessor</code>=1 → 融合 <code>FusionPostProcessor</code>=5 → 精排 <code>RerankPostProcessor</code>=10 → 元数据富化 <code>MetadataEnrichmentPostProcessor</code>=20。</li>
+<li>RRF 公式（<code>FusionPostProcessor.fuseByRrf</code>）：<code>score = Σ weight_channel / (k + rank + 1)</code>，k 取配置 <code>fusion.rrfK</code>，各通道权重来自 <code>fusion.channel-weights</code>（vector / keyword / graph / webSearch / default）；融合后按 <code>candidateLimit</code> 截断再送 Rerank。</li>
+<li>Rerank 链路：<code>RerankPostProcessor</code> → <code>RoutingRerankService</code> → <code>RerankClient</code>（<code>BaiLianRerankClient</code> / <code>NoopRerankClient</code>），总开关 <code>rag.rerank-enabled</code>。</li></ul>
+<h3 id="sec-304">15.3 模型熔断与首包探测（精确参数）</h3>
+<ul><li>三态熔断：<code>CLOSED → OPEN</code>（连续失败达 <code>ai.selection.failureThreshold=2</code>）→ 30s（<code>openDurationMs=30000</code>）后进 <code>HALF_OPEN</code>，半开<strong>只放单个探针</strong>，成功即闭合。</li>
+<li>流式容错：<code>RoutingLLMService.streamChat</code> 按 <code>ModelSelector</code> 给出的候选顺序逐个尝试，每个候选用 <code>ProbeStreamBridge</code> 包装回调，<code>LlmFirstPacketProbe</code> 以该模型 <code>timeoutMs</code> 为首包预算；ERROR / TIMEOUT / NO_CONTENT 一律 markFailure 并切换下一个，全部失败才 onError。</li>
+<li>降级顺序配置：<code>ai.chat.tiers.&lt;tier&gt;.candidates</code> 有序列表，顺序即降级顺序；分 <code>defaultTier</code> / <code>deepThinkingTier</code> 档位。</li></ul>
+<h3 id="sec-305">15.4 意图识别阈值与缓存</h3>
+<ul><li>阈值常量（<code>RAGConstant</code>）：<code>INTENT_MIN_SCORE = 0.35</code>、<code>MAX_INTENT_COUNT = 3</code>；分类采样 <code>temperature=0.1 / topP=0.3</code> 求稳。</li>
+<li><code>IntentResolver</code> 对子问题并行分类（<code>intentClassifyExecutor</code>），超限时「每子问题保底 1 个最高分 + 剩余按分数配额」。</li>
+<li>意图树缓存：Redis 键 <code>ragent:intent:tree</code>，TTL 7 天，节点增删改时主动失效。</li></ul>
+<h3 id="sec-306">15.5 会话记忆压缩参数</h3>
+<ul><li>配置前缀 <code>rag.memory</code>：<code>historyKeepTurns=8</code>（保留最近 8 轮原文）、<code>summaryStartTurns=9</code>（达到 9 条用户消息开始摘要）、<code>summaryMaxChars=200</code>、<code>summaryEnabled</code> 默认关闭。</li>
+<li>摘要覆盖约一半原文窗口（取中点 cutoff），滑出窗口后才重新生成；摘要调用用 <code>Tier.FAST</code> 档位模型、<code>temperature=0.3</code>。</li>
+<li>并发安全：摘要生成加分布式锁（键前缀 <code>ragent:memory:summary:lock:</code>），仅在 assistant 回复后异步触发。</li></ul>
+<hr class="sep">
+<h2 id="sec-307">十六、数据模型：核心表速查（PostgreSQL，23 张）</h2>
+<table><thead><tr><th>域</th><th>表</th><th>用途</th></tr></thead><tbody>
+<tr><td>会话</td><td><code>t_conversation</code> / <code>t_conversation_summary</code> / <code>t_message</code> / <code>t_message_feedback</code></td><td>会话、摘要、消息、点赞点踩反馈</td></tr>
+<tr><td>知识库</td><td><code>t_knowledge_base</code> / <code>t_knowledge_document</code> / <code>t_knowledge_chunk</code> / <code>t_knowledge_vector</code></td><td>库-文档-分块-向量（PGVector 落库）四级模型</td></tr>
+<tr><td>知识库运维</td><td><code>t_knowledge_document_chunk_log</code> / <code>t_knowledge_document_schedule(+_exec)</code></td><td>分块日志、文档定时刷新任务与执行记录</td></tr>
+<tr><td>意图</td><td><code>t_intent_node</code>（intentCode/parentCode 树形）</td><td>意图树持久化，启动时加载进 Redis</td></tr>
+<tr><td>入库</td><td><code>t_ingestion_pipeline(+_node)</code> / <code>t_ingestion_task(+_node)</code></td><td>Pipeline 定义与运行实例（节点级状态）</td></tr>
+<tr><td>观测</td><td><code>t_rag_trace_run</code> / <code>t_rag_trace_node</code> / <code>t_biz_change_log</code></td><td>链路追踪 run/节点两级 + 业务变更审计</td></tr>
+<tr><td>其他</td><td><code>t_user</code> / <code>t_sample_question</code> / <code>t_query_term_mapping</code></td><td>用户、示例问题、查询词同义映射</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-308">十七、线程池配置清单（面试可直接背）</h2>
+<p>定义于 <code>ThreadPoolExecutorConfig</code>（rag/config/），全部经 <code>TtlExecutors</code> 包装保证用户上下文 / Trace 跨线程透传：</p>
+<table><thead><tr><th>线程池</th><th>core / max</th><th>队列</th><th>拒绝策略</th><th>用途</th></tr></thead><tbody>
+<tr><td><code>mcpBatchExecutor</code></td><td>CPU / 2CPU</td><td>SynchronousQueue</td><td>CallerRuns</td><td>MCP 工具批量调用</td></tr>
+<tr><td><code>ragContextExecutor</code> / <code>ragRetrievalExecutor</code></td><td>4CPU / 4CPU</td><td>SynchronousQueue</td><td>CallerRuns</td><td>RAG 上下文组装 / 多路检索</td></tr>
+<tr><td><code>innerRetrievalExecutor</code></td><td>2CPU / 4CPU</td><td>LinkedBlockingQueue(100)</td><td>CallerRuns</td><td>库内并行检索</td></tr>
+<tr><td><code>intentClassifyExecutor</code></td><td>CPU / 2CPU</td><td>SynchronousQueue</td><td>CallerRuns</td><td>意图分类</td></tr>
+<tr><td><code>memorySummaryExecutor</code></td><td>1 / max(2,CPU/2)</td><td>LBQ(200)</td><td>CallerRuns</td><td>记忆摘要（刻意小并发保护 LLM）</td></tr>
+<tr><td><code>modelStreamExecutor</code> / <code>knowledgeChunkExecutor</code></td><td>max(2,CPU/2) / max(4,CPU)</td><td>LBQ(200)</td><td>AbortPolicy</td><td>模型流式输出 / 分块处理</td></tr>
+<tr><td><code>chatEntryExecutor</code></td><td>max-concurrent / max-concurrent</td><td>SynchronousQueue</td><td>AbortPolicy</td><td>对话入口，与限流许可数对齐</td></tr>
+</tbody></table>
+<ul><li><strong>设计要点</strong>：IO 密集池子大（4CPU）、保 LLM 的池子小（摘要）、入口池与限流许可严格对齐——「按工作负载特征隔离，而不是一个大池子打天下」。</li></ul>
+<hr class="sep">
+<h2 id="sec-309">十八、本地跑起来：中间件与启动顺序</h2>
+<ul><li>一键中间件 <code>docker-compose.local.yaml</code>：PostgreSQL 17 + pgvector（自动执行 <code>schema_pg.sql</code> + 初始化数据）、Redis 7、RustFS（S3 兼容对象存储）、RocketMQ 5.2.0（namesrv + broker，健康检查保证启动顺序）。</li>
+<li>可选栈：<code>milvus-stack-2.6.6.compose.yaml</code>（默认向量库）；ES 仅在 <code>rag.keyword.type=es</code> 时需要。</li>
+<li>启动顺序：compose 起中间件 → <code>RagentApplication</code>（bootstrap 主应用）→ 可选 <code>McpServerApplication</code>（端口 9099，端点 <code>/mcp</code>）。</li>
+<li>关键配置（<code>application.yaml</code>）：<code>ai.*</code>（模型/档位/熔断阈值）、<code>rag.rate-limit.global.*</code>、<code>rag.memory.*</code>、<code>rag.keyword.type</code>、<code>rag.storage.type</code>（oss/s3）、<code>fusion.rrfK</code> / <code>fusion.channel-weights</code>。</li>
+<li>内置 MCP 工具（mcp-server，实现类各带 <code>TOOL_ID</code>）：<code>weather_query</code>（天气）、<code>ticket_query</code>（工单）、<code>sales_query</code>（销售）、<code>youcom_search</code>（搜索）；bootstrap 侧 <code>DefaultMcpToolRegistry</code> 启动自动收集所有 <code>McpToolExecutor</code> Bean。</li></ul>
+<hr class="sep">
+<h2 id="sec-310">十九、面试怎么讲这个项目（加分话术）</h2>
+<ul><li><strong>讲链路不讲概念</strong>：「一次问答经过排队限流 → Trace 包裹 → 记忆加载 → 改写拆分 → 意图识别 → 多路检索 → RRF 融合 → Rerank → 首包探测流式输出」，一口气说完再问面试官想深入哪段。</li>
+<li><strong>讲数字不讲形容词</strong>：意图阈值 0.35、最多 3 个意图、熔断连续失败 2 次进入 OPEN 持续 30s、限流全局并发 50 排队 20s、记忆保留 8 轮——数字说明你真读过源码。</li>
+<li><strong>讲取舍不讲堆砌</strong>：为什么自研 infra-ai 不用 Spring AI（统一抽象 + 自主可控的熔断/首包探测）；为什么意图分类一次性打分而不是逐级调用（省 N 次 LLM 调用）；为什么混合检索（向量弱于精确匹配）。</li>
+<li><strong>主动暴露边界</strong>：记忆摘要默认关闭、红锁没用（Redisson 看门狗够用）、ES 可选——知道「哪里做了简化」比假装完美更可信。</li></ul>
+<blockquote>建议打开 IDE 对照本章类名逐个断点跟一遍 <code>StreamChatPipeline.execute</code>，一小时就能建立全链路肌肉记忆。</blockquote>
+
+    <div class="page-foot"><button class="pf-btn" onclick="switchLib('0')">← 返回：Java 面试八股</button><span></span></div>
+  </section>
+  <div class="empty-tip" id="emptyTip">暂无知识库，点击左侧「＋ 新建知识库」开始添加。</div>
+</div></main>
+<div class="modal-mask" id="libModal" onclick="if(event.target===this)closeLibModal()">
+  <div class="modal">
+    <h3>新建知识库</h3>
+    <p class="tip">支持 Markdown 简写：<code># 大标题</code>、<code>## 章节</code>、<code>### 小节</code>、<code>- 列表</code>、<code>&gt; 引用</code>、``` 代码块、<code>**加粗**</code>、<code>`行内代码`</code>。数据保存在本浏览器 localStorage。</p>
+    <div class="row">
+      <div><label>名称</label><input type="text" id="libName" placeholder="例如：MySQL 调优笔记"></div>
+      <div style="max-width:200px"><label>图标</label><div class="icon-opts" id="iconOpts"></div></div>
+    </div>
+    <label>内容</label>
+    <textarea id="libBody" placeholder="# 我的知识库&#10;&#10;## 第一章&#10;&#10;### 1.1 第一个知识点&#10;&#10;- 要点一&#10;- 要点二"></textarea>
+    <div class="actions">
+      <span id="restoreWrap"></span>
+      <span class="right"><button class="m-btn ghost" onclick="closeLibModal()">取消</button><button class="m-btn primary" onclick="createLib()">创建</button></span>
+    </div>
+  </div>
+</div>
+<button class="to-top" id="toTop" onclick="scrollTopFn()">↑</button>
+<button class="ai-fab" id="aiFab" onclick="toggleAI()" title="AI 学习助手">✦</button>
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-head"><span class="dot"></span><span class="t">AI 学习助手</span><span class="s" id="aiMode">本地检索</span>
+    <button onclick="startQuiz()" id="quizBtn" title="出题考我 / 再按退出">📝</button>
+    <button onclick="toggleAiCfg()" title="设置">⚙</button><button onclick="toggleAI()" title="关闭">×</button></div>
+  <div class="ai-cfg" id="aiCfg">
+    <input type="text" id="aiUrl" placeholder="API 地址，如 https://api.deepseek.com/v1">
+    <input type="password" id="aiKey" placeholder="API Key（仅保存在本浏览器）">
+    <input type="text" id="aiModel" placeholder="模型名，如 deepseek-chat">
+    <input type="text" id="aiProxy" placeholder="代理地址（可选，解决跨域/网络拦截，如 https://corsproxy.io/v1?url=）">
+    <div class="row"><button class="m-btn primary" onclick="saveAiCfg()">保存并启用</button><button class="m-btn ghost" onclick="clearAiCfg()">清除，用回本地检索</button></div>
+    <div class="hint">支持任意 OpenAI 兼容接口（DeepSeek / 通义 / 硅基流动等）。配置后回答由大模型生成，上下文取自当前知识库。<b>若 AI 调用报“Failed to fetch”</b>：多半是打开方式（预览面板/本地文件）或网络访问不了 api.deepseek.com，可在「代理地址」填一个 CORS 代理（如 https://corsproxy.io/v1?url=），代理会转发你的 Key，仅在你本浏览器生效。</div>
+  </div>
+  <div class="ai-msgs" id="aiMsgs"></div>
+  <div class="ai-input"><textarea id="aiQ" placeholder="问点什么吧，如：HashMap 为什么线程不安全？" onkeydown="aiKeydown(event)"></textarea><button id="aiSend" onclick="askAI()">发送</button></div>
+</div>
+<div class="resume-tip" id="resumeTip"></div>
+<div class="origin-warn" id="originWarn" style="display:none">
+  <span>⚠️ 当前在「应用内预览面板 / 本地文件」中打开，浏览器源为不透明源，DeepSeek 会拦截 AI 请求。请把下方链接复制到真实浏览器的<b>新标签页</b>打开，即可使用全部 AI 功能：</span>
+  <input class="ow-url" id="owUrl" readonly onclick="this.select()">
+  <button id="owCopyBtn" onclick="copyAppUrl()">复制链接</button>
+  <button onclick="document.getElementById('originWarn').style.display='none'">知道了</button>
+</div>
+<div class="modal-mask" id="reviewModal" onclick="if(event.target===this)closeReview()">
+  <div class="modal">
+    <h3>📅 今日待复习</h3>
+    <p class="tip">按艾宾浩斯曲线（1/2/4/7/15/30 天）从已学章节中到期生成。点标题跳转复习，看完点「已复习」。</p>
+    <div id="reviewList"></div>
+    <div class="actions"><span></span><span class="right"><button class="m-btn ghost" onclick="closeReview()">关闭</button></span></div>
+  </div>
+</div>
+<div class="fc-mask" id="fcMask">
+  <div class="fc-box">
+    <div class="fc-top"><span id="fcInfo"></span><button class="warm" onclick="warmupCurrent()" title="为本库预先生成所有闪卡题目">⚡ 预热</button><button onclick="closeCards()" title="退出闪卡">×</button></div>
+    <div class="fc-card" id="fcCard" onclick="flipCard()">
+      <div class="fc-front" id="fcFront"></div>
+      <div class="fc-back" id="fcBack"></div>
+    </div>
+    <div class="fc-actions"><button class="again" onclick="cardAgain()">🔁 再看一次</button><button class="know" onclick="cardKnow()">✅ 记住了</button></div>
+  </div>
+</div>
+<div class="fc-toast" id="fcToast"></div>
+<div class="modal-mask" id="planModal" onclick="if(event.target===this)closePlan()">
+  <div class="modal">
+    <h3>📋 AI 学习计划</h3>
+    <p class="tip">按艾宾浩斯曲线（1/2/4/7/15/30 天）为你生成逐日「新学 + 复习」安排，点章节标题可直接跳转。</p>
+    <div class="plan-form">
+      <div><label>知识库</label><select id="planLib"></select></div>
+      <div><label>计划天数</label><input type="number" id="planDays" value="14" min="3" max="60"></div>
+      <div><label>开始日期</label><input type="date" id="planStart"></div>
+      <div><label>每日新学章节数</label><input type="number" id="planPerDay" value="2" min="1" max="5"></div>
+    </div>
+    <button class="m-btn primary plan-gen" onclick="generatePlan()">✨ 生成学习计划</button>
+    <div class="plan-out" id="planOut"></div>
+    <div class="actions"><span></span><span class="right"><button class="m-btn ghost" onclick="closePlan()">关闭</button></span></div>
+  </div>
+</div>
+<script>
+var currentLib = "0";
+var CUSTOM_KEY = "kb_custom_libs";
+var HIDDEN_KEY = "kb_hidden_builtins";
+var ICONS = ["📚","📒","🧠","💡","🗄️","⚙️","🔥","🚀","🧪","📖"];
+var selIcon = ICONS[0];
+
+function libName(i){
+  var t = document.querySelector('.lib-tab[data-lib="' + i + '"] .nm');
+  return t ? t.textContent : "知识库";
+}
+function liveLibs(){
+  return Array.prototype.filter.call(document.querySelectorAll(".lib-tab"), function(t){
+    return t.style.display !== "none";
+  }).map(function(t){ return t.dataset.lib; });
+}
+function pageOf(id){
+  var el = document.getElementById(id);
+  if (!el) return currentLib;
+  var p = el.closest ? el.closest(".page") : null;
+  return p ? p.dataset.page : currentLib;
+}
+
+function switchLib(i, target){
+  i = String(i);
+  currentLib = i;
+  document.querySelectorAll(".lib-tab").forEach(function(t){ t.classList.toggle("active", t.dataset.lib === i); });
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.toggle("show", p.dataset.page === i); });
+  document.querySelectorAll(".nav-list").forEach(function(n){ n.classList.toggle("show", n.dataset.lib === i); });
+  document.querySelectorAll(".nav-h2.active,.nav-h3.active").forEach(function(a){ a.classList.remove("active"); });
+  var name = libName(i);
+  var sub = document.getElementById("brandSub"); if (sub) sub.textContent = name;
+  var tt = document.getElementById("topTitle"); if (tt) tt.textContent = name;
+  var empty = document.getElementById("emptyTip"); if (empty) empty.style.display = "none";
+  try { localStorage.setItem("kb_lib", i); } catch(e){}
+  closeMenu();
+  if (target) {
+    hideResume();
+    var el = document.getElementById(target);
+    if (el) {
+      try { history.replaceState(null, "", "#" + target); } catch(e){}
+      requestAnimationFrame(function(){ el.scrollIntoView({ block: "start" }); onScroll(); });
+      return;
+    }
+  }
+  try { history.replaceState(null, "", location.pathname); } catch(e){}
+  window.scrollTo(0, 0);
+  onScroll();
+  showResume(i);
+}
+
+/* 目录 / 锚点点击：跨库时先切库再定位 */
+document.addEventListener("click", function(e){
+  var a = e.target.closest ? e.target.closest('.nav-list a[href^="#"]') : null;
+  if (!a) return;
+  var id = a.getAttribute("href").slice(1);
+  if (pageOf(id) !== currentLib) {
+    e.preventDefault();
+    switchLib(pageOf(id), id);
+  }
+  closeMenu();
+});
+window.addEventListener("hashchange", function(){
+  var id = location.hash.slice(1);
+  if (id && document.getElementById(id) && pageOf(id) !== currentLib) switchLib(pageOf(id), id);
+});
+
+/* ===== 滚动高亮 ===== */
+var map = {};
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if (e.isIntersecting) {
+      document.querySelectorAll(".nav-h2.active,.nav-h3.active").forEach(function(l){ l.classList.remove("active"); });
+      var a = map[e.target.id];
+      if (a && a.closest(".nav-list") && a.closest(".nav-list").dataset.lib === currentLib) a.classList.add("active");
+    }
+  });
+}, { rootMargin: "0px 0px -72% 0px", threshold: 0 });
+function reindex(){
+  document.querySelectorAll(".nav-h2, .nav-h3").forEach(function(l){
+    var id = l.getAttribute("href").slice(1);
+    if (document.getElementById(id)) map[id] = l;
+  });
+  document.querySelectorAll(".content h1[id],.content h2[id],.content h3[id],.content h4[id]").forEach(function(h){ obs.observe(h); });
+  addTicks();
+  addPracticeBtns();
+  applyProg();
+}
+reindex();
+
+var progress = document.getElementById("progress");
+var toTop = document.getElementById("toTop");
+var lastPosSave = 0;
+function onScroll(){
+  var h = document.documentElement;
+  var sc = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+  progress.style.width = (sc * 100) + "%";
+  toTop.classList.toggle("show", window.scrollY > 420);
+  var now = Date.now();
+  if (now - lastPosSave > 800){ lastPosSave = now; savePos(); }
+}
+window.addEventListener("scroll", onScroll, { passive: true });
+
+/* ===== 搜索（过滤当前库目录，提示另一库匹配数） ===== */
+function onSearch(q){
+  q = q.trim().toLowerCase();
+  var otherCount = 0;
+  document.querySelectorAll(".nav-list").forEach(function(list){
+    var isCur = list.dataset.lib === currentLib;
+    list.querySelectorAll("a").forEach(function(a){
+      var hit = !q || a.textContent.toLowerCase().indexOf(q) >= 0;
+      if (isCur) a.style.display = hit ? "" : "none";
+      else if (q && a.textContent.toLowerCase().indexOf(q) >= 0) otherCount++;
+    });
+    list.querySelectorAll(".nav-group").forEach(function(g){
+      if (!isCur || !q) { g.style.display = ""; return; }
+      var any = Array.prototype.some.call(g.querySelectorAll("a"), function(a){ return a.style.display !== "none"; });
+      g.style.display = any ? "" : "none";
+    });
+  });
+  var hint = document.getElementById("searchHint");
+  if (q && otherCount > 0) {
+    hint.style.display = "block";
+    hint.textContent = "另一个知识库还有 " + otherCount + " 个匹配 →";
+  } else {
+    hint.style.display = "none";
+  }
+}
+function jumpOtherLib(){
+  var q = document.getElementById("search").value;
+  var other = liveLibs().filter(function(i){ return i !== currentLib; })[0];
+  if (other) switchLib(other);
+  onSearch(q);
+}
+
+/* ===== 主题 ===== */
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  var b = document.getElementById("themeBtn");
+  if (b) b.innerHTML = (t === "dark") ? "☀️ 亮色" : "🌙 暗色";
+  try { localStorage.setItem("kb_theme", t); } catch(e){}
+}
+function toggleTheme(){
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+}
+
+/* ===== 背题模式（两个库分别构建折叠区） ===== */
+function buildFolds(c){
+  if (!c || c.dataset.fb) return;
+  var nodes = Array.prototype.slice.call(c.children);
+  var cur = null;
+  nodes.forEach(function(n){
+    var t = n.tagName.toLowerCase();
+    if (t === "h3") {
+      cur = document.createElement("div"); cur.className = "fold";
+      c.insertBefore(cur, n.nextSibling); cur.appendChild(n);
+    } else if (t === "h2" || t === "h1") {
+      cur = null;
+    } else if (cur && t !== "div" || cur && t === "div" && !n.classList.contains("page-foot")) {
+      if (cur && !n.classList.contains("page-foot")) cur.appendChild(n);
+    }
+  });
+  c.dataset.fb = "1";
+  c.querySelectorAll("h3").forEach(function(h){
+    h.addEventListener("click", function(){
+      if (!document.body.classList.contains("review")) return;
+      var f = h.parentElement;
+      if (f && f.classList.contains("fold")) { f.classList.toggle("collapsed"); h.classList.toggle("open"); }
+    });
+  });
+}
+function toggleReview(){
+  var on = document.body.classList.toggle("review");
+  var b = document.getElementById("reviewBtn");
+  if (b) b.classList.toggle("on", on);
+  document.querySelectorAll(".page").forEach(function(p){ buildFolds(p); });
+  document.querySelectorAll(".fold").forEach(function(f){ f.classList.toggle("collapsed", on); });
+  if (!on) document.querySelectorAll(".content h3").forEach(function(h){ h.classList.remove("open"); });
+  try { localStorage.setItem("kb_review", on ? "1" : "0"); } catch(e){}
+}
+
+function scrollTopFn(){ window.scrollTo({ top: 0, behavior: "smooth" }); }
+function toggleMenu(){ document.getElementById("sidebar").classList.toggle("open"); document.getElementById("overlay").classList.toggle("show"); }
+function closeMenu(){ document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("show"); }
+
+/* ===== 知识库增删（自建库存 localStorage） ===== */
+function getCustoms(){ try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"); } catch(e){ return []; } }
+function saveCustoms(l){
+  try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(l)); return true; }
+  catch(e){ alert("保存失败：浏览器本地存储空间不足"); return false; }
+}
+function getHidden(){ try { return JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]"); } catch(e){ return []; } }
+function saveHidden(l){ try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(l)); } catch(e){} }
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function inline(s){
+  s = esc(s);
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  return s;
+}
+function mdToHtml(md, prefix){
+  var lines = md.replace(/\r\n?/g, "\n").split("\n");
+  var html = "", heads = [], hn = 0;
+  var inCode = false, codeBuf = [], inUl = false, inOl = false, para = [];
+  function flushPara(){ if (para.length){ html += "<p>" + para.map(inline).join("<br>") + "</p>"; para = []; } }
+  function flushList(){ if (inUl){ html += "</ul>"; inUl = false; } if (inOl){ html += "</ol>"; inOl = false; } }
+  function flushCode(){ html += '<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>' + esc(codeBuf.join("\n")) + "</code></pre>"; codeBuf = []; inCode = false; }
+  lines.forEach(function(ln){
+    if (/^```/.test(ln.trim())){
+      if (inCode) flushCode(); else { flushPara(); flushList(); inCode = true; }
+      return;
+    }
+    if (inCode){ codeBuf.push(ln); return; }
+    var t = ln.trim(), m;
+    if (!t){ flushPara(); flushList(); return; }
+    if ((m = t.match(/^(#{1,3})\s+(.*)$/))){
+      flushPara(); flushList();
+      var lvl = m[1].length, id = prefix + "-h" + (++hn), txt = m[2].replace(/[*`]/g, "").trim();
+      html += "<h" + lvl + ' id="' + id + '">' + inline(m[2]) + "</h" + lvl + ">";
+      heads.push({ lvl: lvl, id: id, text: txt });
+    } else if (/^---+$/.test(t)){
+      flushPara(); flushList(); html += '<hr class="sep">';
+    } else if ((m = t.match(/^[-*]\s+(.*)$/))){
+      flushPara(); if (inOl){ html += "</ol>"; inOl = false; }
+      if (!inUl){ html += "<ul>"; inUl = true; }
+      html += "<li>" + inline(m[1]) + "</li>";
+    } else if ((m = t.match(/^\d+[.、)]\s*(.*)$/))){
+      flushPara(); if (inUl){ html += "</ul>"; inUl = false; }
+      if (!inOl){ html += "<ol>"; inOl = true; }
+      html += "<li>" + inline(m[1]) + "</li>";
+    } else if ((m = t.match(/^>\s?(.*)$/))){
+      flushPara(); flushList();
+      html += "<blockquote>" + inline(m[1]) + "</blockquote>";
+    } else {
+      para.push(ln);
+    }
+  });
+  if (inCode) flushCode();
+  flushPara(); flushList();
+  return { html: html, heads: heads };
+}
+function navFromHeads(heads, fallback){
+  var html = "", open = false;
+  heads.forEach(function(h){
+    if (h.lvl === 1){
+      if (open) html += "</div>";
+      html += '<div class="nav-group"><div class="nav-h1">' + esc(h.text) + "</div>";
+      open = true;
+    } else {
+      if (!open){ html += '<div class="nav-group"><div class="nav-h1">' + esc(fallback) + "</div>"; open = true; }
+      html += '<a class="' + (h.lvl === 2 ? "nav-h2" : "nav-h3") + '" href="#' + h.id + '">' + esc(h.text) + "</a>";
+    }
+  });
+  if (!open) return '<div class="nav-group"><div class="nav-h1">' + esc(fallback) + "</div></div>";
+  return html + "</div>";
+}
+function renderLib(lib){
+  var tabs = document.getElementById("libTabs");
+  var tab = document.createElement("button");
+  tab.type = "button"; tab.className = "lib-tab"; tab.dataset.lib = lib.id;
+  tab.innerHTML = '<span class="ic">' + lib.icon + '</span><span class="nm"></span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库">×</span>';
+  tab.querySelector(".nm").textContent = lib.name;
+  tab.onclick = function(){ switchLib(lib.id); };
+  tab.querySelector(".del").onclick = function(e){ delLib(e, lib.id); };
+  tabs.insertBefore(tab, tabs.querySelector(".lib-add"));
+
+  var nl = document.createElement("div");
+  nl.className = "nav-list"; nl.dataset.lib = lib.id; nl.innerHTML = lib.nav;
+  document.querySelector(".nav-scroll").appendChild(nl);
+
+  var pg = document.createElement("section");
+  pg.className = "page"; pg.dataset.page = lib.id; pg.innerHTML = lib.html;
+  document.getElementById("contentBox").insertBefore(pg, document.getElementById("emptyTip"));
+
+  tab.querySelector(".ct").textContent = nl.querySelectorAll(".nav-h2").length + " 个章节";
+  if (document.body.classList.contains("review")) buildFolds(pg);
+  aiIndex = null;
+  reindex();
+}
+function openLibModal(){
+  document.getElementById("libModal").classList.add("show");
+  refreshRestoreBtn();
+}
+function closeLibModal(){ document.getElementById("libModal").classList.remove("show"); }
+function refreshRestoreBtn(){
+  var w = document.getElementById("restoreWrap");
+  w.innerHTML = getHidden().length
+    ? '<button class="m-btn danger-ghost" onclick="restoreBuiltins()">恢复默认知识库</button>' : "";
+}
+function createLib(){
+  var name = document.getElementById("libName").value.trim();
+  var body = document.getElementById("libBody").value.trim();
+  if (!name){ alert("请填写知识库名称"); return; }
+  if (!body){ alert("请填写内容"); return; }
+  var id = "u" + Date.now().toString(36);
+  var r = mdToHtml(body, id);
+  if (!r.heads.some(function(h){ return h.lvl === 1; })){
+    r.html = '<h1 id="' + id + '-h0">' + esc(name) + "</h1>" + r.html;
+  }
+  var lib = { id: id, name: name, icon: selIcon, html: r.html, nav: navFromHeads(r.heads, name) };
+  var libs = getCustoms(); libs.push(lib);
+  if (!saveCustoms(libs)) return;
+  renderLib(lib);
+  document.getElementById("libName").value = "";
+  document.getElementById("libBody").value = "";
+  closeLibModal();
+  switchLib(id);
+  /* 导入即预热：后台批量生成该库所有闪卡题目并持久缓存 */
+  warmupLib(id);
+}
+function delLib(e, i){
+  e.stopPropagation();
+  i = String(i);
+  var custom = i.charAt(0) === "u";
+  var tip = custom ? "删除后不可恢复。" : "内置库删除后可在「新建知识库」弹窗中恢复。";
+  if (!confirm("确定删除知识库「" + libName(i) + "」吗？\n" + tip)) return;
+  if (custom){
+    saveCustoms(getCustoms().filter(function(l){ return l.id !== i; }));
+    removeLibDom(i);
+  } else {
+    var hd = getHidden(); if (hd.indexOf(i) < 0) hd.push(i); saveHidden(hd);
+    var t = document.querySelector('.lib-tab[data-lib="' + i + '"]');
+    if (t) t.style.display = "none";
+  }
+  if (currentLib === i){
+    var rest = liveLibs();
+    if (rest.length) switchLib(rest[0]);
+    else showEmpty();
+  }
+  refreshRestoreBtn();
+}
+function removeLibDom(i){
+  var t = document.querySelector('.lib-tab[data-lib="' + i + '"]'); if (t) t.remove();
+  var n = document.querySelector('.nav-list[data-lib="' + i + '"]'); if (n) n.remove();
+  var p = document.querySelector('.page[data-page="' + i + '"]'); if (p) p.remove();
+  aiIndex = null;
+  /* 清理该库的闪卡题目缓存，避免 localStorage 无用堆积 */
+  var M = getFcQAll(); if (M[i]){ delete M[i]; try { localStorage.setItem(FC_Q_KEY, JSON.stringify(M)); } catch(e){} }
+}
+function restoreBuiltins(){
+  saveHidden([]);
+  document.querySelectorAll(".lib-tab").forEach(function(t){ t.style.display = ""; });
+  refreshRestoreBtn();
+  closeLibModal();
+  if (liveLibs().indexOf(currentLib) < 0) switchLib("0");
+}
+function showEmpty(){
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("show"); });
+  document.querySelectorAll(".nav-list").forEach(function(n){ n.classList.remove("show"); });
+  var empty = document.getElementById("emptyTip"); if (empty) empty.style.display = "block";
+}
+
+/* ===== AI 学习助手 ===== */
+var AI_CFG_KEY = "kb_ai_cfg";
+var AI_DEFAULT = { url: "https://api.deepseek.com", key: "", model: "deepseek-v4-flash" };
+var aiIndex = null;      /* 惰性构建的检索索引 */
+var aiBusy = false;
+
+function getAiCfg(){
+  try {
+    var c = JSON.parse(localStorage.getItem(AI_CFG_KEY) || "null");
+    if (c && c.url && c.key) return c;
+  } catch(e){}
+  return AI_DEFAULT;   /* 内置默认配置：DeepSeek V4 Flash */
+}
+function saveAiCfg(){
+  var url = document.getElementById("aiUrl").value.trim();
+  var key = document.getElementById("aiKey").value.trim();
+  var model = document.getElementById("aiModel").value.trim();
+  var proxy = document.getElementById("aiProxy").value.trim();
+  if (!url || !key){ alert("请至少填写 API 地址和 Key"); return; }
+  try { localStorage.setItem(AI_CFG_KEY, JSON.stringify({ url: url, key: key, model: model || "deepseek-v4-flash", proxy: proxy })); } catch(e){}
+  refreshAiMode();
+  toggleAiCfg();
+  addMsg("bot", "已启用大模型模式 ✅ 现在提问会结合当前知识库内容由 AI 生成回答。");
+}
+function clearAiCfg(){
+  try { localStorage.removeItem(AI_CFG_KEY); } catch(e){}
+  refreshAiMode();
+  addMsg("bot", "已清除配置，当前为本地检索模式（点 ⚙ 可重新填写 Key）。");
+}
+function refreshAiMode(){
+  var cfg = getAiCfg();
+  var custom = false;
+  try { var c = JSON.parse(localStorage.getItem(AI_CFG_KEY) || "null"); custom = !!(c && c.url && c.key); } catch(e){}
+  var hasKey = !!(cfg && cfg.key);
+  document.getElementById("aiMode").textContent = hasKey ? ("AI · " + cfg.model + (custom ? "" : "（内置）")) : "本地检索";
+  if (cfg){ document.getElementById("aiUrl").value = cfg.url; document.getElementById("aiKey").value = cfg.key; document.getElementById("aiModel").value = cfg.model; if (document.getElementById("aiProxy")) document.getElementById("aiProxy").value = cfg.proxy || ""; }
+}
+function toggleAI(){
+  var p = document.getElementById("aiPanel");
+  p.classList.toggle("show");
+  if (p.classList.contains("show") && !document.getElementById("aiMsgs").children.length){
+    addMsg("bot", "你好！我是你的学习助手 ✦ 可以问我这个知识库里的任何问题，比如「线程池参数怎么配」「Ragent 的限流怎么实现的」。点右上角 ⚙ 可接入大模型获得更完整的解答。");
+  }
+  if (p.classList.contains("show")) document.getElementById("aiQ").focus();
+}
+function toggleAiCfg(){ document.getElementById("aiCfg").classList.toggle("show"); }
+function aiKeydown(e){ if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); askAI(); } }
+
+function addMsg(role, html){
+  var box = document.getElementById("aiMsgs");
+  var d = document.createElement("div");
+  d.className = "ai-msg " + role;
+  d.innerHTML = '<span class="av">' + (role === "user" ? "🧑" : "✦") + '</span><div class="bub">' + html + "</div>";
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  return d;
+}
+
+/* 把当前页面切成「标题 + 正文」块，建检索索引 */
+function buildAiIndex(){
+  aiIndex = [];
+  function htext(n){
+    var t = n.textContent, chip = n.querySelector(".h3-prac");
+    if (chip) t = t.replace(chip.textContent, "");
+    return t.trim();
+  }
+  document.querySelectorAll(".page").forEach(function(pg){
+    var lib = pg.dataset.page;
+    var cur = null, parent = "";
+    Array.prototype.forEach.call(pg.querySelectorAll("h1,h2,h3,p,li,td,blockquote"), function(n){
+      if (/^H[123]$/.test(n.tagName)){
+        if (n.tagName === "H2" || n.tagName === "H1") parent = htext(n);
+        cur = { lib: lib, id: n.id, title: htext(n), parent: parent, text: "" };
+        aiIndex.push(cur);
+      } else if (cur){
+        cur.text += " " + n.textContent.trim();
+      }
+    });
+  });
+}
+function bigrams(s){
+  s = s.toLowerCase().replace(/[\s\p{P}\p{S}]+/gu, "");
+  var out = [];
+  for (var i = 0; i < s.length - 1; i++) out.push(s.slice(i, i + 2));
+  if (s.length === 1) out.push(s);
+  return out;
+}
+function retrieve(q, topN){
+  if (!aiIndex) buildAiIndex();
+  var grams = bigrams(q);
+  var words = q.toLowerCase().match(/[a-z0-9+#.]{2,}/g) || [];
+  var scored = aiIndex.map(function(c){
+    var hay = (c.title + " " + c.text).toLowerCase();
+    var s = 0;
+    grams.forEach(function(g){
+      var i = hay.indexOf(g);
+      while (i >= 0){ s += 1; i = hay.indexOf(g, i + 1); if (s > 400) break; }
+      if (c.title.toLowerCase().indexOf(g) >= 0) s += 6;
+    });
+    words.forEach(function(w){
+      var i = hay.indexOf(w);
+      while (i >= 0){ s += 3; i = hay.indexOf(w, i + 1); if (s > 600) break; }
+      if (c.title.toLowerCase().indexOf(w) >= 0) s += 10;
+    });
+    if (c.lib === currentLib) s *= 1.25;   /* 当前库加权 */
+    return { c: c, s: s };
+  }).filter(function(x){ return x.s > 0; });
+  scored.sort(function(a, b){ return b.s - a.s; });
+  return scored.slice(0, topN || 3);
+}
+function jumpRef(id){
+  var pg = pageOf(id);
+  if (String(pg) !== currentLib) switchLib(pg, id);
+  else { var el = document.getElementById(id); if (el) el.scrollIntoView({ block: "start" }); }
+  if (window.innerWidth <= 920) toggleAI();
+}
+function refsHtml(hits){
+  if (!hits.length) return "";
+  var h = '<span class="ref">📖 相关章节：';
+  hits.forEach(function(x, i){
+    h += '<a onclick="jumpRef(\'' + x.c.id + "')\">" + esc(x.c.title) + "</a>" + (i < hits.length - 1 ? " · " : "");
+  });
+  return h + "</span>";
+}
+function localAnswer(q){
+  var hits = retrieve(q, 3);
+  if (!hits.length || hits[0].s < 3){
+    return "这个问题我在当前知识库里没有找到相关内容 🤔 可以换个关键词试试，或点 ⚙ 接入大模型获得通用解答。";
+  }
+  var best = hits[0].c;
+  var text = best.text.trim();
+  if (text.length > 320) text = text.slice(0, 320) + "……";
+  var html = "<p>根据知识库「<strong>" + esc(best.title) + "</strong>」：</p><p>" + esc(text) + "</p>";
+  if (hits.length > 1) html += "<p style='font-size:12px;color:var(--muted)'>还可以看看下面的相关章节：</p>";
+  return html + refsHtml(hits);
+}
+/* 统一的 LLM 调用（出题/评分/问答共用） */
+function callLLM(msgs, onOk, onFail, onDone){
+  var cfg = getAiCfg();
+  if (!cfg || !cfg.key){ if (onFail) onFail("未配置 API Key：请点击 ⚙ 填写 DeepSeek Key 后使用 AI 功能"); if (onDone) onDone(); return; }
+  var body = JSON.stringify({ model: cfg.model, messages: msgs, temperature: 0.3 });
+  var headers = { "Content-Type": "application/json", "Authorization": "Bearer " + cfg.key };
+  function doFetch(url, viaProxy){
+    var ctrl = new AbortController();
+    var timer = setTimeout(function(){ ctrl.abort(); }, viaProxy ? 90000 : 60000);
+    return fetch(url, { method: "POST", headers: headers, body: body, signal: ctrl.signal })
+      .then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function(data){
+        var txt = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "（空响应）";
+        onOk(txt);
+      })
+      .finally(function(){ clearTimeout(timer); });
+  }
+  var realUrl = cfg.url.replace(/\/+$/, "") + "/chat/completions";
+  doFetch(realUrl, false)
+    .then(function(){ if (onDone) onDone(); })
+    .catch(function(err){
+      /* 直连失败：若配置了代理，自动重试一次（代理会把 Authorization 转发给 DeepSeek） */
+      if (cfg.proxy){
+        var pUrl = cfg.proxy.indexOf("{url}") >= 0 ? cfg.proxy.replace("{url}", encodeURIComponent(realUrl)) : (cfg.proxy + encodeURIComponent(realUrl));
+        doFetch(pUrl, true)
+          .then(function(){ if (onDone) onDone(); })
+          .catch(function(err2){ if (onFail) onFail(String(err2 && err2.message || err2)); if (onDone) onDone(); });
+      } else {
+        if (onFail) onFail(String(err && err.message || err));
+        if (onDone) onDone();
+      }
+    });
+}
+function askAI(){
+  if (aiBusy) return;
+  var inp = document.getElementById("aiQ");
+  var q = inp.value.trim();
+  if (!q) return;
+  inp.value = "";
+  addMsg("user", esc(q));
+  /* 测验进行中：本条输入视为作答 */
+  if (quiz){
+    if (q === "退出" || q === "退出测验"){ quiz = null; addMsg("bot", "已退出测验 🛑 想再练点头部的 📝 随时开始。"); return; }
+    var c = quiz; quiz = null;
+    gradeAnswer(c, q);
+    return;
+  }
+  aiBusy = true;
+  document.getElementById("aiSend").disabled = true;
+  var thinking = addMsg("bot", '<span class="ai-typing"><i></i><i></i><i></i></span>');
+  var hits = retrieve(q, 3);
+  var ctx = hits.map(function(x){ return "【" + x.c.title + "】\n" + x.c.text.slice(0, 900); }).join("\n\n");
+  var msgs = [
+    { role: "system", content: "你是一个面试学习助手。基于给出的知识库上下文回答问题，回答用简体中文、要点化、简洁准确；上下文没有的内容可基于通识补充但要说明。上下文：\n" + (ctx || "（无相关内容）") },
+    { role: "user", content: q }
+  ];
+  callLLM(msgs, function(txt){
+    thinking.querySelector(".bub").innerHTML = simpleMd(txt) + refsHtml(hits);
+  }, function(err){
+    thinking.querySelector(".bub").innerHTML = "大模型调用失败（" + esc(err) + "），已用本地检索回答：<br><br>" + localAnswer(q);
+  }, function(){
+    aiBusy = false;
+    document.getElementById("aiSend").disabled = false;
+    document.getElementById("aiMsgs").scrollTop = document.getElementById("aiMsgs").scrollHeight;
+  });
+}
+function simpleMd(t){
+  var html = esc(t);
+  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  html = html.replace(/^###?\s+(.+)$/gm, "<strong>$1</strong>");
+  html = html.replace(/^[-*]\s+(.+)$/gm, "• $1");
+  html = html.replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
+  return html;
+}
+
+/* ===== AI 面板拖拽（位置存 localStorage） ===== */
+var AI_POS_KEY = "kb_ai_pos";
+(function initAiDrag(){
+  var panel = document.getElementById("aiPanel");
+  var head = panel.querySelector(".ai-head");
+  var sx = 0, sy = 0, ox = 0, oy = 0, dragging = false;
+
+  function clamp(x, y){
+    var r = panel.getBoundingClientRect();
+    var maxX = window.innerWidth - 60, maxY = window.innerHeight - 60;
+    return [Math.max(-r.width + 120, Math.min(x, maxX)), Math.max(0, Math.min(y, maxY))];
+  }
+  function applyPos(x, y){
+    panel.style.left = x + "px";
+    panel.style.top = y + "px";
+    panel.style.right = "auto";
+    panel.style.bottom = "auto";
+  }
+  function restore(){
+    try {
+      var p = JSON.parse(localStorage.getItem(AI_POS_KEY) || "null");
+      if (p){ var c = clamp(p.x, p.y); applyPos(c[0], c[1]); }
+    } catch(e){}
+  }
+  head.addEventListener("pointerdown", function(e){
+    if (e.target.closest("button")) return;   /* 点头部的设置/关闭按钮不触发拖拽 */
+    dragging = true;
+    panel.classList.add("dragging");
+    var r = panel.getBoundingClientRect();
+    /* 首次拖动：把 right/bottom 定位换算成 left/top，避免跳变 */
+    applyPos(r.left, r.top);
+    sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+    head.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  head.addEventListener("pointermove", function(e){
+    if (!dragging) return;
+    var c = clamp(ox + e.clientX - sx, oy + e.clientY - sy);
+    applyPos(c[0], c[1]);
+  });
+  function done(e){
+    if (!dragging) return;
+    dragging = false;
+    panel.classList.remove("dragging");
+    var r = panel.getBoundingClientRect();
+    try { localStorage.setItem(AI_POS_KEY, JSON.stringify({ x: r.left, y: r.top })); } catch(e2){}
+    try { head.releasePointerCapture(e.pointerId); } catch(e3){}
+  }
+  head.addEventListener("pointerup", done);
+  head.addEventListener("pointercancel", done);
+  window.addEventListener("resize", restore);
+  restore();
+})();
+
+/* ===== 学习进度（按库记录已学章节，存 localStorage） ===== */
+var PROG_KEY = "kb_progress";
+function getProg(){ try { return JSON.parse(localStorage.getItem(PROG_KEY) || "{}"); } catch(e){ return {}; } }
+function saveProg(p){ try { localStorage.setItem(PROG_KEY, JSON.stringify(p)); } catch(e){} }
+function addTicks(){
+  document.querySelectorAll(".nav-h2").forEach(function(a){
+    if (a.querySelector(".tick")) return;
+    var s = document.createElement("span");
+    s.className = "tick"; s.textContent = "✓"; s.title = "标记为已学 / 取消";
+    s.onclick = function(e){ toggleDone(e, a.getAttribute("href").slice(1)); };
+    a.appendChild(s);
+  });
+}
+function toggleDone(e, id){
+  e.preventDefault(); e.stopPropagation();
+  var a = e.target.closest ? e.target.closest(".nav-h2") : null;
+  var lib = a && a.closest(".nav-list") ? a.closest(".nav-list").dataset.lib : currentLib;
+  var p = getProg(), arr = p[lib] || [];
+  setDoneProgress(lib, id, arr.indexOf(id) < 0);
+}
+/* 统一的"已学"写入：进度数组 + 学习时间记录 + 界面刷新 */
+function setDoneProgress(lib, id, on){
+  var p = getProg(), arr = p[lib] || [], i = arr.indexOf(id);
+  if (on && i < 0) arr.push(id);
+  if (!on && i >= 0) arr.splice(i, 1);
+  p[lib] = arr;
+  saveProg(p);
+  setLearn(lib, id, on);
+  applyProg();
+  updateDueBadge();
+}
+function applyProg(){
+  var p = getProg();
+  document.querySelectorAll(".nav-list").forEach(function(list){
+    var done = p[list.dataset.lib] || [];
+    list.querySelectorAll(".nav-h2").forEach(function(a){
+      a.classList.toggle("done", done.indexOf(a.getAttribute("href").slice(1)) >= 0);
+    });
+  });
+  document.querySelectorAll(".lib-tab").forEach(function(tab){
+    var lib = tab.dataset.lib;
+    var total = document.querySelectorAll('.nav-list[data-lib="' + lib + '"] .nav-h2').length;
+    var dn = (p[lib] || []).filter(function(id){ return !!document.getElementById(id); }).length;
+    var ct = tab.querySelector(".ct");
+    if (ct) ct.textContent = total + " 个章节 · 已学 " + dn;
+    var bar = tab.querySelector(".pbar i");
+    if (bar) bar.style.width = (total ? Math.round(dn / total * 100) : 0) + "%";
+  });
+}
+function resetProgress(){
+  if (!confirm("确定清空「" + libName(currentLib) + "」的学习进度吗？")) return;
+  var p = getProg(); p[currentLib] = [];
+  saveProg(p);
+  applyProg();
+}
+
+/* ===== 艾宾浩斯复习提醒 ===== */
+var LEARN_KEY = "kb_learn";
+var INTERVALS = [1, 2, 4, 7, 15, 30];   /* 第 n 次复习的间隔天数 */
+function getLearnAll(){ try { return JSON.parse(localStorage.getItem(LEARN_KEY) || "{}"); } catch(e){ return {}; } }
+function saveLearnAll(l){ try { localStorage.setItem(LEARN_KEY, JSON.stringify(l)); } catch(e){} }
+function setLearn(lib, id, on){
+  var L = getLearnAll();
+  if (on){
+    L[lib] = L[lib] || {};
+    var old = L[lib][id];
+    L[lib][id] = { t: Date.now(), n: old ? old.n : 0 };
+  } else if (L[lib]){
+    delete L[lib][id];
+  }
+  saveLearnAll(L);
+}
+function dueList(){
+  var p = getProg(), L = getLearnAll(), out = [], now = Date.now(), dirty = false;
+  Object.keys(p).forEach(function(lib){
+    (p[lib] || []).forEach(function(id){
+      if (!document.getElementById(id)) return;
+      L[lib] = L[lib] || {};
+      var st = L[lib][id];
+      if (!st){ st = { t: now, n: 0 }; L[lib][id] = st; dirty = true; }
+      var days = (now - st.t) / 86400000;
+      var iv = INTERVALS[Math.min(st.n, INTERVALS.length - 1)];
+      if (days >= iv) out.push({ lib: lib, id: id, n: st.n });
+    });
+  });
+  if (dirty) saveLearnAll(L);
+  return out;
+}
+function updateDueBadge(){
+  var n = dueList().length;
+  var b = document.getElementById("dueBadge");
+  if (!b) return;
+  b.style.display = n > 0 ? "" : "none";
+  b.textContent = n;
+}
+function openReview(){
+  var list = dueList();
+  var box = document.getElementById("reviewList");
+  if (!list.length){
+    box.innerHTML = '<div class="rv-empty">🎉 今日没有到期的复习内容<br><span style="font-size:12px">已学章节会按 1/2/4/7/15/30 天节奏出现在这里</span></div>';
+  } else {
+    box.innerHTML = "";
+    list.forEach(function(it){
+      var el = document.getElementById(it.id);
+      var d = document.createElement("div");
+      d.className = "rv-item";
+      d.innerHTML = '<span class="tt"></span><span class="lb"></span><button class="ok">已复习 ✓</button>';
+      var tt = d.querySelector(".tt");
+      tt.textContent = el ? el.textContent : it.id;
+      tt.onclick = function(){ closeReview(); jumpRef(it.id); };
+      d.querySelector(".lb").textContent = libName(it.lib) + " · 第" + (it.n + 1) + "轮";
+      d.querySelector(".ok").onclick = function(){ markReviewed(it.lib, it.id); };
+      box.appendChild(d);
+    });
+  }
+  document.getElementById("reviewModal").classList.add("show");
+}
+function closeReview(){ document.getElementById("reviewModal").classList.remove("show"); }
+function markReviewed(lib, id){
+  var L = getLearnAll();
+  if (L[lib] && L[lib][id]){ L[lib][id].n++; L[lib][id].t = Date.now(); saveLearnAll(L); }
+  updateDueBadge();
+  openReview();
+}
+
+/* ===== 阅读位置记忆 ===== */
+var POS_KEY = "kb_readpos";
+function savePos(){
+  var pg = document.querySelector(".page.show");
+  if (!pg) return;
+  var hs = pg.querySelectorAll("h1[id],h2[id],h3[id]");
+  var cur = null;
+  for (var i = 0; i < hs.length; i++){
+    if (hs[i].getBoundingClientRect().top <= 90) cur = hs[i]; else break;
+  }
+  if (!cur) return;
+  var P = {}; try { P = JSON.parse(localStorage.getItem(POS_KEY) || "{}"); } catch(e){}
+  if (P[currentLib] === cur.id) return;
+  P[currentLib] = cur.id;
+  try { localStorage.setItem(POS_KEY, JSON.stringify(P)); } catch(e){}
+}
+function hideResume(){ document.getElementById("resumeTip").classList.remove("show"); }
+function showResume(i){
+  var tip = document.getElementById("resumeTip");
+  var P = {}; try { P = JSON.parse(localStorage.getItem(POS_KEY) || "{}"); } catch(e){}
+  var pid = P[i];
+  var el = pid ? document.getElementById(pid) : null;
+  if (!el){ tip.classList.remove("show"); return; }
+  tip.innerHTML = '📖 继续阅读：<a id="resumeLink">' + esc(el.textContent) + '</a><span class="x" onclick="hideResume()">×</span>';
+  document.getElementById("resumeLink").onclick = function(){ jumpRef(pid); hideResume(); };
+  tip.classList.add("show");
+  clearTimeout(window._rt);
+  window._rt = setTimeout(hideResume, 9000);
+}
+
+/* ===== 闪卡模式 ===== */
+var FC = { queue: [], cur: null, flipped: false, total: 0, q: {} };
+var FC_Q_KEY = "kb_fc_q";   /* 持久化闪卡题目缓存：{libId: {chunkId: question}} */
+function getFcQAll(){ try { return JSON.parse(localStorage.getItem(FC_Q_KEY) || "{}"); } catch(e){ return {}; } }
+function getFcQ(lib, id){ var M = getFcQAll(); return (M[lib] && M[lib][id]) || null; }
+function setFcQ(lib, id, q){
+  var M = getFcQAll();
+  M[lib] = M[lib] || {};
+  if (M[lib][id] && M[lib][id] !== q && M[lib][id].indexOf("请说明：") === 0) {
+    /* 已有模板降级题，被真题覆盖 */
+  }
+  M[lib][id] = q;
+  try { localStorage.setItem(FC_Q_KEY, JSON.stringify(M)); } catch(e){}
+}
+function fallbackQuestion(c){
+  return "请说明：" + c.title + "（结合你的理解展开）";
+}
+function genCardQuestion(c, cb){
+  var cached = getFcQ(c.lib, c.id);
+  if (cached){ cb(cached); return; }
+  callLLM([
+    { role: "system", content: "你是面试出题官。根据给定知识点内容出一道简洁的面试/理解题。要求：只输出题目本身、一两句话、中文、不要答案不要解析。知识点标题：" + c.title + "\n内容：" + c.text.slice(0, 700) },
+    { role: "user", content: "出题" }
+  ], function(txt){
+    var q = txt.trim().replace(/^[「『"]+|[」』"]+$/g, "");
+    setFcQ(c.lib, c.id, q); cb(q);
+  }, function(){
+    var q = fallbackQuestion(c); setFcQ(c.lib, c.id, q); cb(q);
+  });
+}
+function renderFront(c){
+  var q = getFcQ(c.lib, c.id) || fallbackQuestion(c);
+  document.getElementById("fcFront").innerHTML =
+    '<span class="bc">' + esc(c.parent || "知识卡片") + "</span>" +
+    '<div class="q">' + esc(q) + "</div>" +
+    '<div class="h">' + (FC.flipped ? "" : "点击卡片查看答案") + "</div>";
+}
+/* 预热：为指定库批量生成所有闪卡题目并持久缓存 */
+function libChunks(lib){
+  if (!aiIndex) buildAiIndex();
+  return aiIndex.filter(function(c){ return c.lib === lib && c.text.trim().length > 40 && c.id; });
+}
+function showWarmToast(lib, i, total){
+  var t = document.getElementById("fcToast");
+  var pct = total ? Math.round(i / total * 100) : 100;
+  t.innerHTML = '⚡ 正在为「' + esc(libName(lib)) + '」生成闪卡题目<br>' + i + ' / ' + total +
+    '<span class="bar"><i style="width:' + pct + '%"></i></span>';
+  t.classList.add("show");
+}
+function hideWarmToast(){ document.getElementById("fcToast").classList.remove("show"); }
+function warmupLib(lib, onDone){
+  var chunks = libChunks(lib);
+  var todo = chunks.filter(function(c){ return !getFcQ(c.lib, c.id); });
+  if (!todo.length){ if (onDone) onDone(0, chunks.length); return; }
+  var i = 0, total = todo.length;
+  showWarmToast(lib, 0, total);
+  function step(){
+    if (i >= total){
+      hideWarmToast();
+      if (onDone) onDone(total, chunks.length);
+      return;
+    }
+    showWarmToast(lib, i, total);
+    var c = todo[i];
+    genCardQuestion(c, function(){ i++; setTimeout(step, 150); });
+  }
+  step();
+}
+function warmupCurrent(){
+  warmupLib(currentLib, function(gen, total){
+    var cached = libChunks(currentLib).filter(function(c){ return !!getFcQ(c.lib, c.id); }).length;
+    alert("预热完成 ✅ 本库共 " + total + " 个知识点，已缓存 " + cached + " 道题" + (gen ? "（本次新生成 " + gen + " 道）" : ""));
+  });
+}
+function cardPool(){
+  if (!aiIndex) buildAiIndex();
+  return aiIndex.filter(function(c){ return c.lib === currentLib && c.text.trim().length > 40 && c.id; });
+}
+function startCards(){
+  var pool = cardPool();
+  if (!pool.length){ alert("当前知识库没有可做闪卡的内容"); return; }
+  FC.queue = pool.slice();
+  FC.total = pool.length;
+  document.getElementById("fcMask").classList.add("show");
+  nextCard();
+}
+function nextCard(){
+  var info = document.getElementById("fcInfo");
+  if (!FC.queue.length){
+    FC.cur = null;
+    info.textContent = "完成";
+    document.getElementById("fcCard").classList.remove("flipped");
+    document.getElementById("fcFront").innerHTML = '<div class="q">🎉 本轮闪卡全部完成！</div><div class="h">点右上角 × 退出，或点「🔁 再看一次」重新来一轮</div>';
+    document.getElementById("fcBack").textContent = "";
+    return;
+  }
+  FC.cur = FC.queue.shift();
+  FC.flipped = false;
+  var card = document.getElementById("fcCard");
+  card.classList.remove("flipped");
+  /* 先放"出题中"占位，避免空白，再异步生成真正的题目 */
+  document.getElementById("fcFront").innerHTML =
+    '<span class="bc">' + esc(FC.cur.parent || "知识卡片") + "</span>" +
+    '<div class="q" style="color:var(--muted);font-size:16px"><span class="ai-typing"><i></i><i></i><i></i></span> 正在出题…</div>' +
+    '<div class="h"></div>';
+  var txt = FC.cur.text.trim();
+  if (txt.length > 800) txt = txt.slice(0, 800) + "……";
+  document.getElementById("fcBack").textContent = txt;
+  info.textContent = "剩余 " + (FC.queue.length + 1) + " / 共 " + FC.total + " 张";
+  var me = FC.cur;
+  if (getFcQ(me.lib, me.id)){
+    renderFront(me);
+  } else {
+    genCardQuestion(me, function(){ if (FC.cur === me) renderFront(me); });
+  }
+}
+function flipCard(){
+  if (!FC.cur) return;
+  FC.flipped = !FC.flipped;
+  document.getElementById("fcCard").classList.toggle("flipped", FC.flipped);
+}
+function cardKnow(){
+  if (!FC.cur){ startCards(); return; }
+  setDoneProgress(FC.cur.lib, FC.cur.id, true);
+  nextCard();
+}
+function cardAgain(){
+  if (!FC.cur){ startCards(); return; }
+  FC.queue.push(FC.cur);
+  nextCard();
+}
+function closeCards(){ document.getElementById("fcMask").classList.remove("show"); }
+document.addEventListener("keydown", function(e){
+  if (!document.getElementById("fcMask").classList.contains("show")) return;
+  if (e.key === " "){ e.preventDefault(); flipCard(); }
+  else if (e.key === "ArrowRight") cardKnow();
+  else if (e.key === "ArrowLeft") cardAgain();
+  else if (e.key === "Escape") closeCards();
+});
+
+/* ===== 出题考我 ===== */
+var quiz = null;
+function startQuiz(){
+  if (quiz){ quiz = null; addMsg("bot", "已退出测验 🛑"); return; }
+  var pool = cardPool();
+  if (!pool.length){ addMsg("bot", "当前知识库没有可出题的内容。"); return; }
+  var c = pool[Math.floor(Math.random() * pool.length)];
+  quiz = c;
+  var thinking = addMsg("bot", '<span class="ai-typing"><i></i><i></i><i></i></span>');
+  callLLM([
+    { role: "system", content: "你是面试官。根据给定知识点出一道面试题。只输出题目本身，一两句话，不要答案、不要解析。知识点标题：" + c.title + "\n内容：" + c.text.slice(0, 700) },
+    { role: "user", content: "请出题" }
+  ], function(txt){
+    thinking.querySelector(".bub").innerHTML = "📝 <strong>考题</strong>：" + simpleMd(txt) + "<br><span style='font-size:12px;color:var(--muted)'>直接在下方输入你的回答，我会对照知识库评分；输入「退出」结束测验。</span>";
+  }, function(){
+    thinking.querySelector(".bub").innerHTML = "📝 <strong>考题</strong>：请谈谈「" + esc(c.title) + "」。<br><span style='font-size:12px;color:var(--muted)'>（AI 出题失败，已用章节标题作题）直接在下方作答；输入「退出」结束。</span>";
+  });
+}
+function gradeAnswer(c, ans){
+  aiBusy = true;
+  document.getElementById("aiSend").disabled = true;
+  var thinking = addMsg("bot", '<span class="ai-typing"><i></i><i></i><i></i></span>');
+  callLLM([
+    { role: "system", content: "你是面试考官。根据「标准要点」给考生回答打分。输出格式严格为四段：\n得分：X/100\n点评：（一两句）\n遗漏要点：（列点，没有就写「无」）\n参考要点：（列点）\n标准要点（来自知识点「" + c.title + "」）：\n" + c.text.slice(0, 900) },
+    { role: "user", content: "考生回答：" + ans }
+  ], function(txt){
+    thinking.querySelector(".bub").innerHTML = simpleMd(txt) + '<span class="ref">📖 对照原文：<a onclick="jumpRef(\'' + c.id + '\')">' + esc(c.title) + "</a> · 点头部的 📝 再来一题</span>";
+  }, function(){
+    var txt = c.text.trim();
+    if (txt.length > 320) txt = txt.slice(0, 320) + "……";
+    thinking.querySelector(".bub").innerHTML = "AI 评分失败，请自查对照 👇<br><br><strong>参考内容</strong>（" + esc(c.title) + "）：<br>" + esc(txt);
+  }, function(){
+    aiBusy = false;
+    document.getElementById("aiSend").disabled = false;
+    document.getElementById("aiMsgs").scrollTop = document.getElementById("aiMsgs").scrollHeight;
+  });
+}
+
+/* ===== 动手实践（正文内嵌，按知识点） ===== */
+var PRAC_KEY = "kb_prac";   /* {lib: {secId: {task, code, verdict}}} */
+function getPracAll(){ try { return JSON.parse(localStorage.getItem(PRAC_KEY) || "{}"); } catch(e){ return {}; } }
+function savePracAll(p){ try { localStorage.setItem(PRAC_KEY, JSON.stringify(p)); } catch(e){} }
+function getPrac(lib, id){ var P = getPracAll(); return (P[lib] && P[lib][id]) || null; }
+function setPrac(lib, id, obj){ var P = getPracAll(); P[lib] = P[lib] || {}; P[lib][id] = obj; savePracAll(P); }
+function chunkById(id){ if (!aiIndex) buildAiIndex(); for (var i = 0; i < aiIndex.length; i++) if (aiIndex[i].id === id) return aiIndex[i]; return null; }
+function parsePracticeJSON(txt){
+  if (!txt) return null;
+  txt = txt.replace(/```json|```/g, "").trim();
+  /* 1) 直接解析 */
+  try { var j = JSON.parse(txt); if (j && typeof j === "object") return j; } catch (e){}
+  /* 2) 取首个 { 到最后一个 } 之间的片段 */
+  var s = txt.indexOf("{"), e = txt.lastIndexOf("}");
+  if (s < 0 || e <= s) return null;
+  var sub = txt.slice(s, e + 1);
+  /* 去尾随逗号后重试 */
+  try { return JSON.parse(sub.replace(/,(\s*[}\]])/g, "$1")); } catch (x){}
+  /* 3) 若仍失败，尝试补齐未闭合的字符串/括号（应对截断） */
+  try {
+    var t = sub, depth = 0, open = null;
+    for (var i = 0; i < t.length; i++){
+      var ch = t[i];
+      if (ch === '"' && t[i-1] !== '\\'){ open = open ? null : '"'; }
+      else if (!open){ if (ch === '{') depth++; else if (ch === '}') depth--; }
+    }
+    while (depth > 0){ t += "}"; depth--; }
+    if (open) t += '"';
+    return JSON.parse(t.replace(/,(\s*[}\]])/g, "$1"));
+  } catch (y){ return null; }
+}
+/* 给每个 h3 知识点挂一个「🛠 实践」chip */
+function addPracticeBtns(){
+  document.querySelectorAll(".content h3[id]").forEach(function(h){
+    if (h.querySelector(".h3-prac")) return;
+    var b = document.createElement("span");
+    b.className = "h3-prac"; b.textContent = "🛠 实践"; b.title = "为这个知识点生成动手实践";
+    b.onclick = function(e){ e.preventDefault(); e.stopPropagation(); togglePractice(h.id, b); };
+    h.appendChild(b);
+  });
+}
+function togglePractice(id, btn){
+  var h = document.getElementById(id);
+  if (!h) return;
+  var card = h.nextElementSibling;
+  if (card && card.classList.contains("prac-card-wrap")){
+    if (card.style.display === "none"){ card.style.display = ""; btn.classList.add("active"); }
+    else { card.style.display = "none"; btn.classList.remove("active"); }
+    return;
+  }
+  card = document.createElement("div");
+  card.className = "prac-card-wrap";
+  h.parentNode.insertBefore(card, h.nextSibling);
+  btn.classList.add("active");
+  var lib = pageOf(id);
+  var cached = getPrac(lib, id);
+  if (cached && cached.task){
+    renderPracticeCard(card, id, cached);
+  } else {
+    card.innerHTML = '<div class="prac"><div class="pd"><span class="ai-typing"><i></i><i></i><i></i></span> 正在为该知识点生成实践模板…</div></div>';
+    var c = chunkById(id);
+    if (!c){ card.innerHTML = '<div class="prac"><div class="pd empty">未找到该知识点内容</div></div>'; return; }
+    genPracticeTask(c, function(task){
+      renderPracticeCard(card, id, { task: task, code: task.skeleton || "", verdict: "" });
+    }, function(msg, raw){
+      var hint = /Failed to fetch|NetworkError|TypeError|加载|abort/i.test(msg)
+        ? "<br><small style=\"color:var(--muted)\">多为浏览器跨域(CORS)拦截或网络问题。请务必通过「本地预览服务器」打开本页（不要直接双击 html 文件），并确认网络可访问 api.deepseek.com。</small>" : "";
+      card.innerHTML = '<div class="prac"><div class="pd empty">⚠️ ' + esc(msg) + hint +
+        '<br><br><button class="sub" onclick="retryPractice(\'' + id + '\')">重试</button></div></div>';
+    });
+  }
+}
+function genPracticeTask(c, onTask, onErr){
+  var attempt = 0, max = 2;
+  function go(){
+    attempt++;
+    callLLM([
+      { role: "system", content: "你是技术导师。根据知识点设计一道动手实践题，让学习者写代码或写方案。严格只输出 JSON（不要任何 markdown、不要解释、不要代码块围栏 ```），直接以 { 开头、} 结尾。格式：{\"title\":\"题目\",\"desc\":\"题目描述与要求\",\"lang\":\"Java/SQL/Shell/文本\",\"skeleton\":\"起始代码骨架，含 // TODO 标注待填写处\",\"points\":[\"考察点1\",\"考察点2\",\"考察点3\"],\"difficulty\":\"简单/中等/困难\"}。知识点标题：" + c.title + "\n内容：" + c.text.slice(0, 600) },
+      { role: "user", content: "只输出 JSON，不要其他文字。" }
+    ], function(txt){
+      var t = parsePracticeJSON(txt);
+      if (t && t.title) return onTask(t);
+      if (attempt < max){ return setTimeout(go, 800); }
+      onErr("模型未返回可解析的 JSON（已重试 " + attempt + " 次）", txt);
+    }, function(estr){
+      if (attempt < max){ return setTimeout(go, 800); }
+      onErr("大模型调用失败：" + estr, "");
+    });
+  }
+  go();
+}
+function retryPractice(id){
+  var h = document.getElementById(id);
+  var card = h && h.nextElementSibling;
+  if (!card || !card.classList.contains("prac-card-wrap")) return;
+  card.innerHTML = '<div class="prac"><div class="pd"><span class="ai-typing"><i></i><i></i><i></i></span> 正在重新生成实践模板…</div></div>';
+  var c = chunkById(id);
+  if (!c){ card.innerHTML = '<div class="prac"><div class="pd empty">未找到该知识点内容</div></div>'; return; }
+  genPracticeTask(c, function(task){
+    renderPracticeCard(card, id, { task: task, code: task.skeleton || "", verdict: "" });
+  }, function(msg, raw){
+    var hint = /Failed to fetch|NetworkError|TypeError|加载|abort/i.test(msg)
+      ? "<br><small style=\"color:var(--muted)\">多为浏览器跨域(CORS)拦截或网络问题。请通过本地预览服务器打开本页，并确认网络可访问 api.deepseek.com。</small>" : "";
+    card.innerHTML = '<div class="prac"><div class="pd empty">⚠️ ' + esc(msg) + hint +
+      '<br><br><button class="sub" onclick="retryPractice(\'' + id + '\')">重试</button></div></div>';
+  });
+}
+function renderPracticeCard(card, id, data){
+  var task = data.task, code = data.code || task.skeleton || "", verdict = data.verdict || "";
+  var lib = pageOf(id);
+  var pts = (task.points || []).map(function(p){ return "<li>" + esc(p) + "</li>"; }).join("");
+  card.innerHTML = '<div class="prac">' +
+    '<div class="ph"><div class="pt">🛠 ' + esc(task.title || "动手实践") + '</div><div class="pm">' + esc(task.lang || "代码") + " · " + esc(task.difficulty || "") + "</div></div>" +
+    '<div class="pd"><div class="lab">题目</div>' + esc(task.desc || "") + (pts ? '<div class="lab">考察点</div><ul>' + pts + "</ul>" : "") + "</div>" +
+    '<div class="ed"><div class="lh"><span>' + esc(task.lang || "code") + '</span><span>Tab 缩进 · 自动保存</span></div><textarea class="code" spellcheck="false"></textarea></div>' +
+    '<div class="acts"><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
+    (verdict ? '<div class="verdict">' + verdict + "</div>" : '<div class="verdict" style="display:none"></div>') +
+    "</div>";
+  var ta = card.querySelector("textarea.code");
+  ta.value = code;
+  ta.addEventListener("keydown", function(e){
+    if (e.key === "Tab"){
+      e.preventDefault();
+      var s = this.selectionStart, en = this.selectionEnd;
+      this.value = this.value.slice(0, s) + "    " + this.value.slice(en);
+      this.selectionStart = this.selectionEnd = s + 4;
+    }
+  });
+  ta.addEventListener("input", function(){
+    var d = getPrac(lib, id) || { task: task };
+    d.task = task; d.code = ta.value; d.verdict = card.querySelector(".verdict").innerHTML || "";
+    setPrac(lib, id, d);
+  });
+  card.dataset.sec = id;
+}
+function submitPracticeInline(id){
+  var h = document.getElementById(id);
+  var card = h && h.nextElementSibling;
+  if (!card || !card.classList.contains("prac-card-wrap")) return;
+  var ta = card.querySelector("textarea.code");
+  if (!ta) return;
+  var code = ta.value;
+  var lib = pageOf(id);
+  var d = getPrac(lib, id);
+  if (!d || !d.task){ alert("题目未就绪"); return; }
+  var task = d.task, c = chunkById(id), v = card.querySelector(".verdict");
+  v.style.display = "block"; v.className = "verdict";
+  v.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> AI 评阅中…';
+  var sys = "你是代码评审。评阅用户的实践作答。题目：" + (task.title || "") +
+    "\n描述：" + (task.desc || "") +
+    "\n考察点：" + JSON.stringify(task.points || []) +
+    (c ? "\n参考知识（来自知识点「" + c.title + "」）：\n" + c.text.slice(0, 900) : "") +
+    "\n用户代码：\n" + code;
+  callLLM([
+    { role: "system", content: sys },
+    { role: "user", content: "请评阅。输出第一行必须是「结论：通过」或「结论：不通过」；然后给出：2) 问题与修复建议 3) 优化建议 4) 参考实现（用代码块）。简洁中文。" }
+  ], function(txt){
+    var pass = /^\s*结论[:：]\s*通过/.test(txt) && !/不通过/.test(txt.split("\n")[0]);
+    v.className = "verdict " + (pass ? "pass" : "fail");
+    v.innerHTML = (pass ? "✅ <b>通过</b><br>" : "❌ <b>未通过</b><br>") + simpleMd(txt);
+    var dd = getPrac(lib, id) || { task: task };
+    dd.task = task; dd.code = code; dd.verdict = v.innerHTML;
+    setPrac(lib, id, dd);
+  }, function(err){
+    v.className = "verdict fail";
+    v.innerHTML = "评阅失败：" + esc(err);
+  });
+}
+
+/* ===== AI 学习计划（替换原背题功能） ===== */
+function openPlan(){
+  var sel = document.getElementById("planLib");
+  sel.innerHTML = "";
+  document.querySelectorAll(".lib-tab").forEach(function(t){
+    if (t.style.display !== "none"){
+      var o = document.createElement("option");
+      o.value = t.dataset.lib;
+      o.textContent = t.querySelector(".nm").textContent;
+      sel.appendChild(o);
+    }
+  });
+  sel.value = currentLib;
+  var ds = document.getElementById("planStart");
+  if (!ds.value){ var d = new Date(); ds.value = d.toISOString().slice(0, 10); }
+  document.getElementById("planModal").classList.add("show");
+}
+function closePlan(){ document.getElementById("planModal").classList.remove("show"); }
+function libH2Titles(lib){
+  var out = [];
+  document.querySelectorAll('.nav-list[data-lib="' + lib + '"] .nav-h2').forEach(function(a){
+    out.push({ id: a.getAttribute("href").slice(1), title: a.textContent.trim() });
+  });
+  return out;
+}
+function parsePlanJSON(txt){
+  if (!txt) return null;
+  txt = txt.replace(/```json|```/g, "").trim();
+  try { var a = JSON.parse(txt); if (Array.isArray(a)) return a; } catch (e){}
+  var s = txt.indexOf("["), e = txt.lastIndexOf("]");
+  if (s < 0 || e <= s) return null;
+  var sub = txt.slice(s, e + 1);
+  try { return JSON.parse(sub.replace(/,(\s*[}\]])/g, "$1")); } catch (x){}
+  /* 尝试补齐未闭合括号（应对截断） */
+  try {
+    var t = sub, depth = 0, open = null;
+    for (var i = 0; i < t.length; i++){
+      var ch = t[i];
+      if (ch === '"' && t[i-1] !== '\\'){ open = open ? null : '"'; }
+      else if (!open){ if (ch === '[') depth++; else if (ch === ']') depth--; }
+    }
+    while (depth > 0){ t += "]"; depth--; }
+    if (open) t += '"';
+    return JSON.parse(t.replace(/,(\s*[}\]])/g, "$1"));
+  } catch (y){ return null; }
+}
+function fmtDate(startISO, day){
+  var d = new Date(startISO + "T00:00:00");
+  d.setDate(d.getDate() + (day - 1));
+  return (d.getMonth() + 1) + "月" + d.getDate() + "日 周" + "日一二三四五六".charAt(d.getDay());
+}
+function isPlanToday(startISO, day){
+  var d = new Date(startISO + "T00:00:00");
+  d.setDate(d.getDate() + (day - 1));
+  return d.toDateString() === new Date().toDateString();
+}
+function titleToId(titles, title){
+  var t = title.trim();
+  for (var i = 0; i < titles.length; i++) if (titles[i].title === t) return titles[i].id;
+  return null;
+}
+function planTag(titles, t, cls){
+  var id = titleToId(titles, t);
+  var p = getProg()[document.getElementById("planLib").value] || [];
+  var done = id && p.indexOf(id) >= 0;
+  return '<span class="tag ' + cls + (done ? " done" : "") + '"' +
+    (id ? ' onclick="closePlan();jumpRef(\'' + id + '\')"' : "") + ">" + esc(t) + "</span>";
+}
+function generatePlan(){
+  var lib = document.getElementById("planLib").value;
+  var days = parseInt(document.getElementById("planDays").value, 10) || 14;
+  var per = parseInt(document.getElementById("planPerDay").value, 10) || 2;
+  var start = document.getElementById("planStart").value || new Date().toISOString().slice(0, 10);
+  var titles = libH2Titles(lib);
+  if (!titles.length){ alert("该知识库没有章节，无法生成计划"); return; }
+  var out = document.getElementById("planOut");
+  var attempt = 0, max = 2;
+  function go(){
+    attempt++;
+    out.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> AI 正在排课…（第 ' + attempt + " 次）";
+    var list = titles.map(function(t, i){ return (i + 1) + ". " + t.title; }).join("\n");
+    callLLM([
+      { role: "system", content: "你是学习规划师。基于艾宾浩斯遗忘曲线（复习间隔 1/2/4/7/15/30 天），为以下知识点生成一份 " + days + " 天的学习计划。要求：每天安排约 " + per + " 个新学章节（按列表顺序推进，全部学完后 learn 为空数组），并标注当天到期需要复习的章节（按某章节学后第 1/2/4/7/15/30 天推算，review 标题须与列表完全一致）。严格只输出 JSON 数组（不要 markdown、不要解释、不要代码块围栏），直接以 [ 开头、] 结尾。格式：[{\"day\":1,\"learn\":[\"标题\"],\"review\":[\"标题\"]}]。知识点列表：\n" + list },
+      { role: "user", content: "只输出 JSON 数组，不要其他文字。" }
+    ], function(txt){
+      var plan = parsePlanJSON(txt);
+      if (plan && plan.length) return renderPlan(plan, start, lib, titles);
+      if (attempt < max){ return setTimeout(go, 800); }
+      out.innerHTML = '<div class="plan-day"><div class="empty">⚠️ AI 返回格式异常，<button class="sub" onclick="generatePlan()">重试</button></div><pre style="white-space:pre-wrap;font-size:12px;margin-top:6px">' + esc(txt.slice(0, 800)) + "</pre></div>";
+    }, function(err){
+      if (attempt < max){ return setTimeout(go, 800); }
+      var hint = /Failed to fetch|NetworkError|TypeError|abort/i.test(err)
+        ? "<br><small style=\"color:var(--muted)\">多为浏览器跨域(CORS)拦截或网络问题。请通过本地预览服务器打开本页（不要直接双击 html 文件），并确认网络可访问 api.deepseek.com。</small>" : "";
+      out.innerHTML = '<div class="plan-day empty">⚠️ 生成失败：' + esc(err) + hint + ' <button class="sub" onclick="generatePlan()">重试</button></div>';
+    });
+  }
+  go();
+}
+function renderPlan(plan, start, lib, titles){
+  var p = getProg()[lib] || [];
+  var html = "";
+  plan.forEach(function(d){
+    var learn = d.learn || [], review = d.review || [];
+    var todayMark = isPlanToday(start, d.day) ? ' <span style="color:#c0453a;font-size:11px;font-weight:700">· 今天</span>' : "";
+    html += '<div class="plan-day">';
+    html += '<div class="dh"><span class="dn">第 ' + d.day + ' 天</span><span class="dd">' + fmtDate(start, d.day) + todayMark + "</span></div>";
+    if (learn.length){
+      html += '<div class="row"><b>新学：</b>';
+      learn.forEach(function(t){ html += planTag(titles, t, "l"); });
+      html += "</div>";
+    } else {
+      html += '<div class="row empty">（无新内容，专注复习）</div>';
+    }
+    if (review.length){
+      html += '<div class="row"><b>复习：</b>';
+      review.forEach(function(t){ html += planTag(titles, t, "r"); });
+      html += "</div>";
+    } else if (learn.length){
+      html += '<div class="row empty">（今日无到期复习）</div>';
+    }
+    html += "</div>";
+  });
+  document.getElementById("planOut").innerHTML = html;
+}
+
+/* ===== 初始化 ===== */
+(function(){
+  var t = "light"; try { t = localStorage.getItem("kb_theme") || "light"; } catch(e){} applyTheme(t);
+
+  /* 图标选择 */
+  var io = document.getElementById("iconOpts");
+  ICONS.forEach(function(ic, idx){
+    var s = document.createElement("span");
+    s.textContent = ic;
+    if (idx === 0) s.className = "sel";
+    s.onclick = function(){
+      selIcon = ic;
+      io.querySelectorAll("span").forEach(function(x){ x.classList.remove("sel"); });
+      s.classList.add("sel");
+    };
+    io.appendChild(s);
+  });
+
+  /* 渲染自建库 + 隐藏已删内置库 */
+  getCustoms().forEach(renderLib);
+  getHidden().forEach(function(i){
+    var tab = document.querySelector('.lib-tab[data-lib="' + i + '"]');
+    if (tab) tab.style.display = "none";
+  });
+  applyProg();
+  updateDueBadge();
+
+  /* 恢复上次所在库；若 URL 带锚点则以锚点所在库为准 */
+  var lib = "0"; try { lib = localStorage.getItem("kb_lib") || "0"; } catch(e){}
+  var h = location.hash.slice(1);
+  if (h && document.getElementById(h)) lib = pageOf(h);
+  var live = liveLibs();
+  if (!live.length){ showEmpty(); }
+  else switchLib(live.indexOf(lib) >= 0 ? lib : live[0], h || null);
+
+  refreshAiMode();
+  updateDueBadge();
+  onScroll();
+  checkOrigin();
+})();
+function realAppUrl(){
+  var APP_URL = "https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net";
+  return (window.location.href && /^https?:/.test(window.location.href)) ? window.location.href : APP_URL;
+}
+function openInNewTab(){
+  try { window.open(realAppUrl(), "_blank"); } catch(e){ copyAppUrl(); }
+}
+function copyAppUrl(){
+  var u = realAppUrl();
+  var inp = document.getElementById("owUrl"); if (inp) inp.value = u;
+  function ok(){ var b = document.getElementById("owCopyBtn"); if (b){ b.textContent = "已复制 ✓"; setTimeout(function(){ b.textContent = "复制链接"; }, 2000); } }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(u).then(ok, function(){ if(!fallbackCopy(u)) ok(); });
+  } else { if(!fallbackCopy(u)) ok(); }
+}
+function fallbackCopy(u){
+  try {
+    var ta = document.createElement("textarea"); ta.value = u; ta.style.position="fixed"; ta.style.top="0"; ta.style.left="0"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    var r = document.execCommand("copy"); document.body.removeChild(ta); return r;
+  } catch(e){ return false; }
+}
+function checkOrigin(){
+  var bad = (window.self !== window.top) || (location.protocol === "file:") || !location.origin || (location.origin === "null");
+  var w = document.getElementById("originWarn");
+  if (bad && w){ w.style.display = "flex"; var inp = document.getElementById("owUrl"); if (inp) inp.value = realAppUrl(); }
+}
+</script></body></html>
