@@ -302,15 +302,12 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .term-h span{color:#3ecf8e;font-size:9px;}
 .prac .term pre{margin:0;padding:11px 12px;color:#d7e0ec;font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;}
 .prac .term .ai-typing{display:inline-flex;gap:4px;padding:11px 12px;}
-.prac .hint{display:none;position:relative;margin:0 12px 12px;padding:13px 15px 13px 17px;border:1px solid rgba(200,165,94,.55);border-left:4px solid #d3a94f;border-radius:10px;background:linear-gradient(180deg,rgba(255,238,186,.34),rgba(255,224,150,.18));color:#5a4a22;font-size:13px;line-height:1.85;box-shadow:0 0 0 3px rgba(211,169,79,.12),0 4px 14px rgba(180,140,60,.12);animation:hintPop .32s ease;}
-.prac .hint:before{content:"💡 提示";position:absolute;top:-10px;left:13px;padding:1px 9px;font-size:11px;font-weight:700;letter-spacing:.5px;color:#fff;background:linear-gradient(180deg,#e6b860,#cf9f3d);border-radius:20px;box-shadow:0 2px 6px rgba(180,140,60,.3);}
-.prac .hint h5{margin:4px 0 7px;font-size:12.5px;color:var(--ink);letter-spacing:.5px;}
+.prac .hint{display:none;margin:0 12px 12px;padding:11px 13px;border:1px dashed #c8a55e;border-radius:10px;background:rgba(200,165,94,.06);color:#6f5b2e;font-size:13px;line-height:1.75;}
+.prac .hint h5{margin:0 0 7px;font-size:12.5px;color:var(--ink);letter-spacing:.5px;}
 .prac .hint ol{margin:4px 0 0;padding-left:20px;}
-.prac .hint li{margin:4px 0;}
-.prac .hint b{background:linear-gradient(transparent 58%,rgba(255,214,102,.6) 0);color:#7a5e1f;padding:0 3px;border-radius:3px;font-weight:700;}
-.prac .hint code{background:rgba(180,140,60,.14);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:12px;color:#6b4f1d;}
+.prac .hint li{margin:3px 0;}
+.prac .hint b{color:#9a7b35;}
 .prac .hint-btn{background:linear-gradient(180deg,#fbf3e2,#f3e6cb);color:#8a6d2f;border:1px solid #e1cfa3;}
-@keyframes hintPop{from{opacity:0;transform:translateY(-6px) scale(.98);}to{opacity:1;transform:none;}}
 .prac .run-ok{color:#3ecf8e;}
 .ai-input{flex:none;display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:var(--card);}
 .ai-input textarea{flex:1;resize:none;height:42px;max-height:110px;padding:10px 12px;border:1px solid var(--line);
@@ -2563,7 +2560,7 @@ function hintPracticeInline(id){
     { role: "system", content: sys },
     { role: "user", content: "题目：" + (task.title || "") + "\n描述：" + (task.desc || "") + "\n考察点：" + JSON.stringify(task.points || []) + (c ? "\n参考知识（来自知识点「" + c.title + "」）：\n" + c.text.slice(0, 800) : "") + "\n请给出解题提示（不要答案）。" }
   ], function(txt){
-    var html = "<h5>思路点拨（非标准答案）</h5>" + simpleMd(txt);
+    var html = "<h5>💡 解题提示（思路，非答案）</h5>" + simpleMd(txt);
     box.innerHTML = html;
     var dd = getPrac(lib, id) || { task: task };
     dd.task = task; dd.code = card.querySelector("textarea.code").value;
