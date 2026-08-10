@@ -196,6 +196,8 @@ h4{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--muted);}
 .h-actions button.on{opacity:1;filter:none;}
 .h-fav.on{color:#f4c430;}
 .h-note.on{color:var(--gold);}
+.h-expand{filter:none;opacity:.5;}
+.h-expand:hover{opacity:1;background:var(--grad);color:#2a1f08;}
 /* 我的笔记与收藏 */
 .mn-sub{font-size:13px;font-weight:500;color:var(--muted);margin-left:6px;}
 .mn-tabs{display:flex;gap:8px;margin:12px 0 4px;}
@@ -229,6 +231,16 @@ h4{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--muted);}
 .kb-fig{margin:18px 0;text-align:center;}
 .kb-fig svg{max-width:100%;height:auto;}
 .kb-fig .fig-cap{font-size:12px;color:var(--muted);margin-top:8px;}
+/* AI 拓展讲解 */
+.expand-body{max-height:54vh;overflow-y:auto;padding:4px 2px;font-size:14px;line-height:1.8;color:var(--ink2);}
+.expand-body h1,.expand-body h2,.expand-body h3,.expand-body h4{margin:14px 0 8px;color:var(--ink);scroll-margin-top:20px;}
+.expand-body p{margin:10px 0;}
+.expand-body ul,.expand-body ol{margin:8px 0;padding-left:22px;}
+.expand-body li{margin:5px 0;}
+.expand-body code{background:var(--code-bg);color:var(--code-fg);padding:2px 6px;border-radius:6px;font-family:"SFMono-Regular",Consolas,monospace;font-size:12.5px;border:1px solid var(--code-bd);}
+.expand-body pre{margin:12px 0;padding:12px 14px;border-radius:12px;background:#0d141b;color:#cfd8e0;overflow-x:auto;font-family:"SFMono-Regular",Consolas,monospace;font-size:12.5px;line-height:1.6;}
+.expand-body pre code{border:none;background:none;padding:0;color:inherit;}
+.expand-body strong{color:var(--strong);}
 p{margin:12px 0;}
 a{color:var(--gold);text-decoration:none;}
 a:hover{text-decoration:underline;}
@@ -2834,6 +2846,14 @@ return fallbackAnswer();                        // 全部失败→降级回复</
     <div class="actions"><span class="left"><button class="m-btn ghost danger" onclick="delNote()">🗑 删除笔记</button></span><span class="right"><button class="m-btn ghost" onclick="closeNoteEditor()">取消</button><button class="m-btn primary" onclick="saveNote()">保存</button></span></div>
   </div>
 </div>
+<div class="modal-mask" id="expandModal" onclick="if(event.target===this)closeExpand()">
+  <div class="modal">
+    <h3>✨ AI 拓展讲解 <span class="mn-sub" id="expandSecTitle"></span></h3>
+    <p class="tip" id="expandTip">AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。需配置 API Key（⚙）。</p>
+    <div class="expand-body" id="expandBody"></div>
+    <div class="actions"><span class="left"><button class="m-btn ghost" onclick="stopExpand()">⏹ 停止</button></span><span class="right"><button class="m-btn ghost" onclick="closeExpand()">关闭</button></span></div>
+  </div>
+</div>
 <script>
 var currentLib = "0";
 var CUSTOM_KEY = "kb_custom_libs";
@@ -3789,10 +3809,17 @@ function cardPool(){
   if (!aiIndex) buildAiIndex();
   return aiIndex.filter(function(c){ return c.lib === currentLib && c.text.trim().length > 40 && c.id; });
 }
+function shuffleArr(a){
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
 function startCards(){
   var pool = cardPool();
   if (!pool.length){ alert("当前知识库没有可做闪卡的内容"); return; }
-  FC.queue = pool.slice();
+  FC.queue = shuffleArr(pool.slice());   /* 每次打开都随机排序，不总从第一个开始 */
   FC.total = pool.length;
   document.getElementById("fcMask").classList.add("show");
   nextCard();
@@ -4893,7 +4920,11 @@ function decorateHeadings(){
       note.className = "h-note" + (isNoted(lib, sid) ? " on" : "");
       note.title = "写笔记"; note.textContent = "📝"; note.setAttribute("data-sec", sid);
       note.onclick = function(e){ e.stopPropagation(); openNoteEditor(lib, sid); };
-      act.appendChild(fav); act.appendChild(note); h.appendChild(act);
+      var exp = document.createElement("button");
+      exp.className = "h-expand";
+      exp.title = "AI 拓展讲解"; exp.textContent = "✨"; exp.setAttribute("data-sec", sid);
+      exp.onclick = function(e){ e.stopPropagation(); expandSection(lib, sid); };
+      act.appendChild(fav); act.appendChild(note); act.appendChild(exp); h.appendChild(act);
     });
   });
 }
@@ -4973,6 +5004,63 @@ function delNote(){
   closeNoteEditor();
 }
 function closeNoteEditor(){ document.getElementById("noteModal").classList.remove("show"); _curNote = null; }
+
+/* ---------- 单知识点 AI 拓展讲解 ---------- */
+var _expandAcc = "", _expandDone = false, _expandStop = false;
+
+function cleanHeadingText(h){
+  var c = h.cloneNode(true);
+  var acts = c.querySelector(".h-actions"); if (acts) acts.parentNode.removeChild(acts);
+  return (c.textContent || "").replace(/[⭐📝✨]/g, "").replace(/\s+/g, " ").trim();
+}
+/* 收集某小节的正文纯文本（标题 + 到下一个同级标题之前的所有内容），截断喂给 AI */
+function collectSectionText(lib, secId){
+  var page = document.querySelector('.page[data-page="' + lib + '"]');
+  var h = page ? page.querySelector('[id="' + secId + '"]') : null;
+  if (!h) return "";
+  var parts = [cleanHeadingText(h)];
+  var n = h.nextElementSibling;
+  while (n && !/^h[123]$/i.test(n.tagName)){
+    var t = (n.innerText || n.textContent || "").replace(/\s+/g, " ").trim();
+    if (t) parts.push(t);
+    n = n.nextElementSibling;
+  }
+  var s = parts.join("\n\n");
+  if (s.length > 1500) s = s.slice(0, 1500) + "……";
+  return s;
+}
+function expandSection(lib, secId){
+  var page = document.querySelector('.page[data-page="' + lib + '"]');
+  var h = page ? page.querySelector('[id="' + secId + '"]') : null;
+  var title = h ? cleanHeadingText(h) : secId;
+  document.getElementById("expandSecTitle").textContent = "· " + title;
+  var body = document.getElementById("expandBody");
+  body.innerHTML = '<div class="ai-typing"><i></i><i></i><i></i></div> 正在为你拓展讲解…';
+  document.getElementById("expandModal").classList.add("show");
+  var ctx = collectSectionText(lib, secId);
+  var sys = { role: "system", content: "你是资深技术讲师。请对用户给出的知识点做深入拓展讲解：补充底层原理、典型例子、常见易错点、与相关技术的对比，以及便于记忆的技巧。用中文，适当使用 Markdown 列表与代码块，控制在 450 字以内，不要复述用户已写的内容。" };
+  var user = { role: "user", content: "知识点标题：" + title + "\n\n知识点内容：\n" + ctx };
+  _expandAcc = ""; _expandDone = false; _expandStop = false;
+  callLLMStream([sys, user],
+    function(delta){
+      if (_expandStop || _expandDone) return;
+      _expandAcc += delta;
+      body.innerHTML = simpleMd(_expandAcc);
+      body.scrollTop = body.scrollHeight;
+    },
+    function(){
+      if (_expandStop) return;
+      _expandDone = true;
+      if (!_expandAcc) body.innerHTML = '<p class="tip">（未能生成内容，请稍后重试）</p>';
+    },
+    function(errMsg){
+      if (_expandStop) return;
+      _expandDone = true;
+      body.innerHTML = '<p class="tip">⚠️ ' + esc(errMsg || "生成失败") + '</p>';
+    });
+}
+function stopExpand(){ _expandStop = true; _expandDone = true; }
+function closeExpand(){ document.getElementById("expandModal").classList.remove("show"); _expandStop = true; }
 
 function realAppUrl(){
   var APP_URL = "https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net";
