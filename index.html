@@ -291,6 +291,8 @@ body.review h3.open::before{content:"\25BE  ";}
   font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:12.5px;line-height:1.6;
   resize:vertical;outline:none;white-space:pre;tab-size:4;}
 .prac .ed textarea:focus{box-shadow:inset 0 0 0 2px var(--gold-2);}
+.prac .ed .monaco-mount{height:210px;background:#1e1e1e;border-bottom:1px solid #202d39;overflow:hidden;}
+.prac .ed .monaco-mount .monaco-editor,.prac .ed .monaco-mount .monaco-editor .overflow-guard{border-radius:0;}
 .prac .acts{display:flex;flex-wrap:wrap;gap:8px;padding:9px 12px;background:var(--card);border-top:1px solid var(--line);}
 .prac .acts button{flex:1 1 auto;min-width:84px;border:1px solid var(--line);background:var(--bg);color:var(--ink2);border-radius:9px;
   padding:8px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
@@ -3374,7 +3376,7 @@ function togglePractice(id, btn){
   if (!h) return;
   var card = h.nextElementSibling;
   if (card && card.classList.contains("prac-card-wrap")){
-    if (card.style.display === "none"){ card.style.display = ""; btn.classList.add("active"); }
+    if (card.style.display === "none"){ card.style.display = ""; btn.classList.add("active"); if (card._monacoEditor) setTimeout(function(){ try { card._monacoEditor.layout(); } catch(e){} }, 30); }
     else { card.style.display = "none"; btn.classList.remove("active"); }
     return;
   }
@@ -3437,22 +3439,102 @@ function retryPractice(id){
       '<br><br><button class="sub" onclick="retryPractice(\'' + id + '\')">重试</button></div></div>';
   });
 }
-function renderPracticeCard(card, id, data){
-  var task = data.task, code = data.code || task.skeleton || "", verdict = data.verdict || "";
-  var lib = pageOf(id);
-  var pts = (task.points || []).map(function(p){ return "<li>" + esc(p) + "</li>"; }).join("");
-  card.innerHTML = '<div class="prac">' +
-    '<div class="ph"><div class="pt">🛠 ' + esc(task.title || "动手实践") + '</div><div class="pm">' + esc(task.lang || "代码") + " · " + esc(task.difficulty || "") + "</div></div>" +
-    '<div class="pd"><div class="lab">题目</div>' + esc(task.desc || "") + (pts ? '<div class="lab">考察点</div><ul>' + pts + "</ul>" : "") + "</div>" +
-    '<div class="ed"><div class="lh"><span>' + esc(task.lang || "code") + '</span><span>Tab 缩进 · 自动保存</span></div><textarea class="code" spellcheck="false"></textarea></div>' +
-    '<div class="acts"><button class="run" onclick="runPracticeInline(\'' + id + '\')">▶ 运行</button><button class="hint-btn" onclick="hintPracticeInline(\'' + id + '\')">💡 提示</button><button class="ans-btn" onclick="answerPracticeInline(\'' + id + '\')">🔑 答案</button><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
-    '<div class="term" style="display:none"></div>' +
-    '<div class="hint" style="display:none"></div>' +
-    '<div class="answer" style="display:none"></div>' +
-    (verdict ? '<div class="verdict">' + verdict + "</div>" : '<div class="verdict" style="display:none"></div>') +
-    "</div>";
-  var ta = card.querySelector("textarea.code");
-  ta.value = code;
+function mapMonacoLang(lang){
+  var L = (lang || "").toLowerCase();
+  if (L.indexOf("typescript") >= 0) return "typescript";
+  if (L.indexOf("json") >= 0) return "json";
+  if (L.indexOf("python") >= 0) return "python";
+  if (L.indexOf("javascript") >= 0) return "javascript";
+  if (L.indexOf("java") >= 0) return "java";
+  if (L.indexOf("sql") >= 0) return "sql";
+  if (L.indexOf("go") >= 0) return "go";
+  if (L.indexOf("html") >= 0) return "html";
+  if (L.indexOf("js") >= 0) return "javascript";
+  return "plaintext";
+}
+function getCodeVal(card){
+  if (card._monacoEditor){ try { return card._monacoEditor.getValue(); } catch(e){} }
+  var ta = card.querySelector("textarea.code"); return ta ? ta.value : "";
+}
+var __monacoState = 0, __monacoCbs = [];
+var MONACO_CDNS = [
+  "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min",
+  "https://registry.npmmirror.com/monaco-editor/0.52.2/files/min"
+];
+function ensureMonaco(cb){
+  if (__monacoState === 2){ cb(true); return; }
+  if (__monacoState === 3){ cb(false); return; }
+  if (__monacoState === 1){ __monacoCbs.push(cb); return; }
+  __monacoState = 1; __monacoCbs.push(cb);
+  (function tryIdx(i){
+    if (i >= MONACO_CDNS.length){ failMonaco(); return; }
+    var CDN = MONACO_CDNS[i];
+    try {
+      window.MonacoEnvironment = { getWorkerUrl: function(){
+        return "data:text/javascript;charset=utf-8," + encodeURIComponent(
+          "self.MonacoEnvironment={baseUrl:'" + CDN + "/'};importScripts('" + CDN + "/vs/base/worker/workerMain.js');"
+        );
+      }};
+    } catch(e){}
+    var s = document.createElement("script");
+    s.src = CDN + "/vs/loader.js";
+    s.onload = function(){
+      try {
+        require.config({ paths: { vs: CDN + "/vs" } });
+        require.onError = function(){ failMonaco(); };
+        require(["vs/editor/editor.main"], function(){
+          __monacoState = 2;
+          __monacoCbs.forEach(function(f){ try { f(true); } catch(e){} });
+          __monacoCbs = [];
+        });
+      } catch(e){ tryIdx(i + 1); }
+    };
+    s.onerror = function(){ tryIdx(i + 1); };
+    document.head.appendChild(s);
+  })(0);
+}
+function failMonaco(){
+  __monacoState = 3;
+  __monacoCbs.forEach(function(f){ try { f(false); } catch(e){} });
+  __monacoCbs = [];
+}
+function mountMonaco(card, id, code, lang){
+  var mount = card.querySelector(".monaco-mount");
+  if (!mount) return;
+  ensureMonaco(function(ok){
+    if (!ok || !mount.isConnected){
+      if (mount) mount.style.display = "none";
+      var t0 = card.querySelector("textarea.code"); if (t0) t0.style.display = "";
+      return;
+    }
+    try {
+      if (card._monacoEditor){ try { card._monacoEditor.dispose(); } catch(e){} }
+      var ed = monaco.editor.create(mount, {
+        value: code, language: mapMonacoLang(lang), theme: "vs-dark",
+        fontSize: 13, minimap: { enabled: false }, scrollBeyondLastLine: false,
+        automaticLayout: true, tabSize: 4, insertSpaces: true,
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        padding: { top: 8, bottom: 6 }, lineNumbersMinChars: 3,
+        renderLineHighlight: "line", wordWrap: "on",
+        scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+      });
+      card._monacoEditor = ed;
+      ed.onDidChangeModelContent(function(){
+        var val = ed.getValue();
+        var t = card.querySelector("textarea.code"); if (t) t.value = val;
+        var task = card._pracTask;
+        var d = getPrac(pageOf(id), id) || { task: task };
+        d.task = task; d.code = val;
+        var vd = card.querySelector(".verdict"); d.verdict = vd ? (vd.innerHTML || "") : "";
+        setPrac(pageOf(id), id, d);
+      });
+    } catch(e){
+      if (mount) mount.style.display = "none";
+      var t = card.querySelector("textarea.code"); if (t) t.style.display = "";
+    }
+  });
+}
+function attachTaFallback(ta, card, id, lib, task){
   ta.addEventListener("keydown", function(e){
     if (e.isComposing || e.metaKey || e.ctrlKey) return;
     var v = this.value, s = this.selectionStart, en = this.selectionEnd;
@@ -3463,7 +3545,6 @@ function renderPracticeCard(card, id, data){
       this.dispatchEvent(new Event("input"));
       return;
     }
-    // 括号/引号自动补全（紧跟单词或已存在右括号时不补，避免 foo(bar 变 foo((bar）
     var pair = { "{":"}", "(":")", "[":"]", "\"":"\"", "'":"'", "`":"`" };
     if (pair[e.key]){
       var nx = v[en];
@@ -3480,14 +3561,12 @@ function renderPracticeCard(card, id, data){
       this.dispatchEvent(new Event("input"));
       return;
     }
-    // 输入右括号时若右侧已存在则跳过（不重复）
     var close = { "}":"{", ")":"(", "]":"[" };
     if (close[e.key] && s === en && v[s] === e.key){
       e.preventDefault();
       this.selectionStart = this.selectionEnd = s + 1;
       return;
     }
-    // 退格删除成对空括号/引号
     if (e.key === "Backspace" && s === en && s > 0){
       var pm = { "{":"}", "(":")", "[":"]", "\"":"\"", "'":"'" };
       if (pm[v[s-1]] === v[s]){
@@ -3498,7 +3577,6 @@ function renderPracticeCard(card, id, data){
         return;
       }
     }
-    // 回车自动缩进：继承本行缩进；行尾为 { ( [ 时再进一级
     if (e.key === "Enter"){
       e.preventDefault();
       var ls = v.lastIndexOf("\n", s - 1) + 1;
@@ -3514,9 +3592,29 @@ function renderPracticeCard(card, id, data){
   });
   ta.addEventListener("input", function(){
     var d = getPrac(lib, id) || { task: task };
-    d.task = task; d.code = ta.value; d.verdict = card.querySelector(".verdict").innerHTML || "";
+    d.task = task; d.code = ta.value; var vd = card.querySelector(".verdict"); d.verdict = vd ? (vd.innerHTML || "") : "";
     setPrac(lib, id, d);
   });
+}
+function renderPracticeCard(card, id, data){
+  var task = data.task, code = data.code || task.skeleton || "", verdict = data.verdict || "";
+  var lib = pageOf(id);
+  var pts = (task.points || []).map(function(p){ return "<li>" + esc(p) + "</li>"; }).join("");
+  card.innerHTML = '<div class="prac">' +
+    '<div class="ph"><div class="pt">🛠 ' + esc(task.title || "动手实践") + '</div><div class="pm">' + esc(task.lang || "代码") + " · " + esc(task.difficulty || "") + "</div></div>" +
+    '<div class="pd"><div class="lab">题目</div>' + esc(task.desc || "") + (pts ? '<div class="lab">考察点</div><ul>' + pts + "</ul>" : "") + "</div>" +
+    '<div class="ed"><div class="lh"><span>' + esc(task.lang || "code") + '</span><span>Monaco 编辑器 · 语法高亮 · 自动保存</span></div><div class="monaco-mount" id="mm-' + id + '"></div><textarea class="code" spellcheck="false" style="display:none"></textarea></div>' +
+    '<div class="acts"><button class="run" onclick="runPracticeInline(\'' + id + '\')">▶ 运行</button><button class="hint-btn" onclick="hintPracticeInline(\'' + id + '\')">💡 提示</button><button class="ans-btn" onclick="answerPracticeInline(\'' + id + '\')">🔑 答案</button><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
+    '<div class="term" style="display:none"></div>' +
+    '<div class="hint" style="display:none"></div>' +
+    '<div class="answer" style="display:none"></div>' +
+    (verdict ? '<div class="verdict">' + verdict + "</div>" : '<div class="verdict" style="display:none"></div>') +
+    "</div>";
+  var ta = card.querySelector("textarea.code");
+  if (ta) ta.value = code;
+  card._pracTask = task;
+  if (ta) attachTaFallback(ta, card, id, lib, task);
+  mountMonaco(card, id, code, task.lang);
   card.dataset.sec = id;
 }
 function hintPracticeInline(id){
@@ -3540,7 +3638,7 @@ function hintPracticeInline(id){
     var html = "<h5>思路点拨（非标准答案）</h5>" + simpleMd(txt);
     box.innerHTML = html;
     var dd = getPrac(lib, id) || { task: task };
-    dd.task = task; dd.code = card.querySelector("textarea.code").value;
+    dd.task = task; dd.code = getCodeVal(card);
     dd.verdict = card.querySelector(".verdict").innerHTML || "";
     dd.hint = html;
     setPrac(lib, id, dd);
@@ -3569,7 +3667,7 @@ function answerPracticeInline(id){
     var html = "<h5>🔑 参考答案（完整实现）</h5>" + simpleMd(txt) + '<div class="note">提示：先自己写，再看答案对照思路～</div>';
     box.innerHTML = html;
     var dd = getPrac(lib, id) || { task: task };
-    dd.task = task; dd.code = card.querySelector("textarea.code").value;
+    dd.task = task; dd.code = getCodeVal(card);
     dd.verdict = card.querySelector(".verdict").innerHTML || "";
     dd.hint = card.querySelector(".hint").innerHTML || "";
     dd.answer = html;
@@ -3582,9 +3680,7 @@ function submitPracticeInline(id){
   var h = document.getElementById(id);
   var card = h && h.nextElementSibling;
   if (!card || !card.classList.contains("prac-card-wrap")) return;
-  var ta = card.querySelector("textarea.code");
-  if (!ta) return;
-  var code = ta.value;
+  var code = getCodeVal(card);
   var lib = pageOf(id);
   var d = getPrac(lib, id);
   if (!d || !d.task){ alert("题目未就绪"); return; }
@@ -3616,10 +3712,9 @@ function runPracticeInline(id){
   var h = document.getElementById(id);
   var card = h && h.nextElementSibling;
   if (!card || !card.classList.contains("prac-card-wrap")) return;
-  var ta = card.querySelector("textarea.code");
   var term = card.querySelector(".term");
-  if (!ta || !term) return;
-  var code = ta.value;
+  if (!term) return;
+  var code = getCodeVal(card);
   var d = getPrac(pageOf(id), id);
   if (!d || !d.task){ alert("题目未就绪"); return; }
   var task = d.task, lang = task.lang || "代码";
