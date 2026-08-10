@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>知识库 · Java 八股 / Ragent 项目 / LangChain 1.0+</title><style>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>知识库 · Java 八股 / Ragent / LangChain 1.0+ / Embabel / Spring AI</title><style>
 :root{
   --bg:#f2efe7; --card:#fffdf8; --ink:#222a33; --ink2:#3d4650; --muted:#7a828c;
   --line:#e5dfcf; --gold:#a87c2a; --gold-2:#cfa553; --gold-soft:rgba(168,124,42,.10);
@@ -49,7 +49,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
   font-weight:800;font-size:20px;letter-spacing:3px;color:#f3e9d0;line-height:1.2;}
 .brand .s{font-size:11.5px;color:#93a3b0;margin-top:4px;letter-spacing:.6px;transition:color .2s;}
 
-.lib-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 16px 8px;position:relative;}
+.lib-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;padding:16px 16px 8px;position:relative;}
 .lib-tab{position:relative;padding:12px 12px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.10);
   background:rgba(255,255,255,.04);color:#c3ccd4;cursor:pointer;text-align:left;
   transition:transform .18s,background .18s,border-color .18s,box-shadow .18s;font-family:inherit;}
@@ -462,6 +462,8 @@ body.review h3.open::before{content:"\25BE  ";}
     <button type="button" class="lib-tab active" data-lib="0" onclick="switchLib('0')"><span class="ic">☕</span><span class="nm">Java 八股</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'0')">×</span></button>
     <button type="button" class="lib-tab" data-lib="1" onclick="switchLib('1')"><span class="ic">🤖</span><span class="nm">Ragent 项目</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'1')">×</span></button>
     <button type="button" class="lib-tab" data-lib="2" onclick="switchLib('2')"><span class="ic">🔗</span><span class="nm">LangChain 1.0+</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'2')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="3" onclick="switchLib('3')"><span class="ic">🤖</span><span class="nm">Embabel Agent</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'3')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="4" onclick="switchLib('4')"><span class="ic">🌱</span><span class="nm">Spring AI</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'4')">×</span></button>
     <button type="button" class="lib-add" onclick="openLibModal()">＋ 新建知识库</button>
   </div>
   <div class="search"><input id="search" type="text" placeholder="🔍 搜索当前知识库…" oninput="onSearch(this.value)"><div class="search-hint" id="searchHint" onclick="jumpOtherLib()"></div></div>
@@ -470,6 +472,8 @@ body.review h3.open::before{content:"\25BE  ";}
     <div class="nav-list show" data-lib="0"><div class="nav-group"><div class="nav-h1">Java 面试八股完整知识库（概念 + 业务实战）</div><a class="nav-h2" href="#sec-2">总目录</a></div><div class="nav-group"><div class="nav-h1">第一部分：核心知识点（八股速查）</div><a class="nav-h2" href="#sec-4">1. Java 基础</a><a class="nav-h3" href="#sec-5">1.1 谈谈 Java 的跨平台原理</a><a class="nav-h3" href="#sec-6">1.2 JDK、JRE、JVM 的关系</a><a class="nav-h3" href="#sec-7">1.3 基本数据类型 vs 包装类</a><a class="nav-h3" href="#sec-8">1.4 == 与 equals 的区别</a><a class="nav-h3" href="#sec-9">1.5 String、StringBuffer、StringBuilder</a><a class="nav-h3" href="#sec-10">1.6 String 为什么不可变？好处是什么？</a><a class="nav-h3" href="#sec-11">1.7 重写（Override）与重载（Overload）</a><a class="nav-h3" href="#sec-12">1.8 异常体系</a><a class="nav-h3" href="#sec-13">1.9 final、finally、finalize</a><a class="nav-h3" href="#sec-14">1.10 什么是反射？优缺点？</a><a class="nav-h2" href="#sec-15">2. 面向对象</a><a class="nav-h3" href="#sec-16">2.1 三大特性</a><a class="nav-h3" href="#sec-17">2.2 面向对象 vs 面向过程</a><a class="nav-h3" href="#sec-18">2.3 接口与抽象类的区别</a><a class="nav-h3" href="#sec-19">2.4 深拷贝 vs 浅拷贝</a><a class="nav-h2" href="#sec-20">3. 集合框架</a><a class="nav-h3" href="#sec-21">3.1 整体结构</a><a class="nav-h3" href="#sec-22">3.2 ArrayList vs LinkedList</a><a class="nav-h3" href="#sec-23">3.3 HashMap 原理（重点）</a><a class="nav-h3" href="#sec-24">3.4 ConcurrentHashMap</a><a class="nav-h3" href="#sec-25">3.5 HashSet 如何保证不重复</a><a class="nav-h3" href="#sec-26">3.6 fail-fast 与 fail-safe</a><a class="nav-h2" href="#sec-27">4. 并发与多线程（JUC）</a><a class="nav-h3" href="#sec-28">4.1 进程与线程</a><a class="nav-h3" href="#sec-29">4.2 创建线程的方式</a><a class="nav-h3" href="#sec-30">4.3 线程的生命周期</a><a class="nav-h3" href="#sec-31">4.4 synchronized 关键字</a><a class="nav-h3" href="#sec-32">4.5 volatile</a><a class="nav-h3" href="#sec-33">4.6 synchronized vs volatile</a><a class="nav-h3" href="#sec-34">4.7 锁分类</a><a class="nav-h3" href="#sec-35">4.8 CAS 是什么？有什么问题？</a><a class="nav-h3" href="#sec-36">4.9 线程池</a><a class="nav-h3" href="#sec-37">4.10 ThreadLocal</a><a class="nav-h2" href="#sec-38">5. JVM</a><a class="nav-h3" href="#sec-39">5.1 运行时数据区</a><a class="nav-h3" href="#sec-40">5.2 堆内存划分</a><a class="nav-h3" href="#sec-41">5.3 垃圾回收算法</a><a class="nav-h3" href="#sec-42">5.4 垃圾收集器</a><a class="nav-h3" href="#sec-43">5.5 如何判断对象可回收？</a><a class="nav-h3" href="#sec-44">5.6 双亲委派模型</a><a class="nav-h3" href="#sec-45">5.7 常见 OOM / 调优参数</a><a class="nav-h2" href="#sec-46">6. Java 8+ 新特性</a><a class="nav-h3" href="#sec-47">6.1 Lambda 表达式</a><a class="nav-h3" href="#sec-48">6.2 函数式接口</a><a class="nav-h3" href="#sec-49">6.3 Stream API</a><a class="nav-h3" href="#sec-50">6.4 新日期时间 API</a><a class="nav-h3" href="#sec-51">6.5 接口的 default / static 方法</a><a class="nav-h3" href="#sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</a><a class="nav-h2" href="#sec-53">7. I/O 与 NIO</a><a class="nav-h3" href="#sec-54">7.1 BIO / NIO / AIO</a><a class="nav-h3" href="#sec-55">7.2 NIO 核心组件</a><a class="nav-h2" href="#sec-56">8. 常见设计模式</a><a class="nav-h3" href="#sec-57">8.1 单例模式（双重检查锁）</a><a class="nav-h3" href="#sec-58">8.2 工厂 / 抽象工厂</a><a class="nav-h3" href="#sec-59">8.3 策略模式</a><a class="nav-h3" href="#sec-60">8.4 观察者模式</a><a class="nav-h3" href="#sec-61">8.5 代理模式</a><a class="nav-h3" href="#sec-62">8.6 装饰器模式</a><a class="nav-h2" href="#sec-63">9. MySQL 基础</a><a class="nav-h3" href="#sec-64">9.1 索引</a><a class="nav-h3" href="#sec-65">9.2 事务四大特性（ACID）</a><a class="nav-h3" href="#sec-66">9.3 事务隔离级别</a><a class="nav-h3" href="#sec-67">9.4 慢查询优化思路</a><a class="nav-h3" href="#sec-68">9.5 分库分表</a><a class="nav-h2" href="#sec-69">10. Redis 基础</a><a class="nav-h3" href="#sec-70">10.1 数据类型</a><a class="nav-h3" href="#sec-71">10.2 持久化</a><a class="nav-h3" href="#sec-72">10.3 缓存问题</a><a class="nav-h3" href="#sec-73">10.4 内存淘汰策略</a><a class="nav-h3" href="#sec-74">10.5 常见用途</a><a class="nav-h2" href="#sec-75">11. Spring / Spring Boot</a><a class="nav-h3" href="#sec-76">11.1 控制反转（IoC）与依赖注入（DI）</a><a class="nav-h3" href="#sec-77">11.2 Bean 作用域</a><a class="nav-h3" href="#sec-78">11.3 Bean 生命周期</a><a class="nav-h3" href="#sec-79">11.4 AOP</a><a class="nav-h3" href="#sec-80">11.5 Spring 事务</a><a class="nav-h3" href="#sec-81">11.6 Spring Boot 自动配置原理</a><a class="nav-h2" href="#sec-82">12. 计算机网络</a><a class="nav-h3" href="#sec-83">12.1 TCP 三次握手 / 四次挥手</a><a class="nav-h3" href="#sec-84">12.2 TCP 与 UDP 区别</a><a class="nav-h3" href="#sec-85">12.3 HTTP 与 HTTPS</a><a class="nav-h3" href="#sec-86">12.4 常见状态码</a><a class="nav-h3" href="#sec-87">12.5 浏览器输入 URL 到页面显示的过程</a><a class="nav-h2" href="#sec-88">13. 常见算法与数据结构</a><a class="nav-h3" href="#sec-89">13.1 数据结构</a><a class="nav-h3" href="#sec-90">13.2 排序算法速记</a><a class="nav-h3" href="#sec-91">13.3 刷题套路</a></div><div class="nav-group"><div class="nav-h1">第二部分：业务场景实战</div><a class="nav-h2" href="#sec-93">1. 集合：购物车与商品去重</a><a class="nav-h2" href="#sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</a><a class="nav-h2" href="#sec-95">3. synchronized / 锁：秒杀库存扣减</a><a class="nav-h2" href="#sec-96">4. volatile：系统开关与单例配置中心</a><a class="nav-h2" href="#sec-97">5. 线程池：异步通知与批量任务</a><a class="nav-h2" href="#sec-98">6. ThreadLocal：用户上下文与链路追踪</a><a class="nav-h2" href="#sec-99">7. JVM / GC：大促接口超时排查</a><a class="nav-h2" href="#sec-100">8. String：订单号与金额拼接</a><a class="nav-h2" href="#sec-101">9. 设计模式：支付与促销策略</a><a class="nav-h2" href="#sec-102">10. MySQL 索引：订单查询慢 SQL</a><a class="nav-h2" href="#sec-103">11. 事务：下单扣库存与转账</a><a class="nav-h2" href="#sec-104">12. Redis：缓存与分布式锁</a><a class="nav-h2" href="#sec-105">13. Spring：循环依赖 / AOP / 事务失效</a><a class="nav-h2" href="#sec-106">14. 网络：接口超时与 HTTPS</a><a class="nav-h2" href="#sec-107">15. 消息队列：下单异步解耦</a></div><div class="nav-group"><div class="nav-h1">第三部分：分布式与微服务专项</div><a class="nav-h2" href="#sec-109">1. 微服务与 Spring Cloud 生态</a><a class="nav-h3" href="#sec-110">1.1 微服务核心组件</a><a class="nav-h3" href="#sec-111">1.2 服务注册与发现原理</a><a class="nav-h3" href="#sec-112">1.3 网关（Gateway）作用</a><a class="nav-h3" href="#sec-113">1.4 负载均衡：Ribbon vs Nginx</a><a class="nav-h3" href="#sec-114">1.5 熔断、降级、限流</a><a class="nav-h2" href="#sec-115">2. 消息队列（MQ）</a><a class="nav-h3" href="#sec-116">2.1 为什么用 MQ</a><a class="nav-h3" href="#sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</a><a class="nav-h3" href="#sec-118">2.3 消息可靠性（不丢）</a><a class="nav-h3" href="#sec-119">2.4 重复消费与幂等</a><a class="nav-h3" href="#sec-120">2.5 消息积压处理</a><a class="nav-h3" href="#sec-121">2.6 顺序消息</a><a class="nav-h2" href="#sec-122">3. 分布式事务</a><a class="nav-h3" href="#sec-123">3.1 2PC / 3PC</a><a class="nav-h3" href="#sec-124">3.2 TCC（Try-Confirm-Cancel）</a><a class="nav-h3" href="#sec-125">3.3 消息最终一致性（常用）</a><a class="nav-h3" href="#sec-126">3.4 Seata</a><a class="nav-h3" href="#sec-127">3.5 最大努力通知</a><a class="nav-h2" href="#sec-128">4. 分布式锁与缓存一致性</a><a class="nav-h3" href="#sec-129">4.1 分布式锁方案</a><a class="nav-h3" href="#sec-130">4.2 缓存与 DB 一致性</a><a class="nav-h2" href="#sec-131">5. 分布式 ID 与分库分表</a><a class="nav-h3" href="#sec-132">5.1 分布式 ID 方案</a><a class="nav-h3" href="#sec-133">5.2 分库分表</a></div><div class="nav-group"><div class="nav-h1">附录 A：高频追问清单（自查）</div></div><div class="nav-group"><div class="nav-h1">附录 B：八股 → 业务的回答套路</div></div><div class="nav-group"><div class="nav-h1">第四部分：进阶高频补充（2026 新版考点）</div><a class="nav-h2" href="#sec-201">1. JDK 17 / 21 新特性（T0 必考）</a><a class="nav-h3" href="#sec-202">1.1 虚拟线程（Virtual Threads，Project Loom）★</a><a class="nav-h3" href="#sec-203">1.2 Sealed Classes / Records / Pattern Matching</a><a class="nav-h3" href="#sec-204">1.3 Structured Concurrency 与 Scoped Values</a><a class="nav-h2" href="#sec-205">2. 并发进阶（手写 AQS 是高频要求）</a><a class="nav-h3" href="#sec-206">2.1 AQS 原理 ★</a><a class="nav-h3" href="#sec-207">2.2 ReentrantLock vs synchronized</a><a class="nav-h3" href="#sec-208">2.3 CountDownLatch / CyclicBarrier / Semaphore</a><a class="nav-h3" href="#sec-209">2.4 原子类、LongAdder 与 StampedLock</a><a class="nav-h3" href="#sec-210">2.5 CompletableFuture 编排</a><a class="nav-h2" href="#sec-211">3. JVM 深入</a><a class="nav-h3" href="#sec-212">3.1 类加载过程与对象创建细节</a><a class="nav-h3" href="#sec-213">3.2 CMS / G1 / ZGC 对比与选型</a><a class="nav-h3" href="#sec-214">3.3 线上问题排查四板斧 ★</a><a class="nav-h2" href="#sec-215">4. MySQL 深入</a><a class="nav-h3" href="#sec-216">4.1 MVCC 原理 ★</a><a class="nav-h3" href="#sec-217">4.2 redo log / undo log / binlog 与两阶段提交</a><a class="nav-h3" href="#sec-218">4.3 行锁、间隙锁与死锁</a><a class="nav-h2" href="#sec-219">5. Redis 深入</a><a class="nav-h3" href="#sec-220">5.1 底层数据结构</a><a class="nav-h3" href="#sec-221">5.2 主从 / 哨兵 / Cluster</a><a class="nav-h3" href="#sec-222">5.3 bigkey 与 hotkey 治理</a><a class="nav-h3" href="#sec-223">5.4 分布式锁的正确姿势 ★</a><a class="nav-h2" href="#sec-224">6. Spring 深入</a><a class="nav-h3" href="#sec-225">6.1 循环依赖与三级缓存 ★</a><a class="nav-h3" href="#sec-226">6.2 Spring MVC 请求处理流程</a><a class="nav-h3" href="#sec-227">6.3 Spring Boot 3.x 变化（新版必问）</a><a class="nav-h3" href="#sec-228">6.4 AI 工程化趋势：Spring AI 与 RAG</a><a class="nav-h2" href="#sec-229">7. 高频场景题（设计思路模板）</a><a class="nav-h3" href="#sec-230">7.1 秒杀系统完整链路 ★</a><a class="nav-h3" href="#sec-231">7.2 短链系统</a><a class="nav-h3" href="#sec-232">7.3 排行榜与高并发计数</a><a class="nav-h3" href="#sec-233">7.4 百万数据导出</a><a class="nav-h3" href="#sec-234">7.5 接口幂等设计</a><a class="nav-h2" href="#sec-235">8. 2026 面试趋势与答题策略</a></div></div>
     <div class="nav-list" data-lib="1"><div class="nav-group"><div class="nav-h1">Ragent 平台项目知识库（Agentic RAG 企业级实战）</div><a class="nav-h2" href="#sec-137">一、项目定位与技术栈</a><a class="nav-h3" href="#sec-138">1.1 它是什么</a><a class="nav-h3" href="#sec-139">1.2 技术栈全景</a><a class="nav-h3" href="#sec-140">1.3 四大 Maven 模块职责</a><a class="nav-h2" href="#sec-141">二、架构分层思想</a><a class="nav-h3" href="#sec-142">2.1 三层职责链路</a><a class="nav-h3" href="#sec-143">2.2 为什么这么分</a><a class="nav-h2" href="#sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</a><a class="nav-h3" href="#sec-145">3.1 总览（流水线阶段编排）</a><a class="nav-h3" href="#sec-146">3.2 阶段 1：会话记忆加载</a><a class="nav-h3" href="#sec-147">3.3 阶段 2：问题改写与子问题拆分</a><a class="nav-h3" href="#sec-148">3.4 阶段 3：意图识别（树形多级）</a><a class="nav-h3" href="#sec-149">3.5 阶段 4：歧义引导</a><a class="nav-h3" href="#sec-150">3.6 阶段 5：多路检索 ★</a><a class="nav-h3" href="#sec-151">3.7 阶段 6：Prompt 组装与流式输出</a><a class="nav-h3" href="#sec-152">3.8 一张图看懂调用链（文字时序）</a><a class="nav-h2" href="#sec-153">四、知识库入库链路（Ingestion Pipeline）</a><a class="nav-h3" href="#sec-154">4.1 五种节点类型（接口 IngestionNode）</a><a class="nav-h3" href="#sec-155">4.2 链式执行引擎</a><a class="nav-h3" href="#sec-156">4.3 切片策略与写入</a><a class="nav-h2" href="#sec-157">五、模型路由与故障转移</a><a class="nav-h2" href="#sec-158">六、多路检索深挖</a><a class="nav-h3" href="#sec-159">6.1 检索通道</a><a class="nav-h3" href="#sec-160">6.2 后处理责任链</a><a class="nav-h3" href="#sec-161">6.3 向量库双支持</a><a class="nav-h2" href="#sec-162">七、意图识别体系</a><a class="nav-h2" href="#sec-163">八、MCP 工具调用</a><a class="nav-h2" href="#sec-164">九、多租户与管理后台</a><a class="nav-h2" href="#sec-165">十、设计模式实战（对照表）</a><a class="nav-h2" href="#sec-166">十一、生产级工程特性</a><a class="nav-h3" href="#sec-167">11.1 队列式分布式限流</a><a class="nav-h3" href="#sec-168">11.2 8 线程池 + TTL 透传</a><a class="nav-h3" href="#sec-169">11.3 全链路 Trace（AOP）</a><a class="nav-h3" href="#sec-170">11.4 会话记忆压缩</a><a class="nav-h3" href="#sec-171">11.5 认证鉴权</a><a class="nav-h3" href="#sec-172">11.6 其他生产特性</a><a class="nav-h2" href="#sec-173">十二、可扩展性：新增 X 只需实现接口</a><a class="nav-h2" href="#sec-174">十三、学习路线与面试考点（自查）</a><a class="nav-h2" href="#sec-300">十四、源码导览：核心类速查表</a><a class="nav-h2" href="#sec-301">十五、关键机制深挖（源码级参数）</a><a class="nav-h3" href="#sec-302">15.1 队列式限流的完整实现 ★</a><a class="nav-h3" href="#sec-303">15.2 RRF 融合与后处理责任链（精确参数）</a><a class="nav-h3" href="#sec-304">15.3 模型熔断与首包探测（精确参数）</a><a class="nav-h3" href="#sec-305">15.4 意图识别阈值与缓存</a><a class="nav-h3" href="#sec-306">15.5 会话记忆压缩参数</a><a class="nav-h2" href="#sec-307">十六、数据模型：核心表速查（PostgreSQL，23 张）</a><a class="nav-h2" href="#sec-308">十七、线程池配置清单（面试可直接背）</a><a class="nav-h2" href="#sec-309">十八、本地跑起来：中间件与启动顺序</a><a class="nav-h2" href="#sec-310">十九、面试怎么讲这个项目（加分话术）</a></div></div>
     <div class="nav-list" data-lib="2"><div class="nav-group"><div class="nav-h1">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</div><a class="nav-h2" href="#sec-401">一、定位与设计哲学</a><a class="nav-h3" href="#sec-4011">1.1 发布背景与时间线</a><a class="nav-h3" href="#sec-4012">1.2 设计哲学：一个 Agent 抽象</a><a class="nav-h2" href="#sec-402">二、包结构精简</a><a class="nav-h3" href="#sec-4021">2.1 主包 langchain 的命名空间</a><a class="nav-h3" href="#sec-4022">2.2 langchain-classic（旧代码救生艇）</a><a class="nav-h3" href="#sec-4023">2.3 安装与环境要求</a><a class="nav-h2" href="#sec-403">三、模型初始化 init_chat_model</a><a class="nav-h3" href="#sec-4031">3.1 统一初始化与多模型切换</a><a class="nav-h3" href="#sec-4032">3.2 厂商包与对接国产 / OpenAI 兼容模型</a><a class="nav-h2" href="#sec-404">四、工具定义 @tool</a><a class="nav-h3" href="#sec-4041">4.1 基础用法</a><a class="nav-h3" href="#sec-4042">4.2 结构化入参与状态注入</a><a class="nav-h2" href="#sec-405">五、消息与标准内容块 content_blocks</a><a class="nav-h3" href="#sec-4051">5.1 content_blocks：跨供应商统一</a><a class="nav-h3" href="#sec-4052">5.2 多模态消息</a><a class="nav-h3" href="#sec-4053">5.3 序列化与 LC_OUTPUT_VERSION</a><a class="nav-h2" href="#sec-406">六、构建智能体 create_agent</a><a class="nav-h3" href="#sec-4061">6.1 最小可运行的 Agent</a><a class="nav-h3" href="#sec-4062">6.2 system_prompt 与运行时 context</a><a class="nav-h3" href="#sec-4063">6.3 流式调用</a><a class="nav-h2" href="#sec-407">七、智能体中间件 Middleware</a><a class="nav-h3" href="#sec-4071">7.1 内置中间件</a><a class="nav-h3" href="#sec-4072">7.2 自定义中间件</a><a class="nav-h2" href="#sec-408">八、结构化输出 Structured Output</a><a class="nav-h3" href="#sec-4081">8.1 response_format + ToolStrategy</a><a class="nav-h3" href="#sec-4082">8.2 厂商原生结构化输出</a><a class="nav-h2" href="#sec-409">九、持久化与 LangGraph 运行时</a><a class="nav-h3" href="#sec-4091">9.1 Durable State 与断点恢复</a><a class="nav-h3" href="#sec-4092">9.2 人在回路 HITL</a><a class="nav-h2" href="#sec-410">十、RAG 与检索（1.0 的变化）</a><a class="nav-h3" href="#sec-4101">10.1 检索器迁移到 classic</a><a class="nav-h3" href="#sec-4102">10.2 用 create_agent + 检索工具做 RAG</a><a class="nav-h2" href="#sec-411">十一、迁移指南（0.x → 1.0）</a><a class="nav-h3" href="#sec-4111">11.1 常见 import 对照</a><a class="nav-h3" href="#sec-4112">11.2 升级步骤建议</a><a class="nav-h2" href="#sec-412">十二、实战：工具调用 Agent 完整示例</a><a class="nav-h2" href="#sec-413">十三、1.1 与版本演进（model profiles）</a><a class="nav-h2" href="#sec-414">十四、最佳实践与常见坑</a></div></div>
+    <div class="nav-list" data-lib="3"><div class="nav-group"><div class="nav-h1">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</div><a class="nav-h2" href="#sec-501">一、定位与背景</a><a class="nav-h3" href="#sec-5011">1.1 它解决什么问题</a><a class="nav-h3" href="#sec-5012">1.2 与 Spring AI / LangChain 的关系</a><a class="nav-h2" href="#sec-502">二、核心概念</a><a class="nav-h3" href="#sec-5021">2.1 五大支柱</a><a class="nav-h3" href="#sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</a><a class="nav-h2" href="#sec-503">三、快速开始</a><a class="nav-h3" href="#sec-5031">3.1 项目脚手架</a><a class="nav-h3" href="#sec-5032">3.2 配置与运行</a><a class="nav-h2" href="#sec-504">四、领域模型（强类型基石）</a><a class="nav-h3" href="#sec-5041">4.1 用 record / data class 表达类型</a><a class="nav-h3" href="#sec-5042">4.2 把行为暴露给 LLM</a><a class="nav-h2" href="#sec-505">五、@Agent / @Action / @AchievesGoal</a><a class="nav-h3" href="#sec-5051">5.1 Kotlin 示例：StarNewsFinder</a><a class="nav-h3" href="#sec-5052">5.2 Java 示例：BlogWriterAgent</a><a class="nav-h3" href="#sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</a><a class="nav-h2" href="#sec-506">六、AI 与 LLM 抽象</a><a class="nav-h3" href="#sec-5061">6.1 Ai 与 OperationContext</a><a class="nav-h3" href="#sec-5062">6.2 模型提供商与自定义 LLM</a><a class="nav-h2" href="#sec-507">七、规划引擎（GOAP / A*）</a><a class="nav-h3" href="#sec-5071">7.1 工作原理</a><a class="nav-h3" href="#sec-5072">7.2 为什么不是状态机</a><a class="nav-h2" href="#sec-508">八、工具与 ToolGroup</a><a class="nav-h3" href="#sec-5081">8.1 声明工具组</a><a class="nav-h3" href="#sec-5082">8.2 安全提示</a><a class="nav-h2" href="#sec-509">九、MCP 集成</a><a class="nav-h3" href="#sec-5091">9.1 作为 MCP 服务器暴露</a><a class="nav-h3" href="#sec-5092">9.2 消费 MCP 服务器</a><a class="nav-h2" href="#sec-510">十、RAG 与向量检索</a><a class="nav-h3" href="#sec-5101">10.1 embabel-agent-rag 模块</a><a class="nav-h2" href="#sec-511">十一、多智能体与 A2A</a><a class="nav-h3" href="#sec-5111">11.1 Agent 联邦</a><a class="nav-h2" href="#sec-512">十二、运行、调试与测试</a><a class="nav-h3" href="#sec-5121">12.1 Spring Shell 命令</a><a class="nav-h3" href="#sec-5122">12.2 单元测试</a><a class="nav-h2" href="#sec-513">十三、成本与预算意识</a><a class="nav-h3" href="#sec-5131">13.1 预算感知 Agent</a><a class="nav-h2" href="#sec-514">十四、最佳实践与常见坑</a><a class="nav-h3" href="#sec-5141">14.1 实践清单</a><a class="nav-h3" href="#sec-5142">14.2 迁移 / 版本注意</a></div></div>
+    <div class="nav-list" data-lib="4"><div class="nav-group"><div class="nav-h1">Spring AI 知识库（Java 生态的 AI 工程框架）</div><a class="nav-h2" href="#sec-601">一、定位与版本</a><a class="nav-h3" href="#sec-6011">1.1 设计目标</a><a class="nav-h3" href="#sec-6012">1.2 版本与模块</a><a class="nav-h2" href="#sec-602">二、核心 API 全景</a><a class="nav-h3" href="#sec-6021">2.1 能力矩阵</a><a class="nav-h3" href="#sec-6022">2.2 支持的厂商</a><a class="nav-h2" href="#sec-603">三、快速开始</a><a class="nav-h3" href="#sec-6031">3.1 起步依赖</a><a class="nav-h3" href="#sec-6032">3.2 第一个调用</a><a class="nav-h2" href="#sec-604">四、ChatClient Fluent API</a><a class="nav-h3" href="#sec-6041">4.1 链式调用</a><a class="nav-h3" href="#sec-6042">4.2 流式与默认值</a><a class="nav-h2" href="#sec-605">五、结构化输出</a><a class="nav-h3" href="#sec-6051">5.1 entity 映射到 POJO</a><a class="nav-h3" href="#sec-6052">5.2 让模型理解字段</a><a class="nav-h2" href="#sec-606">六、PromptTemplate</a><a class="nav-h3" href="#sec-6061">6.1 变量与外部资源</a><a class="nav-h2" href="#sec-607">七、模型提供商与 ChatOptions</a><a class="nav-h3" href="#sec-6071">7.1 切换模型与参数</a><a class="nav-h2" href="#sec-608">八、Embedding 与 VectorStore</a><a class="nav-h3" href="#sec-6081">8.1 注入与检索</a><a class="nav-h3" href="#sec-6082">8.2 可移植的元数据过滤</a><a class="nav-h2" href="#sec-609">九、文档 ETL 流水线</a><a class="nav-h3" href="#sec-6091">9.1 读 → 切 → 嵌 → 写</a><a class="nav-h2" href="#sec-610">十、工具调用（Tool Calling）</a><a class="nav-h3" href="#sec-6101">10.1 用 @Tool 定义工具</a><a class="nav-h3" href="#sec-6102">10.2 注册为 ToolCallback 并接线</a><a class="nav-h3" href="#sec-6103">10.3 2.0 的工具循环</a><a class="nav-h2" href="#sec-611">十一、Advisors API</a><a class="nav-h3" href="#sec-6111">11.1 拦截器链模式</a><a class="nav-h2" href="#sec-612">十二、对话记忆（Chat Memory）</a><a class="nav-h3" href="#sec-6121">12.1 记忆仓库与窗口</a><a class="nav-h2" href="#sec-613">十三、RAG 实战</a><a class="nav-h3" href="#sec-6131">13.1 RAG 与工具天然可组合</a><a class="nav-h3" href="#sec-6132">13.2 给模型明确指引</a><a class="nav-h2" href="#sec-614">十四、MCP 集成</a><a class="nav-h3" href="#sec-6141">14.1 暴露为 MCP 工具服务器</a><a class="nav-h3" href="#sec-6142">14.2 消费远程 MCP 服务器</a><a class="nav-h2" href="#sec-615">十五、评估（Evaluation）</a><a class="nav-h3" href="#sec-6151">15.1 相关性评估器</a><a class="nav-h2" href="#sec-616">十六、可观测性</a><a class="nav-h3" href="#sec-6161">16.1 开启观测</a><a class="nav-h2" href="#sec-617">十七、Spring Boot 自动配置与 Starters</a><a class="nav-h3" href="#sec-6171">17.1 约定优于配置</a><a class="nav-h2" href="#sec-618">十八、最佳实践与常见坑</a><a class="nav-h3" href="#sec-6181">18.1 实践清单</a><a class="nav-h3" href="#sec-6182">18.2 版本注意</a></div></div>
   </div>
 </aside>
 <main class="main"><div class="content" id="contentBox">
@@ -1698,7 +1702,535 @@ agent = create_agent(
 <hr class="sep">
 <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">— LangChain 1.0+ 知识库结束 · 内容基于官方 1.0 / 1.1 公告与迁移指南整理 —</p>
 
-    <div class="page-foot"><button class="pf-btn" onclick="switchLib('0')">← 返回：Java 面试八股</button><span></span></div>
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('3')">下一个知识库：Embabel Agent →</button></div>
+  </section>
+  <section class="page" data-page="3"><h1 id="sec-500">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</h1>
+<blockquote>Embabel（发音 Em-BAY-bel）是由 <strong>Spring Framework 创始人 Rod Johnson</strong> 打造的 JVM 智能体框架，构建于 Spring AI 之上，用 <strong>Kotlin</strong> 编写但对 Java 极其友好。它的核心主张是：用<strong>非 LLM 的确定性规划算法（GOAP/A*）动态编排 Actions</strong>，把 LLM 调用与普通 JVM 代码、强类型领域模型无缝混合，从而得到「可解释、可调试、可重构」的智能体。本知识库基于官方文档 docs.embabel.com 与 GitHub 仓库整理，答法遵循「概念 → 注解 → 代码 → 原理 → 坑点」。</blockquote>
+<hr class="sep">
+<h2 id="sec-501">一、定位与背景</h2>
+<h3 id="sec-5011">1.1 它解决什么问题</h3>
+<ul>
+<li>绝大多数 Agent 框架活在 Python 生态；JVM 开发者要么调用 Python 服务，要么在裸 LLM 客户端上手写编排逻辑。</li>
+<li>LangChain 等依赖 LLM 做路由决策，非确定性、难调试；Embabel 用<strong>经典 AI 规划（非 LLM）</strong>决定「下一步执行哪个 Action」。</li>
+<li>目标：成为在 JVM（尤其是 Spring 应用）上做 GenAI 的「自然方式」，证明模型能力，并逐步演化为「自然语言 PaaS」。</li>
+</ul>
+<h3 id="sec-5012">1.2 与 Spring AI / LangChain 的关系</h3>
+<table><thead><tr><th>维度</th><th>Spring AI</th><th>Embabel</th><th>LangChain(1.0)</th></tr></thead><tbody>
+<tr><td>定位</td><td>AI 集成基础库（ChatClient/VectorStore/Tool）</td><td>构建于 Spring AI 之上的智能体<strong>编排框架</strong></td><td>智能体抽象（create_agent）</td></tr>
+<tr><td>规划方式</td><td>无（由你写流程）</td><td><strong>GOAP/A* 确定性规划 + 每步 Replan</strong></td><td>LangGraph 图执行</td></tr>
+<tr><td>强类型</td><td>POJO 映射输出</td><td><strong>全程强类型领域模型驱动</strong></td><td>TypedDict / pydantic</td></tr>
+<tr><td>语言</td><td>Java/Kotlin</td><td>Kotlin 为主，Java 友好</td><td>Python / JS</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-502">二、核心概念</h2>
+<h3 id="sec-5021">2.1 五大支柱</h3>
+<ul>
+<li><strong>Actions</strong>：智能体执行的离散步骤（一个方法），可调用 LLM、工具或普通代码。</li>
+<li><strong>Goals</strong>：智能体要达成的目标，由系统<strong>动态推导</strong>，而非硬编码。</li>
+<li><strong>Conditions</strong>：执行 Action 前需满足的前置条件、以及判定 Goal 是否已达成的后置条件；每个 Action 后都会重新评估。</li>
+<li><strong>Domain Model</strong>：支撑流程的强类型领域对象，为 Actions/Goals/Conditions 提供类型信息。</li>
+<li><strong>Plan</strong>：由系统用非 LLM 算法<strong>动态编排</strong>出的一组 Action 序列；每完成一个 Action 就重新规划（OODA 循环）。</li>
+</ul>
+<h3 id="sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</h3>
+<ul>
+<li>确定性：规划是经典 AI 算法（A*/GOAP），<strong>可解释、可调试、成本极低</strong>，不消耗 token。</li>
+<li>可扩展：新增 Action/Goal/Condition 即可扩展系统能力，<strong>无需改现有的状态机或代码</strong>。</li>
+<li>强类型：提示词与手写代码通过领域模型干净交互，<strong>没有「魔法 Map」，享受完整重构支持</strong>。</li>
+<li>平台抽象：编程模型与运行时解耦，本地可跑，生产可上更高 QoS 而不改应用代码。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-503">三、快速开始</h2>
+<h3 id="sec-5031">3.1 项目脚手架</h3>
+<p>Embabel 暂不兼容 Spring AI 2.0 / Spring Boot 4，请使用 <strong>Spring Boot 3.5.x</strong>。推荐用 <code>project-creator</code> 或 start.spring.io 建一个空 Spring Boot 项目，再手动加依赖。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">xml</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">&lt;!-- pom.xml：管理 Spring AI BOM 与 Embabel 依赖 --&gt;</span>
+<span class="tok-kw">&lt;properties&gt;</span>
+  <span class="tok-kw">&lt;embabel.version&gt;</span>0.4.0-SNAPSHOT<span class="tok-kw">&lt;/embabel.version&gt;</span>
+  <span class="tok-kw">&lt;spring-ai.version&gt;</span>1.1.4<span class="tok-kw">&lt;/spring-ai.version&gt;</span>
+<span class="tok-kw">&lt;/properties&gt;</span>
+<span class="tok-kw">&lt;dependencyManagement&gt;</span>
+  <span class="tok-kw">&lt;dependencies&gt;</span>
+    <span class="tok-kw">&lt;dependency&gt;</span>
+      <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+      <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-bom<span class="tok-kw">&lt;/artifactId&gt;</span>
+      <span class="tok-kw">&lt;version&gt;</span>${spring-ai.version}<span class="tok-kw">&lt;/version&gt;</span>
+      <span class="tok-kw">&lt;type&gt;</span>pom<span class="tok-kw">&lt;/type&gt;</span><span class="tok-kw">&lt;scope&gt;</span>import<span class="tok-kw">&lt;/scope&gt;</span>
+    <span class="tok-kw">&lt;/dependency&gt;</span>
+  <span class="tok-kw">&lt;/dependencies&gt;</span>
+<span class="tok-kw">&lt;/dependencyManagement&gt;</span>
+<span class="tok-kw">&lt;dependencies&gt;</span>
+  <span class="tok-cmt">&lt;!-- shell starter 自带 Spring Shell，便于调试；也可用普通 Web starter --&gt;</span>
+  <span class="tok-kw">&lt;dependency&gt;</span>
+    <span class="tok-kw">&lt;groupId&gt;</span>com.embabel<span class="tok-kw">&lt;/groupId&gt;</span>
+    <span class="tok-kw">&lt;artifactId&gt;</span>embabel-agent-starter-shell<span class="tok-kw">&lt;/artifactId&gt;</span>
+    <span class="tok-kw">&lt;version&gt;</span>${embabel.version}<span class="tok-kw">&lt;/version&gt;</span>
+  <span class="tok-kw">&lt;/dependency&gt;</span>
+  <span class="tok-kw">&lt;dependency&gt;</span>
+    <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+    <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-openai-spring-boot-starter<span class="tok-kw">&lt;/artifactId&gt;</span>
+  <span class="tok-kw">&lt;/dependency&gt;</span>
+<span class="tok-kw">&lt;/dependencies&gt;</span></code></pre>
+<h3 id="sec-5032">3.2 配置与运行</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">properties</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.properties</span>
+spring.main.web-application-type=none
+spring.shell.interactive.enabled=true
+embabel.models.default-llm=gpt-4o-mini
+spring.ai.openai.api-key=${OPENAI_API_KEY}</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">bash</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># 进入交互式 shell（开发调试神器）</span>
+./shell.sh
+<span class="tok-cmt"># 执行一个 agent，框架会自动选择最匹配的那个</span>
+execute "Lynda is a Scorpio, find news for her" -p -r
+<span class="tok-cmt"># x 是 execute 的快捷方式；-p 打印 prompt，-r 打印 LLM 响应</span>
+x "fact check the following: holden cars are still made in australia"
+<span class="tok-cmt"># 进入对话模式，框架为每个命令挑选最合适的 agent</span>
+chat</code></pre>
+<hr class="sep">
+<h2 id="sec-504">四、领域模型（强类型基石）</h2>
+<h3 id="sec-5041">4.1 用 record / data class 表达类型</h3>
+<p>领域对象既可由 LLM 生成，也可由用户代码构造/操作。用 Jackson 注解帮助 LLM 理解字段含义，并标记要忽略的字段。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@JsonClassDescription</span>(<span class="tok-str">"Person with astrology details"</span>)
+<span class="tok-kw">public record</span> StarPerson(
+    String name,
+    <span class="tok-kw">@JsonPropertyDescription</span>(<span class="tok-str">"Star sign"</span>) String sign
+) {}</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Kotlin</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">data class</span> RelevantNewsStories(<span class="tok-kw">val</span> items: List&lt;NewsStory&gt;)
+<span class="tok-kw">data class</span> NewsStory(<span class="tok-kw">val</span> url: String, <span class="tok-kw">val</span> summary: String)</code></pre>
+<h3 id="sec-5042">4.2 把行为暴露给 LLM</h3>
+<p>领域对象上的方法若标注 Spring AI 的 <code>@Tool</code>，当其处于作用域时会<strong>自动暴露给 LLM</strong> 作为可调用工具。注意：工具方法要安全，避免误触发导致删库/改数据。</p>
+<hr class="sep">
+<h2 id="sec-505">五、@Agent / @Action / @AchievesGoal</h2>
+<h3 id="sec-5051">5.1 Kotlin 示例：StarNewsFinder</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Kotlin</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Agent</span>(description = <span class="tok-str">"Find news based on a person's star sign"</span>)
+<span class="tok-kw">class</span> StarNewsFinder(
+    <span class="tok-kw">private val</span> horoscopeService: HoroscopeService,
+    <span class="tok-kw">@param:Value</span>(<span class="tok-str">"\${star-news-finder.story.count:5}"</span>)
+    <span class="tok-kw">private val</span> storyCount: Int = 5,
+) {
+    <span class="tok-cmt">// 全部 prompt 类型安全；此 Action 用 LLM 抽取结构化对象</span>
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> extractPerson(userInput: UserInput, ai: Ai): StarPerson =
+        ai.withDefaultLlm().createObject(
+            <span class="tok-str">"Create a person from this user input, extracting name and star sign: $userInput"</span>)
+
+    <span class="tok-cmt">// 这个 Action 完全不调 LLM，演示 LLM 与普通代码混合</span>
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> retrieveHoroscope(starPerson: StarPerson) =
+        Horoscope(horoscopeService.dailyHoroscope(starPerson.sign))
+
+    <span class="tok-cmt">// toolGroups 声明本 Action 需要 WEB 工具组</span>
+    <span class="tok-kw">@Action</span>(toolGroups = [ToolGroup.WEB])
+    <span class="tok-kw">fun</span> findNewsStories(person: StarPerson, horoscope: Horoscope, ai: Ai): RelevantNewsStories =
+        ai.withDefaultLlm().createObject(<span class="tok-str">"..."</span>)
+
+    <span class="tok-cmt">// @AchievesGoal 标记「完成此 Action 即达成目标」，agent 运行结束</span>
+    <span class="tok-kw">@AchievesGoal</span>(description = <span class="tok-str">"Write an amusing writeup based on horoscope and news"</span>)
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> writeup(person: StarPerson, relevantNewsStories: RelevantNewsStories,
+              horoscope: Horoscope, ai: Ai): Writeup =
+        ai.withLlm(LlmOptions.withModel(model).withTemperature(0.9))
+            .createObject(<span class="tok-str">"..."</span>)
+}</code></pre>
+<h3 id="sec-5052">5.2 Java 示例：BlogWriterAgent</h3>
+<p><code>@Agent</code> 把类同时标记为 Spring Bean 与 Embabel Agent；每个 <code>@Action</code> 方法的<strong>参数即它需要的对象，返回值即它产出的对象</strong>，框架据此推断流程路径。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Agent</span>(description = <span class="tok-str">"Write and review a blog post about a given topic"</span>)
+<span class="tok-kw">public class</span> BlogWriterAgent {
+
+    <span class="tok-cmt">// 用 OperationContext 访问 AI 能力与运行时</span>
+    <span class="tok-kw">@AchievesGoal</span>(description = <span class="tok-str">"Produce a reviewed blog post"</span>)
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">public</span> ReviewedPost writePost(Topic topic, OperationContext context) {
+        BlogDraft draft = context.ai().withDefaultLlm()
+            .createObject(<span class="tok-str">"Write a blog post about "</span> + topic, BlogDraft.<span class="tok-kw">class</span>);
+        <span class="tok-cmt">// 领域服务做确定性校验/改写</span>
+        <span class="tok-kw">return</span> reviewService.review(draft);
+    }
+}</code></pre>
+<h3 id="sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</h3>
+<table><thead><tr><th>属性</th><th>含义</th><th>用途</th></tr></thead><tbody>
+<tr><td><code>description</code></td><td>动作说明</td><td>规划与选择时参考</td></tr>
+<tr><td><code>cost</code></td><td>相对成本（如 0.1）</td><td>规划时权衡花费</td></tr>
+<tr><td><code>value</code></td><td>相对价值（如 0.8）</td><td>规划时评估收益</td></tr>
+<tr><td><code>toolGroups</code></td><td>所需工具组如 <code>[ToolGroup.WEB]</code></td><td>声明前置依赖，不满足则跳过</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-506">六、AI 与 LLM 抽象</h2>
+<h3 id="sec-5061">6.1 Ai 与 OperationContext</h3>
+<ul>
+<li><code>OperationContext</code>：运行时上下文，通过 <code>context.ai()</code> 拿到 <code>Ai</code> 入口。</li>
+<li><code>ai.withDefaultLlm()</code>：用应用配置的默认模型。</li>
+<li><code>ai.withLlm(LlmOptions.withModel("gpt-4").withTemperature(0.9))</code>：自定义模型与超参。</li>
+<li><code>createObject(prompt, Class)</code>：让 LLM 输出可反序列化为指定类型的对象——<strong>把 LLM 当类型安全的解析器</strong>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>IncidentSignal signal = context.ai().withDefaultLlm().createObject(<span class="tok-str">"""
+    Extract an IncidentSignal from the user's message.
+    - lon is a number in [-180, 180]; lat in [-90, 90]
+    - metric is one of: neuralLatencyMs, cpuUsagePct, powerUsageUw
+    User message: %s"""</span>.formatted(input.getContent()), IncidentSignal.<span class="tok-kw">class</span>);</code></pre>
+<h3 id="sec-5062">6.2 模型提供商与自定义 LLM</h3>
+<ul>
+<li>内置支持：OpenAI、Anthropic、Ollama（设 <code>ollama</code> profile 自动接入本地模型）、Docker（<code>docker</code> profile）。</li>
+<li>自定义：对任意提供了 Spring AI <code>ChatModel</code> 的厂商，定义类型为 <code>Llm</code> 的 Spring Bean 即可（参考 <code>OpenAiConfiguration</code>）。配置类应 <code>@ConditionalOnProperty</code> 依赖对应 API Key。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-507">七、规划引擎（GOAP / A*）</h2>
+<h3 id="sec-5071">7.1 工作原理</h3>
+<ol>
+<li><strong>Goal Resolver</strong>：把用户意图映射到最匹配的目标。</li>
+<li><strong>Planning Engine</strong>：用<strong>非 LLM 的 A* 算法</strong>在「当前世界状态」与「目标」之间搜索最优 Action 序列——这是经典 AI 规划，不是让 LLM 决定下一步。</li>
+<li><strong>OODA 循环</strong>：Observe → Orient → Decide → Act。每执行一个 Action 后<strong>重新评估 Conditions 并重新规划</strong>，从而对新信息做出反应。</li>
+<li><strong>Blackboard</strong>：各 Action 的输入/输出对象挂在 Blackboard 上，规划器据此串接（类型 A 产出 → 类型 B 消费）。</li>
+</ol>
+<h3 id="sec-5072">7.2 为什么不是状态机</h3>
+<ul>
+<li>有限状态机 / 线性链是「写死的流程」；Embabel 是「已知步骤的新组合」，能完成从未显式编程的任务。</li>
+<li>新增领域对象、Action、Goal、Condition 即可扩展能力，<strong>无需改 FSM 定义或既有代码</strong>。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-508">八、工具与 ToolGroup</h2>
+<h3 id="sec-5081">8.1 声明工具组</h3>
+<p>Action 用 <code>toolGroups</code> 声明运行所需工具；<code>ToolGroup.WEB</code> 等标准组由框架/扩展提供。工具也可通过领域对象上的 <code>@Tool</code> 方法暴露（见 4.2）。</p>
+<h3 id="sec-5082">8.2 安全提示</h3>
+<ul>
+<li>即使最好的 LLM 也可能「手痒」乱触发工具，对会<strong>改数据/删数据</strong>的方法要特别谨慎。</li>
+<li>更稳妥的做法：把危险操作建模为同一领域类上的<strong>非工具方法</strong>，在代码 Action 里显式调用。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-509">九、MCP 集成</h2>
+<h3 id="sec-5091">9.1 作为 MCP 服务器暴露</h3>
+<p>Embabel 平台本身可作为 MCP Server（通过 SSE）被 Claude Desktop 等 UI 消费：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">json</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// claude_desktop_config.yml</span>
+{
+  <span class="tok-str">"mcpServers"</span>: {
+    <span class="tok-str">"embabel"</span>: { <span class="tok-str">"command"</span>: <span class="tok-str">"npx"</span>, <span class="tok-str">"args"</span>: [<span class="tok-str">"-y"</span>, <span class="tok-str">"mcp-remote"</span>, <span class="tok-str">"http://localhost:8080/sse"</span>] }
+  }
+}</code></pre>
+<h3 id="sec-5092">9.2 消费 MCP 服务器</h3>
+<p>框架内建支持消费 Model Context Protocol 服务器，通过标准接口扩展应用能力；可用 MCP Inspector（<code>npx @modelcontextprotocol/inspector</code>）手动调试。</p>
+<hr class="sep">
+<h2 id="sec-510">十、RAG 与向量检索</h2>
+<h3 id="sec-5101">10.1 embabel-agent-rag 模块</h3>
+<ul>
+<li>独立模块提供检索增强能力，包含分块增强器（如 <code>ChunkMergingEnhancer</code>）与<strong>类型化 Chunk</strong> 处理。</li>
+<li>与 Spring AI 的 <code>VectorStore</code> 打通，可在 Action 中以工具/服务形式检索知识库。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-511">十一、多智能体与 A2A</h2>
+<h3 id="sec-5111">11.1 Agent 联邦</h3>
+<ul>
+<li>路线图中的关键目标：在 GOAP 模型下演示<strong>Agent 联邦（agent federation）</strong>，多个 Agent 协同完成更大任务。</li>
+<li><code>embabel-agent-a2a</code> 模块提供对 Google <strong>A2A（Agent-to-Agent）</strong>协议的支持，实现跨进程/跨平台的智能体协作。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-512">十二、运行、调试与测试</h2>
+<h3 id="sec-5121">12.1 Spring Shell 命令</h3>
+<table><thead><tr><th>命令</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>execute "..."</code> / <code>x "..."</code></td><td>运行匹配目标的 agent</td></tr>
+<tr><td><code>chat</code></td><td>进入交互式会话，保留历史</td></tr>
+<tr><td><code>-p</code></td><td>打印发给 LLM 的 prompt</td></tr>
+<tr><td><code>-r</code></td><td>打印 LLM 原始响应</td></tr>
+<tr><td><code>!!</code></td><td>重复上一条命令（重启后仍保留）</td></tr>
+</tbody></table>
+<h3 id="sec-5122">12.2 单元测试</h3>
+<p>可轻松单测逻辑与 prompt 是否正确，无需真实 LLM：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">public class</span> StarNewsFinderTest {
+    <span class="tok-kw">@Test</span>
+    <span class="tok-kw">void</span> writeupPromptMustContainKeyData() {
+        StarNewsFinder agent = <span class="tok-kw">new</span> StarNewsFinder(mock(HoroscopeService.<span class="tok-kw">class</span>), 5);
+        <span class="tok-kw">var</span> ctx = <span class="tok-kw">new</span> FakeOperationContext();
+        ctx.expectResponse(<span class="tok-kw">new</span> Writeup(<span class="tok-str">"Gonna be a good day"</span>));
+        <span class="tok-cmt">// 验证 agent 把正确数据与 prompt 传给了 LLM</span>
+        String result = agent.writeup(...);
+        assertTrue(result.contains(<span class="tok-str">"good day"</span>));
+    }
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-513">十三、成本与预算意识</h2>
+<h3 id="sec-5131">13.1 预算感知 Agent</h3>
+<ul>
+<li>Action 的 <code>cost</code>/<code>value</code> 元数据让规划器权衡花费，例如：「研究该主题，若仍在摸索阶段花费上限 20 美分」。</li>
+<li>设计上鼓励<strong>混用多个 LLM</strong>（贵的做判断、便宜的做解析），兼顾成本与能力。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-514">十四、最佳实践与常见坑</h2>
+<h3 id="sec-5141">14.1 实践清单</h3>
+<ul>
+<li><strong>类型优先</strong>：所有 LLM 输出尽量映射为 record/data class，享受重构与强类型。</li>
+<li><strong>LLM 只做它擅长的</strong>：抽取、生成、判断用 LLM；查库、计算、校验用确定性代码。</li>
+<li><strong>明确工具边界</strong>：会改/删数据的操作不要用 <code>@Tool</code> 暴露给 LLM，改在代码里显式调用。</li>
+<li><strong>描述即契约</strong>：<code>@Agent</code>/<code>@Action</code>/<code>@JsonClassDescription</code> 的 description 是规划与选择依据，要写清楚。</li>
+<li><strong>用 shell 调试</strong>：<code>-p -r</code> 看 prompt 与响应，快速定位规划/提示词问题。</li>
+</ul>
+<h3 id="sec-5142">14.2 迁移 / 版本注意</h3>
+<ul>
+<li>Embabel <strong>尚不兼容 Spring AI 2.0 / Spring Boot 4</strong>，当前用 Spring Boot 3.5.x + Spring AI 1.1.x。</li>
+<li>版本演进快（如 1.5.0-SNAPSHOT 主线），引入新特性前先核对对应版本的文档与依赖坐标。</li>
+<li>License：Apache 2.0，仓库 <code>github.com/embabel/embabel-agent</code>，文档 <code>docs.embabel.com</code>。</li>
+</ul>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('4')">下一个知识库：Spring AI →</button></div>
+  </section>
+  <section class="page" data-page="4"><h1 id="sec-600">Spring AI 知识库（Java 生态的 AI 工程框架）</h1>
+<blockquote>Spring AI 是 Spring 官方出品的 <strong>AI 工程应用框架</strong>，于 <strong>2025-05-20 发布 1.0 GA</strong>。它把 Spring 生态的设计原则（可移植、模块化、以 POJO 为积木）带到 AI 领域，核心挑战是<strong>把企业数据与 API 连接到大模型</strong>。核心 API 是 <code>ChatClient</code>（可移植、易用的模型交互入口）。本库基于 spring.io 官方文档与参考手册整理，答法遵循「概念 → API → 代码 → 实战 → 坑点」。</blockquote>
+<hr class="sep">
+<h2 id="sec-601">一、定位与版本</h2>
+<h3 id="sec-6011">1.1 设计目标</h3>
+<ul>
+<li>把 Spring 的可移植性、模块化原则应用于 AI 领域，提倡用 <strong>POJO</strong> 作为应用构建块。</li>
+<li>统一抽象：同一套 API 跨多家模型/向量库厂商，切换厂商只需改配置。</li>
+<li>不止无状态问答：内置 RAG、对话记忆、工具调用、评估、可观测等「增强 LLM」能力。</li>
+</ul>
+<h3 id="sec-6012">1.2 版本与模块</h3>
+<table><thead><tr><th>版本</th><th>状态</th><th>要点</th></tr></thead><tbody>
+<tr><td>1.0 GA</td><td>2025-05-20 稳定</td><td>ChatClient、Advisors、Tool Calling、VectorStore、MCP、ETL、Eval 齐备</td></tr>
+<tr><td>1.1.x</td><td>稳定</td><td>新增模型支持与小幅改进（如阿里云 DashScope）</td></tr>
+<tr><td>2.0（参考文档）</td><td>预览/演进中</td><td>把工具调用循环统一收归 <code>ToolCallingAdvisor</code>，<code>ChatClient</code> 自动注册</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-602">二、核心 API 全景</h2>
+<h3 id="sec-6021">2.1 能力矩阵</h3>
+<table><thead><tr><th>能力</th><th>说明</th></tr></thead><tbody>
+<tr><td>Chat / Embedding / Image / Audio / TTS / Moderation</td><td>可移植模型 API，同步 + 流式</td></tr>
+<tr><td>Structured Output</td><td>AI 输出映射为 POJO</td></tr>
+<tr><td>Vector Store</td><td>20+ 向量库，含类 SQL 的元数据过滤</td></tr>
+<tr><td>Tools / Function Calling</td><td>模型请求执行客户端工具函数</td></tr>
+<tr><td>Advisors</td><td>封装通用生成式 AI 模式（RAG、记忆等）</td></tr>
+<tr><td>MCP</td><td>消费/暴露 Model Context Protocol 服务</td></tr>
+<tr><td>ETL / Eval / Observability</td><td>数据工程、内容评估、可观测</td></tr>
+<tr><td>Spring Boot Starters</td><td>全模型/向量库的自动配置</td></tr>
+</tbody></table>
+<h3 id="sec-6022">2.2 支持的厂商</h3>
+<ul>
+<li>模型：Anthropic、OpenAI、Microsoft、Amazon、Google、Ollama 等，ChatClient 可对接 20+ 模型。</li>
+<li>向量库：Cassandra、Azure、Chroma、Milvus、MongoDB Atlas、Neo4j、Oracle、PostgreSQL/PGVector、Pinecone、Qdrant、Redis、Weaviate 等。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-603">三、快速开始</h2>
+<h3 id="sec-6031">3.1 起步依赖</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">xml</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">&lt;dependency&gt;</span>
+  <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+  <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-starter-model-openai<span class="tok-kw">&lt;/artifactId&gt;</span>
+<span class="tok-kw">&lt;/dependency&gt;</span>
+<span class="tok-cmt">&lt;!-- 也可在 start.spring.io 勾选对应模型/向量库 --&gt;</span></code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">properties</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.properties</span>
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o</code></pre>
+<h3 id="sec-6032">3.2 第一个调用</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Bean</span>
+<span class="tok-kw">public</span> CommandLineRunner runner(ChatClient.Builder builder) {
+    <span class="tok-kw">return</span> args -&gt; {
+        ChatClient chatClient = builder.build();
+        String response = chatClient.prompt(<span class="tok-str">"Tell me a joke"</span>).call().content();
+        System.out.println(response);
+    };
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-604">四、ChatClient Fluent API</h2>
+<h3 id="sec-6041">4.1 链式调用</h3>
+<p>ChatClient 的流式 API 与 WebClient/RestClient 风格一致：构造 prompt → 调模型 → 取结果。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@RestController</span>
+<span class="tok-kw">class</span> MyController {
+    <span class="tok-kw">private final</span> ChatClient chatClient;
+    MyController(ChatClient.Builder b) { <span class="tok-kw">this</span>.chatClient = b.build(); }
+
+    <span class="tok-kw">@GetMapping</span>(<span class="tok-str">"/ai"</span>)
+    String generation(String userInput) {
+        <span class="tok-kw">return</span> chatClient.prompt()
+            .system(sp -&gt; sp.param(<span class="tok-str">"voice"</span>, <span class="tok-str">"pirate"</span>))  <span class="tok-cmt">// 模板变量</span>
+            .user(userInput)
+            .call()
+            .content();
+    }
+}</code></pre>
+<h3 id="sec-6042">4.2 流式与默认值</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 响应式流式输出</span>
+Flux&lt;String&gt; out = chatClient.prompt().user(<span class="tok-str">"Tell me a joke"</span>).stream().content();
+
+<span class="tok-cmt">// 在 @Configuration 里固定 system 文本与模型超参</span>
+<span class="tok-kw">@Bean</span> ChatClient chatClient(ChatClient.Builder b) {
+    <span class="tok-kw">return</span> b.defaultSystem(<span class="tok-str">"You are a friendly bot in the voice of a {voice}"</span>).build();
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-605">五、结构化输出</h2>
+<h3 id="sec-6051">5.1 entity 映射到 POJO</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">record</span> ActorFilms(String actor, List&lt;String&gt; movies) {}
+
+ActorFilms result = chatClient.prompt()
+    .user(<span class="tok-str">"Generate the filmography for a random actor."</span>)
+    .call()
+    .entity(ActorFilms.<span class="tok-kw">class</span>);   <span class="tok-cmt">// 直接拿到强类型对象</span></code></pre>
+<h3 id="sec-6052">5.2 让模型理解字段</h3>
+<p>配合 Jackson 注解描述字段，提升抽取准确率：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@JsonClassDescription</span>(<span class="tok-str">"Person with astrology details"</span>)
+<span class="tok-kw">record</span> StarPerson(String name,
+    <span class="tok-kw">@JsonPropertyDescription</span>(<span class="tok-str">"Star sign"</span>) String sign) {}</code></pre>
+<hr class="sep">
+<h2 id="sec-606">六、PromptTemplate</h2>
+<h3 id="sec-6061">6.1 变量与外部资源</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>PromptTemplate template = <span class="tok-kw">new</span> PromptTemplate(
+    <span class="tok-kw">new</span> ClassPathResource(<span class="tok-str">"prompts/support-system.st"</span>));
+Prompt prompt = template.create(Map.of(<span class="tok-str">"customer"</span>, <span class="tok-str">"Alice"</span>));</code></pre>
+<hr class="sep">
+<h2 id="sec-607">七、模型提供商与 ChatOptions</h2>
+<h3 id="sec-6071">7.1 切换模型与参数</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">yaml</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.yml：用阿里云 DashScope 兼容 OpenAI 接口</span>
+spring:
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${DASHSCOPE_KEY}
+      chat:
+        options:
+          model: qwen-plus
+          temperature: 0.3</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>OpenAiChatOptions opts = OpenAiChatOptions.builder()
+    .model(<span class="tok-str">"gpt-4o-mini"</span>).temperature(0.2).maxTokens(600).build();
+chatClient.prompt().user(q).options(opts).call().content();</code></pre>
+<hr class="sep">
+<h2 id="sec-608">八、Embedding 与 VectorStore</h2>
+<h3 id="sec-6081">8.1 注入与检索</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Bean</span> VectorStore vectorStore(EmbeddingModel embeddingModel) {
+    <span class="tok-kw">return</span> <span class="tok-kw">new</span> PgVectorStore(embeddingModel, pgVectorTemplate);
+}
+
+<span class="tok-cmt">// 写入</span>
+vectorStore.add(List.of(<span class="tok-kw">new</span> Document(<span class="tok-str">"content"</span>, Map.of(<span class="tok-str">"source"</span>, <span class="tok-str">"kb"</span>))));
+<span class="tok-cmt">// 相似检索</span>
+List&lt;Document&gt; hits = vectorStore.similaritySearch(
+    SearchRequest.builder().query(<span class="tok-str">"如何重置密码"</span>).topK(5).build());</code></pre>
+<h3 id="sec-6082">8.2 可移植的元数据过滤</h3>
+<p>各家向量库查询语言各异，Spring AI 提供<strong>类 SQL 的可移植过滤表达式</strong>：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>Filter.Expression f = <span class="tok-kw">new</span> Filter.Expression(Filter.Operator.AND, List.of(
+    <span class="tok-kw">new</span> Filter.Expression(Filter.Operator.EQ,  <span class="tok-kw">new</span> Filter.Key(<span class="tok-str">"genre"</span>), <span class="tok-kw">new</span> Filter.Value(<span class="tok-str">"drama"</span>)),
+    <span class="tok-kw">new</span> Filter.Expression(Filter.Operator.GTE, <span class="tok-kw">new</span> Filter.Key(<span class="tok-str">"year"</span>),  <span class="tok-kw">new</span> Filter.Value(2000))
+));
+SearchRequest req = SearchRequest.builder().query(<span class="tok-str">"..."</span>).filterExpression(f).build();</code></pre>
+<hr class="sep">
+<h2 id="sec-609">九、文档 ETL 流水线</h2>
+<h3 id="sec-6091">9.1 读 → 切 → 嵌 → 写</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>TextReader reader = <span class="tok-kw">new</span> TextReader(<span class="tok-str">"data/policy.txt"</span>);
+List&lt;Document&gt; docs = reader.get();
+TokenTextSplitter splitter = <span class="tok-kw">new</span> TokenTextSplitter();
+List&lt;Document&gt; chunks = splitter.apply(docs);  <span class="tok-cmt">// 切分避免超长</span>
+vectorStore.add(chunks);                        <span class="tok-cmt">// 嵌入并落库</span></code></pre>
+<hr class="sep">
+<h2 id="sec-610">十、工具调用（Tool Calling）</h2>
+<h3 id="sec-6101">10.1 用 @Tool 定义工具</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Service</span>
+<span class="tok-kw">class</span> WeatherTools {
+    <span class="tok-kw">@Tool</span>(description = <span class="tok-str">"根据城市名查询当前天气"</span>)
+    <span class="tok-kw">public</span> String getWeather(
+        <span class="tok-kw">@ToolParam</span>(description = <span class="tok-str">"城市名称，不含'市'字"</span>) String city) {
+        <span class="tok-kw">return</span> weatherService.query(city);
+    }
+}</code></pre>
+<h3 id="sec-6102">10.2 注册为 ToolCallback 并接线</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Configuration</span>
+<span class="tok-kw">class</span> ToolConfig {
+    <span class="tok-kw">@Bean</span> MethodToolCallbackProvider weatherProvider(WeatherTools t) {
+        <span class="tok-kw">return</span> MethodToolCallbackProvider.builder().toolObjects(t).build();
+    }
+}
+<span class="tok-cmt">// 接线到 ChatClient</span>
+chatClient.prompt().user(q).tools(weatherTools).call().content();</code></pre>
+<h3 id="sec-6103">10.3 2.0 的工具循环</h3>
+<ul>
+<li>2.0 起把工具调用循环从各 ChatModel 抽出，统一由 <strong>ToolCallingAdvisor</strong> 管理，<code>ChatClient</code> 自动注册，跨模型切换更一致、更易调试。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-611">十一、Advisors API</h2>
+<h3 id="sec-6111">11.1 拦截器链模式</h3>
+<p>Advisor 类似 AOP 环绕通知，在 LLM 调用前后变换数据，提供跨模型/场景的可移植性（记忆、工具、RAG）。</p>
+<table><thead><tr><th>Advisor</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>QuestionAnswerAdvisor</code></td><td>RAG：从向量库检索上下文注入 prompt</td></tr>
+<tr><td><code>MessageChatMemoryAdvisor</code></td><td>把对话历史加入请求（聊天记忆）</td></tr>
+<tr><td><code>SimpleLoggerAdvisor</code></td><td>把内部 trace 打到日志，便于调试</td></tr>
+</tbody></table>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>ChatClient client = builder
+    .defaultAdvisors(
+        <span class="tok-kw">new</span> QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults().withTopK(5)),
+        MessageChatMemoryAdvisor.builder(chatMemory).build())
+    .defaultTools(orderTools, productTools)
+    .build();</code></pre>
+<hr class="sep">
+<h2 id="sec-612">十二、对话记忆（Chat Memory）</h2>
+<h3 id="sec-6121">12.1 记忆仓库与窗口</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>ChatMemory chatMemory = MessageWindowChatMemory.builder()
+    .chatMemoryRepository(<span class="tok-kw">new</span> InMemoryChatMemoryRepository())
+    .build();
+
+<span class="tok-cmt">// 按会话隔离：每次请求带上 CONVERSATION_ID</span>
+chatClient.prompt().user(q)
+    .advisors(a -&gt; a.param(ChatMemory.CONVERSATION_ID, chatId))
+    .call().content();</code></pre>
+<hr class="sep">
+<h2 id="sec-613">十三、RAG 实战</h2>
+<h3 id="sec-6131">13.1 RAG 与工具天然可组合</h3>
+<ul>
+<li><code>QuestionAnswerAdvisor</code> 在<strong>调用前</strong>检索并注入上下文；<code>@Tool</code> 在<strong>调用中</strong>由模型决定是否调用——两者不冲突。</li>
+<li>常见场景（如保修咨询）：政策用 RAG（知识库），订单/产品用工具（实时系统）。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>ChatClient support = builder
+    .defaultAdvisors(
+        <span class="tok-kw">new</span> QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults().withTopK(5)),
+        MessageChatMemoryAdvisor.builder(chatMemory).conversationWindowSize(20).build())
+    .defaultTools(orderTools, productTools)
+    .build();</code></pre>
+<h3 id="sec-6132">13.2 给模型明确指引</h3>
+<p>当同时有 RAG 上下文与工具时，<strong>在 system prompt 里显式说明何时用哪个</strong>（如「政策类问题用 CONTEXT，订单/产品细节用 TOOLS」），否则模型可能偏废其一。</p>
+<hr class="sep">
+<h2 id="sec-614">十四、MCP 集成</h2>
+<h3 id="sec-6141">14.1 暴露为 MCP 工具服务器</h3>
+<p>标注 <code>@Tool</code> 的 Spring Bean 会被自动发现，通过 Streamable HTTP / SSE 暴露为 MCP 工具，零样板注册。</p>
+<h3 id="sec-6142">14.2 消费远程 MCP 服务器</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">properties</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.properties 连接远程 MCP 工具</span>
+spring.ai.mcp.client.toolcallback.enabled=true
+spring.ai.mcp.client.sse.connections.news-tool.url=http://localhost:8090</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// ToolCallbackProvider 自动集齐所有 MCP 工具，透明地发给 LLM 并执行</span>
+<span class="tok-kw">@Bean</span> ChatClient researchAgent(ChatClient.Builder b, ToolCallbackProvider mcpTools,
+                               VectorStore vs) {
+    <span class="tok-kw">return</span> b.defaultToolCallbacks(mcpTools)
+            .defaultAdvisors(<span class="tok-kw">new</span> QuestionAnswerAdvisor(vs))
+            .build();
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-615">十五、评估（Evaluation）</h2>
+<h3 id="sec-6151">15.1 相关性评估器</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>RelevancyEvaluator evaluator = <span class="tok-kw">new</span> RelevancyEvaluator(ChatClient.builder(model));
+EvaluationRequest req = <span class="tok-kw">new</span> EvaluationRequest(userText, List.of(contextDoc), response);
+EvaluationResponse res = evaluator.evaluate(req);
+<span class="tok-kw">boolean</span> relevant = res.getEvaluationResult().isPass();  <span class="tok-cmt">// 防幻觉/兜底</span></code></pre>
+<hr class="sep">
+<h2 id="sec-616">十六、可观测性</h2>
+<h3 id="sec-6161">16.1 开启观测</h3>
+<ul>
+<li>Spring AI 提供对 AI 相关操作的洞察（token 用量、调用链）。</li>
+<li>调高日志级别可看 Advisor 内部 trace：<code>logging.level.org.springframework.ai.chat.client.advisor=DEBUG</code>。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-617">十七、Spring Boot 自动配置与 Starters</h2>
+<h3 id="sec-6171">17.1 约定优于配置</h3>
+<ul>
+<li>所有模型与向量库都有对应的 <code>spring-ai-starter-*</code>，引入即自动配置。</li>
+<li><code>ChatClient.Builder</code> 由 Spring Boot 自动注入，直接 <code>@Autowired</code> 使用。</li>
+<li>从 <code>start.spring.io</code> 勾选模型/向量库即可一键 bootstrap。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-618">十八、最佳实践与常见坑</h2>
+<h3 id="sec-6181">18.1 实践清单</h3>
+<ul>
+<li><strong>以 ChatClient 为入口</strong>：不要直接调 <code>ChatModel</code>，让 advisor 链、工具注册、流式支持一肩挑。</li>
+<li><strong>System Prompt 优先于换模型</strong>：用清晰的角色/边界/工具规则/system prompt 往往比换模型更有效、更省钱。</li>
+<li><strong>结构化输出用 record + @JsonClassDescription</strong>：稳定拿到强类型结果。</li>
+<li><strong>RAG + 工具组合时给模型指引</strong>：明确「何时用上下文、何时用工具」。</li>
+<li><strong>控制工具数量与记忆窗口</strong>：工具过多会稀释模型决策；记忆窗口按需裁剪控制 token。</li>
+<li><strong>加可观测性</strong>：生产环境务必开启评估与日志，及时发现幻觉/越界。</li>
+</ul>
+<h3 id="sec-6182">18.2 版本注意</h3>
+<ul>
+<li>1.0 GA 是当前主流稳定版；2.0 引入 <code>ToolCallingAdvisor</code> 统一工具循环，迁移时留意 advisor 注册方式变化。</li>
+<li>多模态（图文/音视频）取决于底层模型是否支持，使用前核对厂商能力。</li>
+</ul>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('0')">↻ 回到：Java 面试八股</button></div>
   </section>
   <div class="empty-tip" id="emptyTip">暂无知识库，点击左侧「＋ 新建知识库」开始添加。</div>
 </div></main>
