@@ -1898,6 +1898,61 @@ function callLLM(msgs, onOk, onFail, onDone){
       }
     });
 }
+/* 流式版本：逐 token 回调 onToken，用于聊天实时渲染 */
+function callLLMStream(msgs, onToken, onDone, onFail){
+  var cfg = getAiCfg();
+  if (!cfg || !cfg.key){ if (onFail) onFail("未配置 API Key：请点击 ⚙ 填写 DeepSeek Key 后使用 AI 功能"); if (onDone) onDone(); return; }
+  var body = JSON.stringify({ model: cfg.model, messages: msgs, temperature: 0.3, stream: true });
+  var headers = { "Content-Type": "application/json", "Authorization": "Bearer " + cfg.key };
+  function readStream(url, viaProxy){
+    var ctrl = new AbortController();
+    var timer = setTimeout(function(){ ctrl.abort(); }, viaProxy ? 90000 : 60000);
+    return fetch(url, { method: "POST", headers: headers, body: body, signal: ctrl.signal })
+      .then(function(r){
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        if (!r.body || !r.body.getReader) throw new Error("stream_unsupported");
+        var reader = r.body.getReader();
+        var dec = new TextDecoder("utf-8");
+        var buf = "";
+        function pump(){
+          return reader.read().then(function(step){
+            if (step.done) return;
+            buf += dec.decode(step.value, { stream: true });
+            var parts = buf.split("\n");
+            buf = parts.pop();
+            for (var i = 0; i < parts.length; i++){
+              var ln = parts[i].trim();
+              if (!ln || ln.indexOf("data:") !== 0) continue;
+              var payload = ln.slice(5).trim();
+              if (payload === "[DONE]") continue;
+              try {
+                var obj = JSON.parse(payload);
+                var delta = obj.choices && obj.choices[0] && obj.choices[0].delta && obj.choices[0].delta.content;
+                if (delta) onToken(delta);
+              } catch (e) { /* 流式中途的碎片 JSON 忽略 */ }
+            }
+            return pump();
+          });
+        }
+        return pump();
+      })
+      .finally(function(){ clearTimeout(timer); });
+  }
+  var realUrl = cfg.url.replace(/\/+$/, "") + "/chat/completions";
+  readStream(realUrl, false)
+    .then(function(){ if (onDone) onDone(); })
+    .catch(function(err){
+      if (cfg.proxy){
+        var pUrl = cfg.proxy.indexOf("{url}") >= 0 ? cfg.proxy.replace("{url}", encodeURIComponent(realUrl)) : (cfg.proxy + encodeURIComponent(realUrl));
+        readStream(pUrl, true)
+          .then(function(){ if (onDone) onDone(); })
+          .catch(function(err2){ if (onFail) onFail(String(err2 && err2.message || err2)); if (onDone) onDone(); });
+      } else {
+        if (onFail) onFail(String(err && err.message || err));
+        if (onDone) onDone();
+      }
+    });
+}
 function askAI(){
   if (aiBusy) return;
   var inp = document.getElementById("aiQ");
@@ -1921,11 +1976,20 @@ function askAI(){
     { role: "system", content: "你是一个面试学习助手。基于给出的知识库上下文回答问题，回答用简体中文、要点化、简洁准确；上下文没有的内容可基于通识补充但要说明。上下文：\n" + (ctx || "（无相关内容）") },
     { role: "user", content: q }
   ];
-  callLLM(msgs, function(txt){
-    thinking.querySelector(".bub").innerHTML = simpleMd(txt) + refsHtml(hits);
-  }, function(err){
-    thinking.querySelector(".bub").innerHTML = "大模型调用失败（" + esc(err) + "），已用本地检索回答：<br><br>" + localAnswer(q);
+  var bub = thinking.querySelector(".bub");
+  var acc = "";
+  callLLMStream(msgs, function(tok){
+    acc += tok;
+    bub.innerHTML = simpleMd(acc) + refsHtml(hits);
+    document.getElementById("aiMsgs").scrollTop = document.getElementById("aiMsgs").scrollHeight;
   }, function(){
+    bub.innerHTML = simpleMd(acc) + refsHtml(hits);
+    aiBusy = false;
+    document.getElementById("aiSend").disabled = false;
+    document.getElementById("aiMsgs").scrollTop = document.getElementById("aiMsgs").scrollHeight;
+  }, function(err){
+    if (!acc) bub.innerHTML = "大模型调用失败（" + esc(err) + "），已用本地检索回答：<br><br>" + localAnswer(q);
+    else bub.innerHTML = simpleMd(acc) + refsHtml(hits);
     aiBusy = false;
     document.getElementById("aiSend").disabled = false;
     document.getElementById("aiMsgs").scrollTop = document.getElementById("aiMsgs").scrollHeight;
