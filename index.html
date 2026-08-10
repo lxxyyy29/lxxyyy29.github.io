@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>知识库 · Java 八股 / Ragent / LangChain 1.0+ / Embabel / Spring AI</title><style>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>知识库 · Java 八股 / Ragent / LangChain 1.0+ / Embabel / Spring AI</title><style>
 :root{
   --bg:#f2efe7; --card:#fffdf8; --ink:#222a33; --ink2:#3d4650; --muted:#7a828c;
   --line:#e5dfcf; --gold:#a87c2a; --gold-2:#cfa553; --gold-soft:rgba(168,124,42,.10);
@@ -298,14 +298,29 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .ed .ed-grip::after{content:"拖动调整高度";}
 .prac .ed .ed-grip:hover,.prac .ed .ed-grip:active{background:#2b3848;color:var(--gold-2);}
 .prac .ed .ed-grip:hover::before,.prac .ed .ed-grip:active::before{color:var(--gold-2);}
-/* Monaco 补全下拉框（suggest widget）文字强制可见，避免与主题/缓存冲突导致空白 */
+/* Monaco 补全下拉框（suggest widget）文字强制可见，避免与页面主题/缓存继承导致空白 */
 .monaco-editor .suggest-widget{background:#252526!important;border:1px solid #454545!important;color:#e6e6e6!important;}
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label{color:#e6e6e6!important;}
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label .match{color:#4ec9b0!important;}
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .description,.monaco-editor .suggest-widget .monaco-list .monaco-list-row .type-label{color:#9aa3ad!important;}
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused,.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected{background:#094771!important;color:#fff!important;}
-.monaco-editor .suggest-widget .details,.monaco-editor .suggest-widget .details>.header>.title{color:#e6e6e6!important;}
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .icon-label,.monaco-editor .suggest-widget .monaco-list .monaco-list-row .codicon{color:#e6e6e6!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-name,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-description,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .type-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label span,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .highlight,
+.monaco-editor .suggest-widget .details,
+.monaco-editor .suggest-widget .details *{color:#e6e6e6!important;fill:#e6e6e6!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label .highlight{color:#4ec9b0!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected{background:#094771!important;color:#fff!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused *,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected *{color:#fff!important;fill:#fff!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .highlight,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected .highlight{color:#7fffd4!important;}
 .prac .acts{display:flex;flex-wrap:wrap;gap:8px;padding:9px 12px;background:var(--card);border-top:1px solid var(--line);}
 .prac .acts button{flex:1 1 auto;min-width:84px;border:1px solid var(--line);background:var(--bg);color:var(--ink2);border-radius:9px;
   padding:8px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
