@@ -2540,11 +2540,62 @@ function renderPracticeCard(card, id, data){
   var ta = card.querySelector("textarea.code");
   ta.value = code;
   ta.addEventListener("keydown", function(e){
+    if (e.isComposing || e.metaKey || e.ctrlKey) return;
+    var v = this.value, s = this.selectionStart, en = this.selectionEnd;
     if (e.key === "Tab"){
       e.preventDefault();
-      var s = this.selectionStart, en = this.selectionEnd;
-      this.value = this.value.slice(0, s) + "    " + this.value.slice(en);
+      this.value = v.slice(0, s) + "    " + v.slice(en);
       this.selectionStart = this.selectionEnd = s + 4;
+      this.dispatchEvent(new Event("input"));
+      return;
+    }
+    // 括号/引号自动补全（紧跟单词或已存在右括号时不补，避免 foo(bar 变 foo((bar）
+    var pair = { "{":"}", "(":")", "[":"]", "\"":"\"", "'":"'", "`":"`" };
+    if (pair[e.key]){
+      var nx = v[en];
+      if ((nx && /[\w]/.test(nx)) || nx === pair[e.key]) return;
+      e.preventDefault();
+      var sel = v.slice(s, en);
+      if (sel){
+        this.value = v.slice(0, s) + e.key + sel + pair[e.key] + v.slice(en);
+        this.selectionStart = this.selectionEnd = s + 1 + sel.length;
+      } else {
+        this.value = v.slice(0, s) + e.key + pair[e.key] + v.slice(en);
+        this.selectionStart = this.selectionEnd = s + 1;
+      }
+      this.dispatchEvent(new Event("input"));
+      return;
+    }
+    // 输入右括号时若右侧已存在则跳过（不重复）
+    var close = { "}":"{", ")":"(", "]":"[" };
+    if (close[e.key] && s === en && v[s] === e.key){
+      e.preventDefault();
+      this.selectionStart = this.selectionEnd = s + 1;
+      return;
+    }
+    // 退格删除成对空括号/引号
+    if (e.key === "Backspace" && s === en && s > 0){
+      var pm = { "{":"}", "(":")", "[":"]", "\"":"\"", "'":"'" };
+      if (pm[v[s-1]] === v[s]){
+        e.preventDefault();
+        this.value = v.slice(0, s-1) + v.slice(s+1);
+        this.selectionStart = this.selectionEnd = s - 1;
+        this.dispatchEvent(new Event("input"));
+        return;
+      }
+    }
+    // 回车自动缩进：继承本行缩进；行尾为 { ( [ 时再进一级
+    if (e.key === "Enter"){
+      e.preventDefault();
+      var ls = v.lastIndexOf("\n", s - 1) + 1;
+      var ind = (v.slice(ls, s).match(/^[ \t]*/) || [""])[0];
+      var tail = v.slice(0, s).replace(/\s+$/, "").slice(-1);
+      var extra = (tail === "{" || tail === "(" || tail === "[") ? "    " : "";
+      var ins = "\n" + ind + extra;
+      this.value = v.slice(0, s) + ins + v.slice(en);
+      this.selectionStart = this.selectionEnd = s + ins.length;
+      this.dispatchEvent(new Event("input"));
+      return;
     }
   });
   ta.addEventListener("input", function(){
