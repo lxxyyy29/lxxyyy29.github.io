@@ -149,7 +149,10 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
   color:#f6e8c6;font-weight:600;box-shadow:inset 3px 0 0 var(--gold-2);}
 
 /* ===== 主区域 ===== */
-.main{margin-left:308px;padding:48px 32px 80px;}
+/* KB-FIX(monaco-suggest-v2): 必须限定为 main 标签。裸 .main 会命中 Monaco 补全项内部的
+   <div class="main">，把候选文字挤出可视区（margin-left:308px + padding-top:48px），
+   表现为"下拉框有、选中行蓝、但文字看不见"。 */
+main.main{margin-left:308px;padding:48px 32px 80px;}
 .content{max-width:880px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;
   box-shadow:var(--shadow);padding:56px 64px;transition:background .3s,border-color .3s;
   position:relative;overflow:hidden;}
@@ -287,10 +290,12 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .pd .lab{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.5px;margin:8px 0 3px;text-transform:uppercase;}
 .prac .pd ul{margin:3px 0;padding-left:18px;font-size:12.5px;}
 .prac .ed .lh{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#161b22;border-bottom:1px solid #202d39;font-size:11px;color:#c8a55e;font-family:"SFMono-Regular",Consolas,monospace;}
-.prac .ed textarea{width:100%;min-height:170px;padding:11px 13px;border:none;background:#0d141b;color:#cfd8e0;
+/* KB-FIX(monaco-suggest-v2): 限定 > textarea.code，否则会命中 Monaco 的隐藏输入框
+   .inputarea（min-height:170px/padding/background），导致光标错位与布局跳动。 */
+.prac .ed > textarea.code{width:100%;min-height:170px;padding:11px 13px;border:none;background:#0d141b;color:#cfd8e0;
   font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:12.5px;line-height:1.6;
   resize:vertical;outline:none;white-space:pre;tab-size:4;}
-.prac .ed textarea:focus{box-shadow:inset 0 0 0 2px var(--gold-2);}
+.prac .ed > textarea.code:focus{box-shadow:inset 0 0 0 2px var(--gold-2);}
 .prac .ed .monaco-mount{height:210px;min-height:120px;background:#1e1e1e;border-bottom:1px solid #202d39;overflow:hidden;}
 .prac .ed .monaco-mount .monaco-editor,.prac .ed .monaco-mount .monaco-editor .overflow-guard{border-radius:0;}
 .prac .ed .ed-grip{height:20px;cursor:ns-resize;display:flex;align-items:center;justify-content:center;gap:7px;background:#222d3a;border-top:1px solid #33414f;color:#8fa0ad;font-size:11px;letter-spacing:.5px;user-select:none;-webkit-user-select:none;}
@@ -298,9 +303,34 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .ed .ed-grip::after{content:"拖动调整高度";}
 .prac .ed .ed-grip:hover,.prac .ed .ed-grip:active{background:#2b3848;color:var(--gold-2);}
 .prac .ed .ed-grip:hover::before,.prac .ed .ed-grip:active::before{color:var(--gold-2);}
+/* ===== KB-FIX(monaco-suggest-v2) Monaco 隔离层 =====
+   根因：页面的通用选择器（.main / a / ul,ol,li / .prac .ed textarea）会命中 Monaco 内部
+   同名 DOM（补全项的 <div class="main">、<a class="label-name"> 等）。其中 .main 的
+   margin-left:308px + padding:48px 32px 80px 把候选文字推出被 .contents{overflow:hidden}
+   裁剪的 18px 行高之外 —— 所以行背景/选中高亮都在，唯独文字看不见。
+   这里做几何复位（margin/padding/缩进/浮动），文字颜色由下方规则单独锁定。 */
+.monaco-editor .main,
+.monaco-editor .suggest-widget .monaco-list-row .contents,
+.monaco-editor .suggest-widget .monaco-list-row .main,
+.monaco-editor .suggest-widget .monaco-list-row .left,
+.monaco-editor .suggest-widget .monaco-list-row .right,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-icon-label,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-icon-label-container,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-icon-name-container,
+.monaco-editor .suggest-widget .monaco-list-row .label,
+.monaco-editor .suggest-widget .monaco-list-row .label-name,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-highlighted-label{
+  margin:0!important;padding:0!important;text-indent:0!important;float:none!important;
+  letter-spacing:normal!important;text-transform:none!important;max-width:none!important;}
+/* 页面 a{} / ul,ol{} / li{} 对 Monaco 内部元素的污染（补全标签就是 <a>，菜单用 ul/li） */
+.monaco-editor a{color:inherit;text-decoration:none;}
+.monaco-editor ul,.monaco-editor ol,.monaco-editor li{margin:0;padding:0;list-style:none;}
+/* 编辑器整体兜底前景色，避免继承页面 var(--ink) 造成深底深字 */
+.monaco-editor{color:#d4d4d4;}
 /* Monaco 补全下拉框（suggest widget）文字强制可见，避免与页面主题/缓存继承导致空白 */
 .monaco-editor .suggest-widget{background:#252526!important;border:1px solid #454545!important;color:#e6e6e6!important;}
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row .label,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-name,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-description,
@@ -467,7 +497,7 @@ body.review h3.open::before{content:"\25BE  ";}
 @media (max-width:920px){
   .sidebar{transform:translateX(-100%);width:84%;max-width:340px;transition:transform .25s ease;}
   .sidebar.open{transform:translateX(0);}
-  .main{margin-left:0;padding:66px 14px 44px;}
+  main.main{margin-left:0;padding:66px 14px 44px;} /* KB-FIX(monaco-suggest-v2) 同上，禁止裸 .main */
   .content{padding:28px 20px;border-radius:16px;}
   .topbar{display:flex;align-items:center;position:fixed;top:0;left:0;right:0;z-index:900;
     background:rgba(255,253,248,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:11px 15px;}
