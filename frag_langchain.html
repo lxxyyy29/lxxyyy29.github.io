@@ -1,0 +1,373 @@
+<h1 id="sec-400">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</h1>
+<blockquote>LangChain 于 <strong>2025 年 10 月发布 1.0（GA）</strong>，是一次「做减法」的大版本：砍掉数百个历史遗留 Chain/Agent，把框架收敛到单一的高层智能体抽象 <code>create_agent</code>，底层跑在 LangGraph 运行时之上；2025 年 12 月 2 日又推出 <strong>1.1</strong>，新增模型能力画像（model profiles）。本知识库覆盖包结构、核心 API、中间件、标准内容块、RAG 与迁移，答法遵循「概念 → 用法 → 原理 → 坑点 → 实战」。</blockquote>
+<hr class="sep">
+<h2 id="sec-401">一、定位与设计哲学</h2>
+<h3 id="sec-4011">1.1 发布背景与时间线</h3>
+<ul>
+<li><strong>2024-06</strong>：集成从核心包拆分，部分迁入独立包或 <code>langchain-community</code>。</li>
+<li><strong>2024-10</strong>：LangGraph 被确立为「不只是单次 LLM 调用」应用的首选编排方式，旧 Chain/Agent 大量被标记弃用。</li>
+<li><strong>2025-04</strong>：模型走向多模态，<code>langchain-core</code> 的消息格式升级以支持图文/音视频输入。</li>
+<li><strong>2025-10</strong>：<strong>v1.0.0 GA</strong>——重构所有 chains/agents，统一为基于 LangGraph 的单一 Agent 抽象；旧版迁移到 <code>langchain-classic</code>。</li>
+<li><strong>2025-12-02</strong>：<strong>v1.1</strong>——Chat 模型新增 <code>.profile</code> 能力画像（来自 models.dev 开放目录）。</li>
+</ul>
+<h3 id="sec-4012">1.2 设计哲学：一个 Agent 抽象</h3>
+<ul>
+<li>LangChain 团队发现绝大多数使用场景可归结为同一个模式：<strong>给 LLM 一些工具 → 调用模型 → 若调用工具则执行并把结果喂回 → 不再调用工具则结束</strong>。</li>
+<li>v1.0 把这个「Agent 抽象」从 LangGraph 的 <code>create_react_agent</code> 提升为 LangChain 主包的 <code>create_agent</code>，并用 LangGraph 作为底层运行时不重新造轮子。</li>
+<li>核心收益：<strong>只有一种被官方推荐的方式构建 Agent</strong>，不再有 AgentExecutor / create_react_agent / 手写 LangGraph 三选一的纠结。</li>
+</ul>
+<table><thead><tr><th>需求</th><th>推荐</th><th>说明</th></tr></thead><tbody>
+<tr><td>快速构建标准智能体</td><td>LangChain 1.0（<code>create_agent</code> + 中间件）</td><td>高层抽象，开箱即用</td></tr>
+<tr><td>复杂业务流程 / 自定义编排</td><td>LangGraph 1.0</td><td>图执行模型 + 持久状态</td></tr>
+<tr><td>长周期任务 / 人工审核</td><td>LangGraph</td><td>原生人在回路（HITL）</td></tr>
+<tr><td>混合工作流</td><td>两者结合</td><td>LangChain 构建于 LangGraph 之上，可平滑切换</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-402">二、包结构精简</h2>
+<h3 id="sec-4021">2.1 主包 <code>langchain</code> 的命名空间</h3>
+<p>v1.0 把主包显著瘦身，只保留构建 Agent 的核心 API（大多从 <code>langchain-core</code> 重新导出），更易发现与使用：</p>
+<table><thead><tr><th>模块</th><th>核心内容</th><th>来源</th></tr></thead><tbody>
+<tr><td><code>langchain.agents</code></td><td><code>create_agent</code>、<code>AgentState</code></td><td>智能体创建核心</td></tr>
+<tr><td><code>langchain.messages</code></td><td>消息类型、<code>content_blocks</code>、<code>trim_messages</code></td><td>从 langchain-core 重导出</td></tr>
+<tr><td><code>langchain.tools</code></td><td><code>@tool</code>、<code>BaseTool</code>、注入辅助</td><td>从 langchain-core 重导出</td></tr>
+<tr><td><code>langchain.chat_models</code></td><td><code>init_chat_model</code>、<code>BaseChatModel</code></td><td>统一模型初始化</td></tr>
+<tr><td><code>langchain.embeddings</code></td><td><code>init_embeddings</code>、<code>Embeddings</code></td><td>嵌入模型管理</td></tr>
+</tbody></table>
+<h3 id="sec-4022">2.2 <code>langchain-classic</code>（旧代码救生艇）</h3>
+<p>v0.x 中已被弃用的功能全部搬到独立包 <code>langchain-classic</code>，让主包保持干净。包含：</p>
+<ul>
+<li>旧版 Chain：<code>LLMChain</code>、<code>ConversationChain</code>、<code>SequentialChain</code>、<code>RetrievalQA</code> 等。</li>
+<li>旧版 Retriever：<code>MultiQueryRetriever</code>、<code>ParentDocumentRetriever</code> 等（含整个 <code>langchain.retrievers</code> 模块）。</li>
+<li>Indexing API、<code>hub</code> 模块（程序化管理 Prompt）、<code>CacheBackedEmbeddings</code> 及社区嵌入。</li>
+<li><code>langchain-community</code> 的再导出与部分旧 Agent（<code>AgentExecutor</code>、零样本 ReAct）。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># 旧代码迁移：改 import 即可，逻辑不变</span>
+<span class="tok-kw">from</span> langchain_classic.chains <span class="tok-kw">import</span> LLMChain
+<span class="tok-kw">from</span> langchain_classic.retrievers <span class="tok-kw">import</span> MultiQueryRetriever
+<span class="tok-kw">from</span> langchain_classic.indexes <span class="tok-kw">import</span> clean</code></pre>
+<h3 id="sec-4023">2.3 安装与环境要求</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">bash</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># Python（需要 3.10+，已放弃 3.9）</span>
+pip install --upgrade langchain
+pip install langchain-classic     <span class="tok-cmt"># 仅老项目兼容需要</span>
+pip install langchain-openai      <span class="tok-cmt"># 厂商包按需安装</span>
+
+<span class="tok-cmt"># Node.js</span>
+npm install @langchain/langchain@latest
+npm install @langchain/langchain-classic</code></pre>
+<hr class="sep">
+<h2 id="sec-403">三、模型初始化 <code>init_chat_model</code></h2>
+<h3 id="sec-4031">3.1 统一初始化与多模型切换</h3>
+<ul>
+<li><code>init_chat_model</code> 用「<strong>provider:model</strong>」字符串一次性初始化任意厂商模型，<strong>切换模型代码零改动</strong>。</li>
+<li>支持的厂商前缀：<code>openai</code>、<code>anthropic</code>、<code>google</code>、<code>ollama</code>、<code>aws</code>、<code>azure</code> 等，后缀即模型名。</li>
+<li>原理：内部按前缀分发到对应厂商包（如 <code>langchain-openai</code>），但调用方只依赖统一的 <code>BaseChatModel</code> 接口。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-4o-mini"</span>)          <span class="tok-cmt"># 字符串前缀路由</span>
+model = init_chat_model(<span class="tok-str">"anthropic:claude-3-5-sonnet"</span>)
+model = init_chat_model(<span class="tok-str">"gpt-4o"</span>, model_provider=<span class="tok-str">"openai"</span>)  <span class="tok-cmt"># 也可显式指定 provider</span>
+
+resp = model.invoke(<span class="tok-str">"用一句话解释 LangChain 1.0"</span>)
+<span class="tok-kw">print</span>(resp.content)</code></pre>
+<h3 id="sec-4032">3.2 厂商包与对接国产 / OpenAI 兼容模型</h3>
+<ul>
+<li>生产环境官方建议直接用厂商包（如 <code>from langchain_openai import ChatOpenAI</code>），主包只做统一接口层。</li>
+<li>兼容 OpenAI 协议的第三方（<strong>DeepSeek、通义千问、火山方舟、Ollama</strong> 等）可复用 <code>langchain-openai</code>，只需改 <code>base_url</code> 与 key。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain_openai <span class="tok-kw">import</span> ChatOpenAI
+
+<span class="tok-cmt"># 以 DeepSeek 为例（OpenAI 兼容协议）</span>
+deepseek = ChatOpenAI(
+    model=<span class="tok-str">"deepseek-chat"</span>,
+    api_key=<span class="tok-str">"sk-..."</span>,
+    base_url=<span class="tok-str">"https://api.deepseek.com"</span>,
+)</code></pre>
+<hr class="sep">
+<h2 id="sec-404">四、工具定义 <code>@tool</code></h2>
+<h3 id="sec-4041">4.1 基础用法</h3>
+<ul>
+<li>用 <code>@tool</code> 装饰普通函数即可把任意 Python 函数变成 Agent 可调用的工具；函数 <strong>docstring 即为工具描述</strong>（给模型看，务必写清楚）。</li>
+<li>类型注解会被自动转为 JSON Schema 入参；<code>TypedDict</code> / <code>pydantic.BaseModel</code> 可做更精细的结构化入参。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> get_weather(city: <span class="tok-type">str</span>, unit: <span class="tok-type">str</span> = <span class="tok-str">"celsius"</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""查询指定城市的当前天气。
+
+    Args:
+        city: 城市名，如 "北京"
+        unit: 温度单位，"celsius" 或 "fahrenheit"
+    """</span>
+    <span class="tok-kw">return</span> <span class="tok-str">f"{city} 当前 25 度（{unit}），晴"</span>
+
+<span class="tok-kw">print</span>(get_weather.name)        <span class="tok-cmt"># "get_weather"</span>
+<span class="tok-kw">print</span>(get_weather.args)        <span class="tok-cmt"># {'city':..., 'unit':...} 自动生成的 JSON Schema</span></code></pre>
+<h3 id="sec-4042">4.2 结构化入参与状态注入</h3>
+<ul>
+<li>工具函数可用 <code>InjectedState</code>（<code>from langchain.agents</code>）注入运行时状态（如 <code>context</code> 或图状态），而不占用模型可见的入参。</li>
+<li>错误处理：工具内部抛异常会被框架捕获并作为「工具错误信息」回传给模型，让模型自行纠错重试，无需额外包装。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> InjectedState
+<span class="tok-kw">from</span> typing <span class="tok-kw">import</span> Annotated
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> reply_with_user(ctx: Annotated[<span class="tok-type">dict</span>, InjectedState(<span class="tok-str">"context"</span>)], msg: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""把消息和当前登录用户名拼起来返回。"""</span>
+    <span class="tok-kw">return</span> <span class="tok-str">f"[{ctx['user_id']}] {msg}"</span></code></pre>
+<hr class="sep">
+<h2 id="sec-405">五、消息与标准内容块 content_blocks</h2>
+<h3 id="sec-4051">5.1 content_blocks：跨供应商统一</h3>
+<ul>
+<li>现代模型输出已从「纯字符串」演进为<strong>内容块列表</strong>：推理轨迹（reasoning）、引用（citations）、服务器端工具调用等。</li>
+<li>v1.0 给消息新增 <code>.content_blocks</code> 属性，提供<strong>跨供应商一致的类型化视图</strong>；旧的 <code>.content</code> 字段保持完全向后兼容（仍是字符串或厂商原生结构）。</li>
+<li>支持的块类型：<code>text</code>、<code>reasoning</code>、<code>image</code>、<code>audio</code>、<code>tool_call</code>、<code>citation</code> 等。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-5-mini"</span>)
+resp = model.invoke(<span class="tok-str">"解释一下强化学习"</span>)
+
+<span class="tok-kw">for</span> block <span class="tok-kw">in</span> resp.content_blocks:
+    <span class="tok-kw">if</span> block[<span class="tok-str">"type"</span>] == <span class="tok-str">"reasoning"</span>:
+        <span class="tok-kw">print</span>(<span class="tok-str">"思考："</span>, block.get(<span class="tok-str">"reasoning"</span>))
+    <span class="tok-kw">elif</span> block[<span class="tok-str">"type"</span>] == <span class="tok-str">"text"</span>:
+        <span class="tok-kw">print</span>(<span class="tok-str">"回答："</span>, block.get(<span class="tok-str">"text"</span>))</code></pre>
+<p>旧写法（v0）需针对每个厂商单独处理 <code>reasoning</code> / <code>thinking</code> 等字段，<code>content_blocks</code> 把这层差异抹平。</p>
+<h3 id="sec-4052">5.2 多模态消息</h3>
+<ul>
+<li>通过 <code>HumanMessage(content_blocks=[...])</code> 以标准化方式传入文本、图片、音频等，无需再写 OpenAI 风格 / Anthropic 风格两套结构。</li>
+<li>图片块可用 <code>url</code>（远程）或 <code>data</code>（base64）提供，并指定 <code>mime_type</code>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.messages <span class="tok-kw">import</span> HumanMessage
+
+msg = HumanMessage(content_blocks=[
+    {<span class="tok-str">"type"</span>: <span class="tok-str">"text"</span>, <span class="tok-str">"text"</span>: <span class="tok-str">"描述这张图片"</span>},
+    {<span class="tok-str">"type"</span>: <span class="tok-str">"image"</span>, <span class="tok-str">"url"</span>: <span class="tok-str">"https://example.com/cat.png"</span>, <span class="tok-str">"mime_type"</span>: <span class="tok-str">"image/png"</span>},
+])
+res = model.invoke([msg])</code></pre>
+<h3 id="sec-4053">5.3 序列化与 <code>LC_OUTPUT_VERSION</code></h3>
+<ul>
+<li>默认 <code>content_blocks</code> 不会写回 <code>content</code> 字段。若需把标准块序列化进 <code>content</code>（如发给前端客户端），可开启：</li>
+<li>环境变量 <code>LC_OUTPUT_VERSION=v1</code>，或初始化时 <code>init_chat_model(..., output_version="v1")</code>。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-406">六、构建智能体 <code>create_agent</code></h2>
+<h3 id="sec-4061">6.1 最小可运行的 Agent</h3>
+<ul>
+<li><code>create_agent(model, tools, prompt/system_prompt)</code> 是 v1.0 推荐的唯一起点，替代旧 <code>AgentExecutor</code> 与 <code>langgraph.prebuilt.create_react_agent</code>。</li>
+<li>返回的 agent 是一个 LangGraph 编译后的图，支持 <code>.invoke()</code> / <code>.stream()</code> / <code>.ainvoke()</code>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+<span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> add(a: <span class="tok-type">int</span>, b: <span class="tok-type">int</span>) -&gt; <span class="tok-type">int</span>:
+    <span class="tok-str">"""把两个数相加。"""</span>
+    <span class="tok-kw">return</span> a + b
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-4o-mini"</span>)
+agent = create_agent(model, tools=[add], prompt=<span class="tok-str">"你是一个爱用中文的计算助手。"</span>)
+
+result = agent.invoke({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"3 加 5 等于多少？"</span>}]})
+<span class="tok-kw">print</span>(result[<span class="tok-str">"messages"</span>][-1].content)</code></pre>
+<p>Node.js 等价写法：<code>import { createAgent } from "@langchain/langchain"</code>。</p>
+<h3 id="sec-4062">6.2 system_prompt 与运行时 context</h3>
+<ul>
+<li>v0 用 <code>prompt</code> 参数；v1 推荐用 <code>system_prompt</code>，并支持 <code>SystemMessage</code> 实例。</li>
+<li><strong>静态上下文</strong>（如 user_id、session_id，整轮对话不变）通过 <code>context</code> 参数注入，配合 <code>context_schema</code> 声明结构；动态对话状态仍是 messages。旧 <code>config["configurable"]</code> 方式保留兼容。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> dataclasses <span class="tok-kw">import</span> dataclass
+<span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+
+<span class="tok-kw">@dataclass</span>
+<span class="tok-kw">class</span> <span class="tok-type">Context</span>:
+    user_id: <span class="tok-type">str</span>
+    session_id: <span class="tok-type">str</span>
+
+agent = create_agent(model, tools=[add], context_schema=Context)
+
+result = agent.invoke(
+    {<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"你好"</span>}]},
+    context=Context(user_id=<span class="tok-str">"123"</span>, session_id=<span class="tok-str">"abc"</span>),
+)</code></pre>
+<h3 id="sec-4063">6.3 流式调用</h3>
+<ul>
+<li><code>agent.stream(...)</code> 逐块产出消息增量（含工具调用与最终文本），适合做打字机式 UI。</li>
+<li>每个流式事件含 <code>messages</code> 列表，用法与 <code>invoke</code> 一致，只是分多次返回。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">for</span> chunk <span class="tok-kw">in</span> agent.stream({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"讲个冷笑话"</span>}]}):
+    <span class="tok-kw">for</span> m <span class="tok-kw">in</span> chunk.get(<span class="tok-str">"messages"</span>, []):
+        <span class="tok-kw">if</span> <span class="tok-kw">hasattr</span>(m, <span class="tok-str">"content"</span>) <span class="tok-kw">and</span> m.content:
+            <span class="tok-kw">print</span>(m.content, end=<span class="tok-str">""</span>, flush=<span class="tok-type">True</span>)</code></pre>
+<hr class="sep">
+<h2 id="sec-407">七、智能体中间件 Middleware</h2>
+<h3 id="sec-4071">7.1 内置中间件</h3>
+<ul>
+<li>中间件是可插拔的钩子，挂在 Agent 循环的<strong>每一步</strong>，替代以前「子类化 + 自己包一层」的写法。</li>
+<li>内置三件套：
+<ul>
+<li><strong>Human-in-the-loop</strong>：关键步骤暂停，等待人工审批 / 修改。</li>
+<li><strong>Summarization（摘要）</strong>：自动压缩历史对话，防止上下文溢出（1.1 起利用 model profile 更聪明地决策）。</li>
+<li><strong>PII Redaction（隐私擦除）</strong>：内容传递前自动脱敏敏感信息。</li>
+</ul></li>
+<li>1.1 额外提供：<strong>OpenAI Moderation 中间件</strong>、内置带退避的模型重试。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.agents.middleware <span class="tok-kw">import</span> HumanInTheLoop, Summarization
+
+agent = create_agent(
+    model, tools=[transfer_money],
+    middleware=[
+        HumanInTheLoop(tools=[<span class="tok-str">"transfer_money"</span>]),   <span class="tok-cmt"># 转账前人工确认</span>
+        Summarization(threshold=<span class="tok-num">20</span>),                    <span class="tok-cmt"># 超过 20 条消息自动摘要</span>
+    ],
+)</code></pre>
+<h3 id="sec-4072">7.2 自定义中间件</h3>
+<ul>
+<li>实现中间件协议（提供 <code>init</code> / <code>process_model_input</code> / <code>process_model_output</code> 等钩子）即可在循环任意阶段插入逻辑，比如日志、限流、二次校验。</li>
+<li>钩子粒度：进入模型前改写输入、模型返回后改写输出、工具调用前/后拦截。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-408">八、结构化输出 Structured Output</h2>
+<h3 id="sec-4081">8.1 response_format + ToolStrategy</h3>
+<ul>
+<li>v1.0 把<strong>结构化输出生成整合进主 Agent 循环</strong>，不再额外多调一次 LLM，降低延迟与成本。</li>
+<li>用 <code>response_format</code> 指定 pydantic 模型 + 策略（<code>ToolStrategy</code> 走工具调用，或厂商原生 structured output），让模型最终输出强类型对象。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.agents.structured_output <span class="tok-kw">import</span> ToolStrategy
+<span class="tok-kw">from</span> pydantic <span class="tok-kw">import</span> BaseModel
+
+<span class="tok-kw">class</span> <span class="tok-type">WeatherReport</span>(BaseModel):
+    temperature: <span class="tok-type">float</span>
+    condition: <span class="tok-type">str</span>
+
+agent = create_agent(
+    <span class="tok-str">"openai:gpt-4o-mini"</span>,
+    tools=[get_weather],
+    response_format=ToolStrategy(WeatherReport),
+    prompt=<span class="tok-str">"请查天气并以结构化报告返回。"</span>,
+)
+
+report = agent.invoke({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"北京天气？"</span>}]})
+<span class="tok-kw">print</span>(report.structured_response)   <span class="tok-cmt"># WeatherReport(temperature=25.0, condition="晴")</span></code></pre>
+<h3 id="sec-4082">8.2 厂商原生结构化输出</h3>
+<ul>
+<li>若厂商支持原生 structured output（如 OpenAI / Anthropic），可改用原生策略以获得更好性能；跨厂商统一则用 <code>ToolStrategy</code> 兜底。</li>
+<li>细粒度控制权：开发者可决定「用工具调用」还是「厂商原生」，框架在 Agent 循环内统一收敛。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-409">九、持久化与 LangGraph 运行时</h2>
+<h3 id="sec-4091">9.1 Durable State 与断点恢复</h3>
+<ul>
+<li>LangGraph 是 LangChain 的底层运行时，提供<strong>持久化状态</strong>：Agent 执行状态自动落盘，服务器重启或长任务中断后可<strong>从断点精确恢复</strong>，用户无需重来。</li>
+<li><strong>内置持久化</strong>：通过 <code>checkpointer</code> 保存/恢复任意时刻的工作流，无需手写数据库逻辑，支持多天审批、跨会话后台任务。</li>
+<li>用法：给 agent 传入 <code>checkpointer=MemorySaver()</code>（演示）或 <code>PostgresSaver</code>（生产），并在调用时带 <code>thread_id</code>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langgraph.checkpoint.memory <span class="tok-kw">import</span> MemorySaver
+
+agent = create_agent(model, tools=[add], checkpointer=MemorySaver())
+cfg = {<span class="tok-str">"configurable"</span>: {<span class="tok-str">"thread_id"</span>: <span class="tok-str">"sess-1"</span>}}
+
+agent.invoke({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"记住我叫小明"</span>}]}, cfg)
+<span class="tok-cmt"># 下次同一 thread_id 调用会带着上轮记忆继续</span></code></pre>
+<h3 id="sec-4092">9.2 人在回路 HITL</h3>
+<ul>
+<li>LangGraph 对「暂停 → 人工审查 / 修改 / 批准」提供一等公民 API，配合上一节中间件可轻松构建高风险决策的人类兜底。</li>
+<li>典型流程：agent 跑到需审批节点 → 暂停并等待人类输入 → resume 带批准结果继续。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-410">十、RAG 与检索（1.0 的变化）</h2>
+<h3 id="sec-4101">10.1 检索器迁移到 classic</h3>
+<ul>
+<li><strong>v1.0 把绝大多数检索相关能力搬到 <code>langchain-classic</code></strong>：<code>MultiQueryRetriever</code>、<code>ParentDocumentRetriever</code>、Indexing API、<code>CacheBackedEmbeddings</code> 等。</li>
+<li>向量库（PGVector、FAISS、Chroma…）与文档加载/切分（<code>DirectoryLoader</code>、<code>RecursiveCharacterTextSplitter</code>）属于 <code>langchain-community</code> 与独立集成包。</li>
+<li><strong>主包只保留 <code>init_embeddings</code> 与消息/工具/模型抽象</strong>，RAG 编排交给 Agent + 检索工具。</li>
+</ul>
+<h3 id="sec-4102">10.2 用 create_agent + 检索工具做 RAG</h3>
+<ul>
+<li>1.0 的推荐 RAG 模式：把「检索」包成一个工具，交给 <code>create_agent</code>，由模型自己决定何时检索，而不是旧的固定 <code>RetrievalQA</code> 链。</li>
+<li>好处：检索与对话、工具调用统一在同一个 Agent 循环里，支持多轮、追问、混合工具。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> search_docs(query: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""在本地知识库中检索与 query 相关的片段。"""</span>
+    hits = vectorstore.similarity_search(query, k=<span class="tok-num">3</span>)
+    <span class="tok-kw">return</span> <span class="tok-str">"\n---\n"</span>.join(h.page_content <span class="tok-kw">for</span> h <span class="tok-kw">in</span> hits)
+
+rag_agent = create_agent(model, tools=[search_docs],
+                          prompt=<span class="tok-str">"你是一个严谨的客服，答案必须来自检索结果。"</span>)</code></pre>
+<hr class="sep">
+<h2 id="sec-411">十一、迁移指南（0.x → 1.0）</h2>
+<h3 id="sec-4111">11.1 常见 import 对照</h3>
+<table><thead><tr><th>能力</th><th>v0.x（旧）</th><th>v1.0（新）</th></tr></thead><tbody>
+<tr><td>构建 Agent</td><td><code>langgraph.prebuilt.create_react_agent</code> / <code>AgentExecutor</code></td><td><code>langchain.agents.create_agent</code></td></tr>
+<tr><td>模型</td><td><code>langchain.chat_models.ChatOpenAI</code></td><td><code>langchain.chat_models.init_chat_model</code></td></tr>
+<tr><td>Chain</td><td><code>langchain.chains.LLMChain</code></td><td>迁移到 <code>langchain_classic.chains</code></td></tr>
+<tr><td>Retriever</td><td><code>langchain.retrievers.MultiQueryRetriever</code></td><td>迁移到 <code>langchain_classic.retrievers</code></td></tr>
+<tr><td>Prompt 参数名</td><td><code>prompt</code></td><td><code>system_prompt</code>（推荐）</td></tr>
+<tr><td>静态上下文</td><td><code>config["configurable"]</code></td><td><code>context</code> + <code>context_schema</code>（推荐）</td></tr>
+<tr><td>多模态输入</td><td>厂商原生 <code>content</code> 结构</td><td><code>content_blocks</code>（统一）</td></tr>
+</tbody></table>
+<h3 id="sec-4112">11.2 升级步骤建议</h3>
+<ul>
+<li><strong>新项目</strong>：直接 <code>pip install langchain</code> + 厂商包，从 <code>create_agent</code> 起步，防护/摘要/人工审核用中间件实现。</li>
+<li><strong>老项目</strong>：先锁定当前版本 → 读官方迁移指南 → 装 <code>langchain-classic</code> 改 import → 逐步把旧 Chain/Agent 重构成 <code>create_agent</code>。</li>
+<li>多厂商应用：尽早用 <code>content_blocks</code> 统一 reasoning/citation 处理，用 1.1 的 model <code>.profile</code> 探测能力而非硬编码。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-412">十二、实战：工具调用 Agent 完整示例</h2>
+<p>下面把前面知识点串起来：初始化模型 → 定义两个工具 → 加 HITL 与摘要中间件 → 流式运行。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.agents.middleware <span class="tok-kw">import</span> Summarization
+<span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+<span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> search(query: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""联网搜索关键词，返回摘要。"""</span>
+    <span class="tok-kw">return</span> f"关于「{query}」的搜索结果：LangChain 1.0 已发布。"</span>
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> calc(expr: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""计算数学表达式，如 '23*7'。"""</span>
+    <span class="tok-kw">return</span> <span class="tok-kw">str</span>(eval(expr))   <span class="tok-cmt"># 仅演示，生产请用安全解析</span>
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-4o-mini"</span>)
+agent = create_agent(
+    model,
+    tools=[search, calc],
+    system_prompt=<span class="tok-str">"你是一个严谨助理，先检索再计算，给出带出处的中文回答。"</span>,
+    middleware=[Summarization(threshold=<span class="tok-num">16</span>)],
+)
+
+<span class="tok-kw">for</span> chunk <span class="tok-kw">in</span> agent.stream({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>,
+                              <span class="tok-str">"content"</span>: <span class="tok-str">"LangChain 1.0 是哪天发布的？再算一下 23 乘 7。"</span>}]}):
+    <span class="tok-kw">for</span> m <span class="tok-kw">in</span> chunk.get(<span class="tok-str">"messages"</span>, []):
+        <span class="tok-kw">if</span> <span class="tok-kw">getattr</span>(m, <span class="tok-str">"content"</span>, <span class="tok-str">""</span>):
+            <span class="tok-kw">print</span>(m.content, end=<span class="tok-str">""</span>, flush=<span class="tok-type">True</span>)</code></pre>
+<hr class="sep">
+<h2 id="sec-413">十三、1.1 与版本演进（model profiles）</h2>
+<ul>
+<li><strong>v1.1（2025-12-02）</strong>：Chat 模型暴露 <code>.profile</code> 属性，描述能力（结构化输出、函数调用等），数据来自开放的 <code>models.dev</code> 目录。</li>
+<li>摘要中间件与原生结构化输出策略会读取 <code>profile</code> 做更聪明的决策；<code>create_agent</code> 新增对 <code>SystemMessage</code> 实例的支持、内置带退避的模型重试、OpenAI Moderation 中间件。</li>
+<li>API 稳定性承诺：1.x 期间<strong>不再有重大破坏性变更</strong>，直到未来的 2.0。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-414">十四、最佳实践与常见坑</h2>
+<ul>
+<li><strong>日常开发</strong>：<code>pip install langchain</code> + 厂商包即可，从 <code>langchain</code> 主包导入一切；生产尽量用官方厂商包（如 <code>langchain_openai</code>）。</li>
+<li><strong>多模型切换</strong>：用 <code>init_chat_model("provider:model")</code>，避免散落各处的 <code>ChatXxx</code> 实例化。</li>
+<li><strong>国产 / OpenAI 兼容模型</strong>：复用 <code>langchain-openai</code> + 改 <code>base_url</code> 与 key（DeepSeek、通义、火山方舟、Ollama 等）。</li>
+<li><strong>旧代码不要强行留在主包</strong>：Chain / Retriever / Indexing / Hub 已迁移 classic，新项目直接上 <code>create_agent</code>。</li>
+<li><strong>结构化输出别再单独多调一次</strong>：用 <code>response_format</code> 在主循环内生成，省延迟省成本。</li>
+<li><strong>上下文溢出</strong>：长对话挂 <code>Summarization</code> 中间件或用 <code>trim_messages</code> 裁剪。</li>
+<li><strong>版本</strong>：1.0 要求 Python 3.10+；LangGraph 1.0 是底层运行时，复杂编排/持久化/人工审核直接用 LangGraph。</li>
+</ul>
+<hr class="sep">
+<p style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">— LangChain 1.0+ 知识库结束 · 内容基于官方 1.0 / 1.1 公告与迁移指南整理 —</p>

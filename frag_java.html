@@ -1,0 +1,141 @@
+<h1 id="sec-200">第四部分：进阶高频补充（2026 新版考点）</h1>
+<blockquote>结合 2025–2026 最新面经整理：场景题占比已超过 50%，<strong>虚拟线程、AQS、MVCC、Spring Boot 3.x</strong> 成为新的 T0 必考点。本部分在原有八股基础上补充深度与新版内容，答法同样遵循「概念 → 原理 → 项目实战 → 坑点」的套路。</blockquote>
+<hr class="sep">
+<h2 id="sec-201">1. JDK 17 / 21 新特性（T0 必考）</h2>
+<h3 id="sec-202">1.1 虚拟线程（Virtual Threads，Project Loom）★</h3>
+<ul><li><strong>是什么</strong>：JDK 21 正式发布的轻量级线程，由 <strong>JVM 调度</strong>而非操作系统，运行在少量「载体线程（Carrier Thread）」之上。</li>
+<li><strong>为什么需要</strong>：平台线程栈约 1–2MB，1 万并发连接就要 10–20GB 内存；虚拟线程栈仅约 1KB，可轻松创建百万级。</li>
+<li><strong>核心原理</strong>：虚拟线程阻塞在 I/O 上时被 <strong>park 挂起</strong>，载体线程立即去跑其他虚拟线程；I/O 就绪后在任意可用载体上恢复。用同步写法获得异步性能。</li>
+<li><strong>不适用场景</strong>：CPU 密集型任务（无法 park，白占载体）；大量使用 <code>synchronized</code> 的代码（<strong>pinning 问题</strong>——synchronized 块内挂起会把载体线程一起钉住，JDK 24 已改进；改造方案是换 <code>ReentrantLock</code>）。</li></ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 三种创建方式</span>
+<span class="tok-type">Thread</span>.startVirtualThread(() -&gt; doWork());
+<span class="tok-type">Thread</span>.ofVirtual().name(<span class="tok-str">&quot;vt-&quot;</span>).start(() -&gt; doWork());
+<span class="tok-kw">try</span> (<span class="tok-kw">var</span> exec = <span class="tok-type">Executors</span>.newVirtualThreadPerTaskExecutor()) {
+    exec.submit(() -&gt; doWork()); <span class="tok-cmt">// 一任务一虚拟线程，不要池化复用！</span>
+}
+<span class="tok-cmt">// Spring Boot 3.2+ 一行开启：spring.threads.virtual.enabled=true</span></code></pre>
+<ul><li><strong>面试话术</strong>：「线程池的存在是为了复用昂贵的平台线程；虚拟线程足够便宜，<strong>不需要池化</strong>，一任务一线程即可。限流改用信号量 Semaphore。」</li></ul>
+<h3 id="sec-203">1.2 Sealed Classes / Records / Pattern Matching</h3>
+<ul><li><strong>Record（16+）</strong>：不可变数据载体，自动生成构造器、getter、equals/hashCode/toString，替代 DTO 样板代码；类与字段均 final。</li>
+<li><strong>Sealed（17+）</strong>：<code>sealed</code> + <code>permits</code> 限定谁能继承/实现，配合模式匹配可实现<strong>穷尽性 switch</strong>（编译器校验，无需 default）。</li>
+<li><strong>Pattern Matching for switch（21+）</strong>：<code>case Circle c -&gt; ...</code> 类型模式 + 解构，替代 instanceof 链与访问者模式。</li>
+<li><strong>文本块（15+）</strong>：<code>&quot;&quot;&quot;</code> 多行字符串，写 JSON/SQL 不再需要转义。</li></ul>
+<h3 id="sec-204">1.3 Structured Concurrency 与 Scoped Values</h3>
+<ul><li><strong>Structured Concurrency（21 预览）</strong>：<code>StructuredTaskScope</code> 把一组并发子任务当作一个单元——任一失败整体取消、全部完成才返回，杜绝线程泄漏。</li>
+<li><strong>Scoped Values</strong>：虚拟线程时代替代 <code>ThreadLocal</code> 的方案，不可变、有明确作用域、内存友好。</li></ul>
+<hr class="sep">
+<h2 id="sec-205">2. 并发进阶（手写 AQS 是高频要求）</h2>
+<h3 id="sec-206">2.1 AQS 原理 ★</h3>
+<ul><li>全称 AbstractQueuedSynchronizer，JUC 锁与同步器的基座：<code>ReentrantLock</code>、<code>CountDownLatch</code>、<code>Semaphore</code>、<code>ReentrantReadWriteLock</code> 都基于它。</li>
+<li>核心三件套：<strong>volatile int state</strong>（同步状态）+ <strong>CLH 变体双向队列</strong>（排队等待线程）+ <strong>CAS</strong>（无锁修改 state）。</li>
+<li>独占模式流程：tryAcquire CAS 抢 state → 失败入队（Node 封装线程）→ LockSupport.park 挂起 → 前驱释放时 unpark 后继。</li>
+<li>共享模式：state 表示许可数，获取成功后<strong>传播唤醒</strong>后续共享节点（CountDownLatch、Semaphore）。</li></ul>
+<h3 id="sec-207">2.2 ReentrantLock vs synchronized</h3>
+<table><thead><tr><th>维度</th><th>synchronized</th><th>ReentrantLock</th></tr></thead><tbody><tr><td>实现</td><td>JVM 层面，Monitor</td><td>JDK 层面，AQS</td></tr><tr><td>锁释放</td><td>自动</td><td>必须 finally 中 unlock</td></tr><tr><td>可中断</td><td>否</td><td>lockInterruptibly()</td></tr><tr><td>超时获取</td><td>否</td><td>tryLock(timeout)</td></tr><tr><td>公平锁</td><td>非公平</td><td>可选（默认非公平）</td></tr><tr><td>条件队列</td><td>一个 wait/notify</td><td>多个 Condition</td></tr><tr><td>虚拟线程 pinning</td><td>有（JDK 24 前）</td><td>无，推荐替代</td></tr></tbody></table>
+<h3 id="sec-208">2.3 CountDownLatch / CyclicBarrier / Semaphore</h3>
+<table><thead><tr><th>工具</th><th>语义</th><th>能否复用</th><th>典型场景</th></tr></thead><tbody><tr><td>CountDownLatch</td><td>一个或多个线程等 N 个事件完成</td><td>否</td><td>主线程等多个子任务加载完</td></tr><tr><td>CyclicBarrier</td><td>N 个线程互相等到齐再一起走</td><td>可循环</td><td>多线程分阶段计算汇合</td></tr><tr><td>Semaphore</td><td>许可信号量，控制并发数</td><td>许可归还即可</td><td>限流、连接池、虚拟线程限流</td></tr></tbody></table>
+<h3 id="sec-209">2.4 原子类、LongAdder 与 StampedLock</h3>
+<ul><li><code>AtomicInteger</code> 等基于 CAS 自旋；高并发下大量线程自旋失败，CPU 空转。</li>
+<li><strong>LongAdder</strong>：分段思想——base + Cell[] 分散热点，最终 sum 求和；高并发计数首选（缺点：sum 非强一致快照）。</li>
+<li><strong>StampedLock</strong>：读写锁升级版，支持<strong>乐观读</strong>（tryOptimisticRead 不阻塞写，读后 validate 校验票据），读多写少场景吞吐更高；不可重入。</li></ul>
+<h3 id="sec-210">2.5 CompletableFuture 编排</h3>
+<ul><li>串行 <code>thenApply/thenCompose</code>、并行汇聚 <code>thenCombine/allOf</code>、任一完成 <code>anyOf/acceptEither</code>。</li><li>异常处理 <code>exceptionally/handle</code>；超时 <code>orTimeout/completeOnTimeout</code>（JDK 9+）。</li><li>默认用 ForkJoinPool 公共池，<strong>生产环境务必指定业务线程池</strong>，避免被公共池拖累。</li></ul>
+<hr class="sep">
+<h2 id="sec-211">3. JVM 深入</h2>
+<h3 id="sec-212">3.1 类加载过程与对象创建细节</h3>
+<ul><li>类加载五阶段：<strong>加载 → 验证 → 准备（静态变量赋零值）→ 解析（符号引用转直接引用）→ 初始化（执行 clinit）</strong>。</li>
+<li>对象创建：类加载检查 → 分配内存（<strong>指针碰撞</strong>-内存规整 / <strong>空闲列表</strong>-内存交错；并发安全靠 CAS+失败重试 或 <strong>TLAB</strong> 本地线程分配缓冲）→ 零值初始化 → 设置对象头（Mark Word、类型指针）→ 执行 init。</li>
+<li>逃逸分析：对象未逃逸出方法可<strong>栈上分配 + 标量替换</strong>，随栈帧销毁，减轻 GC 压力。</li></ul>
+<h3 id="sec-213">3.2 CMS / G1 / ZGC 对比与选型</h3>
+<table><thead><tr><th>收集器</th><th>目标</th><th>停顿</th><th>关键机制</th><th>短板</th></tr></thead><tbody><tr><td>CMS</td><td>低停顿</td><td>两次短 STW</td><td>并发标记清除</td><td>碎片、CPU 敏感、JDK 14 移除</td></tr><tr><td>G1（JDK9+ 默认）</td><td>可预测停顿</td><td>-XX:MaxGCPauseMillis 可控</td><td>Region 分区 + 回收价值排序</td><td>大堆下仍有百 ms 级停顿</td></tr><tr><td>ZGC</td><td>超低停顿</td><td>&lt;1ms（与堆大小无关）</td><td>染色指针 + 读屏障 + 并发整理</td><td>吞吐略降、内存占用高</td></tr></tbody></table>
+<ul><li>选型：常规微服务 G1 即可；大堆（16G+）、延迟敏感（交易、网关）选 ZGC（JDK 21 分代 ZGC 进一步降低分配压力）。</li></ul>
+<h3 id="sec-214">3.3 线上问题排查四板斧 ★</h3>
+<ul><li><strong>CPU 飙高</strong>：<code>top</code> 找进程 → <code>top -Hp pid</code> 找线程 → <code>printf %x</code> 转 16 进制 → <code>jstack pid | grep nid</code> 定位代码行。常见原因：死循环、正则灾难回溯、频繁 GC。</li>
+<li><strong>Full GC 频繁</strong>：<code>jstat -gcutil pid 1s</code> 看各区占用 → <code>jmap -histo</code> 或 dump 后用 MAT 查支配树。常见原因：大对象、内存泄漏（ThreadLocal/静态集合/连接未关）、元空间不足。</li>
+<li><strong>接口超时/抖动</strong>：Arthas <code>trace</code> 看方法耗时、<code>watch</code> 看入参出参；结合 GC 日志排除 STW。</li>
+<li><strong>死锁</strong>：<code>jstack</code> 直接报 Found deadlock；或 Arthas <code>thread -b</code> 一键定位。</li></ul>
+<hr class="sep">
+<h2 id="sec-215">4. MySQL 深入</h2>
+<h3 id="sec-216">4.1 MVCC 原理 ★</h3>
+<ul><li>三要素：每行隐藏字段 <code>DB_TRX_ID</code>（最近修改事务 ID）、<code>DB_ROLL_PTR</code>（回滚指针，串起 <strong>undo log 版本链</strong>）、ReadView（读视图，含活跃事务列表 m_ids、min_trx_id、max_trx_id、creator_trx_id）。</li>
+<li>可见性判断：版本 trx_id &lt; min_trx_id → 可见；&ge; max_trx_id → 不可见；在 m_ids 中（仍活跃）→ 不可见，沿版本链继续找。</li>
+<li><strong>RC 与 RR 的区别</strong>：RC 每次 SELECT 生成新 ReadView；RR 只在事务第一次 SELECT 时生成一次——这就是 RR 可重复读的原因。</li>
+<li>当前读 vs 快照读：<code>SELECT ... FOR UPDATE / LOCK IN SHARE MODE</code>、增删改是当前读，读最新版本并加锁。</li></ul>
+<h3 id="sec-217">4.2 redo log / undo log / binlog 与两阶段提交</h3>
+<ul><li><strong>redo log</strong>（InnoDB，物理日志）：保证持久性，WAL 先写日志再刷盘，crash 后重放。</li>
+<li><strong>undo log</strong>：保证原子性 + 支撑 MVCC 版本链。</li>
+<li><strong>binlog</strong>（Server 层，逻辑日志）：主从复制与数据恢复。</li>
+<li><strong>两阶段提交</strong>：redo prepare → 写 binlog → redo commit，保证崩溃恢复时两份日志一致，否则主从数据会不一致。</li></ul>
+<h3 id="sec-218">4.3 行锁、间隙锁与死锁</h3>
+<ul><li><strong>Record Lock</strong> 锁记录、<strong>Gap Lock</strong> 锁区间、<strong>Next-Key Lock</strong>（临键锁，左开右闭）= 记录 + 区间，RR 下默认，用于防幻读。</li>
+<li>加锁规则核心：<strong>锁加在索引上</strong>；没走索引的 UPDATE/DELETE 会锁全表（全记录 + 全间隙）。</li>
+<li>死锁排查：<code>SHOW ENGINE INNODB STATUS</code> 看 LATEST DETECTED DEADLOCK；开启 <code>innodb_print_all_deadlocks</code> 记录全部死锁。</li>
+<li>避免死锁：固定加锁顺序、缩小事务、合理建索引、热点行拆分。</li></ul>
+<hr class="sep">
+<h2 id="sec-219">5. Redis 深入</h2>
+<h3 id="sec-220">5.1 底层数据结构</h3>
+<ul><li><strong>SDS</strong>：O(1) 取长度、二进制安全、预分配 + 惰性释放。</li>
+<li><strong>listpack（7.0 取代 ziplist）</strong>：紧凑存储小元素，解决连锁更新问题。</li>
+<li><strong>跳表（ZSet）</strong>：多层索引，平均 O(log n) 查找，范围查询高效；不用红黑树是因为实现简单 + 范围遍历友好。</li>
+<li><strong>渐进式 rehash</strong>：两个哈希表并存，每次增删改查顺带迁移一个桶，避免一次性迁移卡顿。</li></ul>
+<h3 id="sec-221">5.2 主从 / 哨兵 / Cluster</h3>
+<ul><li>主从复制：全量（RDB）+ 增量（repl_backlog 缓冲区）+ 命令传播。</li>
+<li>哨兵：监控、主观/客观下线、Raft 选 leader、故障转移、通知客户端。</li>
+<li><strong>Cluster</strong>：<strong>16384 个槽</strong>按 CRC16 分片，节点间 Gossip 交换信息；key 不在本节点返回 MOVED/ASK 重定向；槽位选择 16384 是心跳包大小与节点规模的权衡。</li></ul>
+<h3 id="sec-222">5.3 bigkey 与 hotkey 治理</h3>
+<ul><li>发现：<code>--bigkeys</code> 扫描、<code>MEMORY USAGE</code>、monitor 采样、代理层统计。</li>
+<li>bigkey 危害：阻塞主线程（删除用 <code>UNLINK</code> 异步）、网卡打满、集群迁移慢。治理：拆分成多个小 key、压缩、避免大集合全量读取（HGETALL → HSCAN）。</li>
+<li>hotkey 治理：本地缓存（Caffeine）兜底、key 打散加随机后缀读多份、读写分离。</li></ul>
+<h3 id="sec-223">5.4 分布式锁的正确姿势 ★</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// ❌ 面经常见反例：SETNX 和 EXPIRE 分两步，加锁后宕机 = 死锁</span>
+<span class="tok-kw">if</span> (redis.setnx(key, <span class="tok-str">&quot;1&quot;</span>)) { redis.expire(key, <span class="tok-num">30</span>); }
+<span class="tok-cmt">// ✅ 正确：原子加锁（value 存唯一标识）+ Lua 原子解锁</span>
+<span class="tok-type">SET</span> lock_key uuid <span class="tok-type">NX</span> <span class="tok-type">PX</span> <span class="tok-num">30000</span>
+<span class="tok-cmt">// 解锁 Lua：先 GET 比对 uuid 再 DEL，防止误删别人的锁</span></code></pre>
+<ul><li>业务超时锁到期怎么办：<strong>Redisson 看门狗</strong>——默认 30s 租约，每 10s 自动续期，直到显式 unlock 或宕机（宕机则自然过期）。</li>
+<li>可重入：Redisson 用 Hash 结构（field=线程标识，value=重入次数）。</li>
+<li>主从切换丢锁问题：官方红锁（RedLock）争议大，多数业务「Redis 锁 + DB 约束兜底」即可，金融级强一致再考虑 ZooKeeper/etcd。</li></ul>
+<hr class="sep">
+<h2 id="sec-224">6. Spring 深入</h2>
+<h3 id="sec-225">6.1 循环依赖与三级缓存 ★</h3>
+<ul><li>三级缓存：<code>singletonObjects</code>（成品 Bean）、<code>earlySingletonObjects</code>（提前暴露的半成品）、<code>singletonFactories</code>（ObjectFactory 工厂）。</li>
+<li>A 依赖 B、B 依赖 A：A 实例化后先把 ObjectFactory 放入三级缓存 → 填充属性时发现依赖 B → 创建 B，B 填充属性时从三级缓存拿到 A 的<strong>早期引用</strong> → B 完成 → A 完成。</li>
+<li><strong>为什么需要三级而不是两级</strong>：ObjectFactory 可在获取时执行 AOP 代理逻辑，保证注入的是<strong>代理对象</strong>而非原始对象；两级缓存无法在「需要代理」和「不需要代理」间统一。</li>
+<li>无法解决：构造器注入循环依赖（实例化阶段就卡住）、prototype 循环依赖。</li></ul>
+<h3 id="sec-226">6.2 Spring MVC 请求处理流程</h3>
+<ul><li>请求 → <code>DispatcherServlet</code> → HandlerMapping 找 Handler → HandlerAdapter 适配执行 → 拦截器 preHandle → 参数解析（HandlerMethodArgumentResolver）→ 调用 Controller → 返回值处理（HandlerMethodReturnValueHandler / HttpMessageConverter）→ 拦截器 postHandle → 视图渲染或直接写响应。</li></ul>
+<h3 id="sec-227">6.3 Spring Boot 3.x 变化（新版必问）</h3>
+<ul><li>最低 JDK 17；<code>javax.*</code> → <code>jakarta.*</code> 命名空间迁移（老项目升级最大坑点）。</li>
+<li>自动配置注册文件从 <code>spring.factories</code> 迁移到 <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>。</li>
+<li>支持<strong>虚拟线程</strong>（3.2+ 一行配置开启）与 <strong>GraalVM Native Image AOT 编译</strong>（启动毫秒级、内存大幅降低，代价是反射/动态代理需显式声明）。</li>
+<li>观测性一体化：Micrometer + OpenTelemetry 内置 Tracing/Metrics。</li></ul>
+<h3 id="sec-228">6.4 AI 工程化趋势：Spring AI 与 RAG</h3>
+<ul><li>2026 面试新风向：面试官越来越爱问「项目里有没有 AI 落地」。要点：Spring AI 的 <code>ChatClient</code> 抽象、Embedding/向量库集成、Tool Calling（函数调用）、RAG 检索增强。</li>
+<li>有真实 RAG 项目（如本知识库的 Ragent）时，重点讲<strong>检索质量与工程容错</strong>（多路召回、Rerank、意图识别、模型降级），而不是「我调了哪个大模型」。</li></ul>
+<hr class="sep">
+<h2 id="sec-229">7. 高频场景题（设计思路模板）</h2>
+<h3 id="sec-230">7.1 秒杀系统完整链路 ★</h3>
+<ul><li>逐级削峰：<strong>页面静态化/CDN → 网关限流（令牌桶）→ 验证码/答题防刷 → MQ 削峰异步下单 → Redis Lua 预减库存 → DB 乐观锁兜底（WHERE stock&gt;0）→ 定时关单回滚库存</strong>。</li>
+<li>防超卖三板斧：Lua 原子扣减 + DB 条件更新 + 唯一索引防重复下单。</li>
+<li>扩展回答：库存预热、热点商品库存分片、排队结果异步通知（WebSocket/SSE）。</li></ul>
+<h3 id="sec-231">7.2 短链系统</h3>
+<ul><li>长链 → 发号器（自增 ID / 雪花）→ <strong>62 进制</strong>（0-9a-zA-Z）转短码 → 存映射（缓存 + DB）。</li>
+<li>跳转用 <strong>301（永久重定向，浏览器缓存，减轻服务器压力）还是 302（可统计点击数）</strong>——按是否需要统计选择。</li>
+<li>防缓存穿透：不存在的短码走布隆过滤器。</li></ul>
+<h3 id="sec-232">7.3 排行榜与高并发计数</h3>
+<ul><li>排行榜：Redis <strong>ZSet</strong>（score=分数，member=用户），ZADD/ZREVRANGE 天然支持；同分按时间先后可把时间戳拼进 score 小数位。</li>
+<li>亿级计数：Redis 单 key 会成热key → <strong>分片计数</strong>（count:key:0~99 随机写、汇总读）或本地 LongAdder 定时批量上报。</li></ul>
+<h3 id="sec-233">7.4 百万数据导出</h3>
+<ul><li>禁止一次性查出全部（OOM）：<strong>流式查询</strong>（MyBatis Cursor / fetchSize）+ EasyExcel 分批写。</li>
+<li>异步化：提交导出任务 → MQ/线程池处理 → 文件上传 OSS → 通知用户下载；页面轮询任务状态。</li></ul>
+<h3 id="sec-234">7.5 接口幂等设计</h3>
+<ul><li>方案梯度：唯一索引（最硬）→ 防重 token（先取 token，提交时 Redis 原子删除）→ 状态机（仅允许合法状态流转）→ 分布式锁。</li>
+<li>MQ 消费端幂等：业务唯一键 + 去重表 / Redis SETNX。</li></ul>
+<hr class="sep">
+<h2 id="sec-235">8. 2026 面试趋势与答题策略</h2>
+<ul><li><strong>T0（必背零容错）</strong>：HashMap/ConcurrentHashMap、JVM 内存与 GC、锁机制/线程池/AQS、Spring IoC/AOP/循环依赖、MySQL 索引/事务/MVCC、Redis 数据结构/缓存三兄弟、<strong>JDK 21 虚拟线程</strong>。</li>
+<li><strong>T1（高薪分水岭）</strong>：Spring Boot 3.x 原理、微服务治理、分布式事务、MQ、分库分表、分布式锁、ZGC。</li>
+<li><strong>T2（加分项）</strong>：GraalVM、云原生、Spring AI/RAG 落地、Service Mesh。</li>
+<li><strong>八股 + 项目绑定法</strong>：每个知识点都准备一个项目里的真实场景；问原理先答核心，再讲「我在项目里怎么用的、踩过什么坑」。</li>
+<li><strong>不会的问题应对公式</strong>：坦诚承认 + 讲出现有认知（相关经验）+ 给出学习思路，切忌不懂装懂。</li></ul>
+<blockquote>至此 Java 八股部分覆盖「基础概念 → 业务实战 → 分布式专项 → 2026 新版进阶」四层，建议按 T0 → T1 → T2 顺序滚动复习。</blockquote>

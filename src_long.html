@@ -1,0 +1,865 @@
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'><title>知识库</title><style>
+:root{
+  --bg:#eef1f6; --card:#ffffff; --ink:#1e293b; --ink2:#334155; --muted:#64748b;
+  --line:#e2e8f0; --code-bg:#eef2ff; --code-fg:#5b21b6; --code-bd:#e0e7ff;
+  --quote-bg:linear-gradient(90deg,#f5f3ff,#faf5ff); --quote-fg:#475569;
+  --strong:#4338ca; --tbl-hover:#f5f3ff;
+  --indigo:#6366f1; --violet:#8b5cf6; --pink:#ec4899;
+  --grad:linear-gradient(135deg,#6366f1,#8b5cf6 55%,#ec4899);
+}
+[data-theme="dark"]{
+  --bg:#0f172a; --card:#1e293b; --ink:#e2e8f0; --ink2:#cbd5e1; --muted:#94a3b8;
+  --line:#334155; --code-bg:#312e81; --code-fg:#c7d2fe; --code-bd:#4338ca;
+  --quote-bg:linear-gradient(90deg,#312e81,#1e1b4b); --quote-fg:#cbd5e1;
+  --strong:#a5b4fc; --tbl-hover:#273449;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.85;font-size:15.5px;transition:background .3s,color .3s;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:#94a3b8;}
+
+.progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:2000;background:var(--grad);transition:width .12s ease-out;}
+
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:1000;
+  background:linear-gradient(180deg,#1e1b4b 0%,#312e81 55%,#4c1d95 100%);
+  color:#e2e8f0;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(30,27,75,.25);}
+.brand{padding:20px 22px 14px;background:linear-gradient(135deg,#312e81,#7c3aed);color:#fff;}
+.brand .logo{font-size:24px;}
+.brand .t{font-weight:800;font-size:17px;margin-top:6px;letter-spacing:.5px;}
+.brand .s{font-size:12px;opacity:.82;margin-top:3px;}
+
+.lib-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px 8px;}
+.lib-tab{flex:1 1 40%;min-width:0;padding:9px 6px;border:1px solid rgba(255,255,255,.18);border-radius:10px;
+  background:rgba(255,255,255,.05);color:#cbd5e1;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;text-align:center;text-decoration:none;display:block;}
+.lib-tab:hover{background:rgba(255,255,255,.12);color:#fff;}
+
+.search{padding:8px 16px 6px;}
+.search input{width:100%;padding:9px 12px;border:1px solid rgba(255,255,255,.18);border-radius:10px;
+  background:rgba(255,255,255,.08);color:#fff;font-size:13px;outline:none;transition:.15s;}
+.search input::placeholder{color:rgba(255,255,255,.55);}
+.search input:focus{border-color:#c4b5fd;background:rgba(255,255,255,.14);}
+.tools{display:flex;gap:8px;padding:6px 16px 10px;}
+.tools button{flex:1;padding:8px 6px;border:1px solid rgba(255,255,255,.2);border-radius:10px;
+  background:rgba(255,255,255,.06);color:#e2e8f0;font-size:12.5px;cursor:pointer;transition:.15s;
+  display:flex;align-items:center;justify-content:center;gap:5px;}
+.tools button:hover{background:rgba(255,255,255,.14);}
+.tools button.on{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff;font-weight:600;}
+.nav-scroll{padding:8px 12px 40px;overflow-y:auto;flex:1;}
+.nav-scroll::-webkit-scrollbar{width:6px;}
+.nav-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22);border-radius:4px;}
+.nav-group{margin-bottom:6px;}
+.nav-h1{color:#c7d2fe;font-weight:700;font-size:12px;margin:16px 10px 6px;letter-spacing:1.5px;text-transform:uppercase;}
+.nav-h2{display:block;padding:6px 10px;margin:2px 0;color:#e2e8f0;text-decoration:none;font-size:13.5px;border-radius:8px;transition:.15s;}
+.nav-h3{display:block;padding:5px 10px 5px 24px;color:#94a3b8;text-decoration:none;font-size:12.5px;border-radius:8px;transition:.15s;}
+.nav-h2:hover,.nav-h3:hover{background:rgba(255,255,255,.10);color:#fff;}
+.nav-h2.active,.nav-h3.active{background:linear-gradient(90deg,rgba(139,92,246,.55),rgba(139,92,246,.12));
+  color:#fff;font-weight:600;box-shadow:inset 3px 0 0 #c4b5fd;}
+
+.main{margin-left:300px;padding:40px 26px 60px;}
+.content{max-width:940px;margin:0 auto;background:var(--card);border-radius:18px;
+  box-shadow:0 10px 40px rgba(30,27,75,.08);padding:44px 50px;transition:background .3s;}
+
+h1,h2,h3,h4{scroll-margin-top:24px;position:relative;}
+.content > h1{font-size:29px;line-height:1.3;font-weight:800;margin:38px 0 20px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.4px;
+  padding-bottom:14px;}
+.content > h1::after{content:"";position:absolute;left:0;bottom:0;width:70px;height:4px;border-radius:3px;background:var(--grad);}
+.content > h1:first-of-type{margin-top:4px;}
+h2{font-size:21px;font-weight:700;margin:36px 0 14px;padding-left:13px;color:var(--ink);
+  border-left:4px solid var(--violet);}
+h3{font-size:17px;font-weight:700;margin:26px 0 10px;color:var(--ink2);}
+h4{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--muted);}
+p{margin:12px 0;}
+a{color:var(--indigo);text-decoration:none;}
+a:hover{text-decoration:underline;}
+strong{color:var(--strong);}
+ul,ol{margin:10px 0;padding-left:22px;}
+li{margin:6px 0;}
+li::marker{color:var(--violet);}
+
+code{background:var(--code-bg);color:var(--code-fg);padding:2px 7px;border-radius:6px;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px;border:1px solid var(--code-bd);}
+
+.code-block{margin:18px 0;border-radius:12px;overflow:hidden;background:#0d1117;border:1px solid #1f2630;
+  box-shadow:0 6px 20px rgba(13,17,23,.18);}
+.code-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#161b22;border-bottom:1px solid #21262d;}
+.code-lang{color:#8b949e;font-size:12px;letter-spacing:.5px;font-family:"SFMono-Regular",Consolas,monospace;}
+.code-dots{display:inline-flex;gap:7px;}
+.code-dots i{width:12px;height:12px;border-radius:50%;display:block;}
+.code-dots i:nth-child(1){background:#ff5f56;}
+.code-dots i:nth-child(2){background:#ffbd2e;}
+.code-dots i:nth-child(3){background:#27c93f;}
+.code-block code{display:block;background:none;border:none;color:#c9d1d9;padding:16px 18px;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:13px;line-height:1.6;
+  overflow-x:auto;white-space:pre;}
+.tok-kw{color:#ff7b72;}
+.tok-type{color:#ffa657;}
+.tok-str{color:#a5d6ff;}
+.tok-num{color:#79c0ff;}
+.tok-cmt{color:#8b949e;font-style:italic;}
+
+table{border-collapse:separate;border-spacing:0;width:100%;margin:20px 0;font-size:14px;
+  border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(30,27,75,.07);}
+th,td{border-bottom:1px solid var(--line);padding:11px 13px;text-align:left;}
+th{background:linear-gradient(180deg,#6366f1,#7c3aed);color:#fff;font-weight:600;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:.12s;}
+tbody tr:hover{background:var(--tbl-hover);}
+
+blockquote{margin:16px 0;padding:13px 18px;border-left:4px solid var(--violet);
+  background:var(--quote-bg);border-radius:0 12px 12px 0;color:var(--quote-fg);}
+
+.fold.collapsed{display:none;}
+body.review h3{cursor:pointer;user-select:none;}
+body.review h3::before{content:"\25B8  ";color:var(--violet);font-weight:700;}
+body.review h3.open::before{content:"\25BE  ";}
+
+.to-top{position:fixed;right:26px;bottom:26px;width:46px;height:46px;border:none;border-radius:50%;
+  background:var(--grad);color:#fff;font-size:20px;cursor:pointer;z-index:1500;
+  box-shadow:0 8px 22px rgba(99,102,241,.45);opacity:0;pointer-events:none;transition:.3s;}
+.to-top.show{opacity:1;pointer-events:auto;}
+.to-top:hover{transform:translateY(-3px);}
+
+.topbar{display:none;}
+.menu-btn{display:none;}
+.overlay{display:none;}
+@media (max-width:920px){
+  .sidebar{transform:translateX(-100%);width:84%;max-width:340px;transition:transform .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:62px 14px 40px;}
+  .content{padding:26px 18px;border-radius:14px;}
+  .topbar{display:flex;align-items:center;position:fixed;top:0;left:0;right:0;z-index:900;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:11px 14px;}
+  .menu-btn{display:inline-block;font-size:21px;background:none;border:none;cursor:pointer;margin-right:12px;color:var(--ink);}
+  .topbar .title{font-weight:700;font-size:15px;}
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:990;}
+  .overlay.show{display:block;}
+  .content > h1{font-size:24px;}
+}
+</style></head><body><div class='progress' id='progress'></div><div class='topbar'><button class='menu-btn' onclick='toggleMenu()'>☰</button><span class='title'>知识库</span></div><div class='overlay' id='overlay' onclick='closeMenu()'></div><aside class='sidebar' id='sidebar'><div class='brand'><div class='logo'>📚</div><div class='t'>知识库</div><div class='s'>Java 八股 + Ragent 项目</div></div><div class='lib-tabs' id='libTabs'><a class="lib-tab" href="#sec-1" data-page="0">Java 八股</a><a class="lib-tab" href="#sec-136" data-page="1">Ragent 项目</a></div><div class='search'><input id='search' type='text' placeholder='🔍 搜索所有知识库…' oninput='onSearch(this.value)'></div><div class='tools'><button id='themeBtn' onclick='toggleTheme()'>🌙 暗色</button><button id='reviewBtn' onclick='toggleReview()'>📇 背题</button></div><div class='nav-scroll'><div class="nav-group"><div class="nav-h1">Java 面试八股完整知识库（概念 + 业务实战）</div><a class="nav-h2" href="#sec-2">总目录</a></div><div class="nav-group"><div class="nav-h1">第一部分：核心知识点（八股速查）</div><a class="nav-h2" href="#sec-4">1. Java 基础</a><a class="nav-h3" href="#sec-5">1.1 谈谈 Java 的跨平台原理</a><a class="nav-h3" href="#sec-6">1.2 JDK、JRE、JVM 的关系</a><a class="nav-h3" href="#sec-7">1.3 基本数据类型 vs 包装类</a><a class="nav-h3" href="#sec-8">1.4 == 与 equals 的区别</a><a class="nav-h3" href="#sec-9">1.5 String、StringBuffer、StringBuilder</a><a class="nav-h3" href="#sec-10">1.6 String 为什么不可变？好处是什么？</a><a class="nav-h3" href="#sec-11">1.7 重写（Override）与重载（Overload）</a><a class="nav-h3" href="#sec-12">1.8 异常体系</a><a class="nav-h3" href="#sec-13">1.9 final、finally、finalize</a><a class="nav-h3" href="#sec-14">1.10 什么是反射？优缺点？</a><a class="nav-h2" href="#sec-15">2. 面向对象</a><a class="nav-h3" href="#sec-16">2.1 三大特性</a><a class="nav-h3" href="#sec-17">2.2 面向对象 vs 面向过程</a><a class="nav-h3" href="#sec-18">2.3 接口与抽象类的区别</a><a class="nav-h3" href="#sec-19">2.4 深拷贝 vs 浅拷贝</a><a class="nav-h2" href="#sec-20">3. 集合框架</a><a class="nav-h3" href="#sec-21">3.1 整体结构</a><a class="nav-h3" href="#sec-22">3.2 ArrayList vs LinkedList</a><a class="nav-h3" href="#sec-23">3.3 HashMap 原理（重点）</a><a class="nav-h3" href="#sec-24">3.4 ConcurrentHashMap</a><a class="nav-h3" href="#sec-25">3.5 HashSet 如何保证不重复</a><a class="nav-h3" href="#sec-26">3.6 fail-fast 与 fail-safe</a><a class="nav-h2" href="#sec-27">4. 并发与多线程（JUC）</a><a class="nav-h3" href="#sec-28">4.1 进程与线程</a><a class="nav-h3" href="#sec-29">4.2 创建线程的方式</a><a class="nav-h3" href="#sec-30">4.3 线程的生命周期</a><a class="nav-h3" href="#sec-31">4.4 synchronized 关键字</a><a class="nav-h3" href="#sec-32">4.5 volatile</a><a class="nav-h3" href="#sec-33">4.6 synchronized vs volatile</a><a class="nav-h3" href="#sec-34">4.7 锁分类</a><a class="nav-h3" href="#sec-35">4.8 CAS 是什么？有什么问题？</a><a class="nav-h3" href="#sec-36">4.9 线程池</a><a class="nav-h3" href="#sec-37">4.10 ThreadLocal</a><a class="nav-h2" href="#sec-38">5. JVM</a><a class="nav-h3" href="#sec-39">5.1 运行时数据区</a><a class="nav-h3" href="#sec-40">5.2 堆内存划分</a><a class="nav-h3" href="#sec-41">5.3 垃圾回收算法</a><a class="nav-h3" href="#sec-42">5.4 垃圾收集器</a><a class="nav-h3" href="#sec-43">5.5 如何判断对象可回收？</a><a class="nav-h3" href="#sec-44">5.6 双亲委派模型</a><a class="nav-h3" href="#sec-45">5.7 常见 OOM / 调优参数</a><a class="nav-h2" href="#sec-46">6. Java 8+ 新特性</a><a class="nav-h3" href="#sec-47">6.1 Lambda 表达式</a><a class="nav-h3" href="#sec-48">6.2 函数式接口</a><a class="nav-h3" href="#sec-49">6.3 Stream API</a><a class="nav-h3" href="#sec-50">6.4 新日期时间 API</a><a class="nav-h3" href="#sec-51">6.5 接口的 default / static 方法</a><a class="nav-h3" href="#sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</a><a class="nav-h2" href="#sec-53">7. I/O 与 NIO</a><a class="nav-h3" href="#sec-54">7.1 BIO / NIO / AIO</a><a class="nav-h3" href="#sec-55">7.2 NIO 核心组件</a><a class="nav-h2" href="#sec-56">8. 常见设计模式</a><a class="nav-h3" href="#sec-57">8.1 单例模式（双重检查锁）</a><a class="nav-h3" href="#sec-58">8.2 工厂 / 抽象工厂</a><a class="nav-h3" href="#sec-59">8.3 策略模式</a><a class="nav-h3" href="#sec-60">8.4 观察者模式</a><a class="nav-h3" href="#sec-61">8.5 代理模式</a><a class="nav-h3" href="#sec-62">8.6 装饰器模式</a><a class="nav-h2" href="#sec-63">9. MySQL 基础</a><a class="nav-h3" href="#sec-64">9.1 索引</a><a class="nav-h3" href="#sec-65">9.2 事务四大特性（ACID）</a><a class="nav-h3" href="#sec-66">9.3 事务隔离级别</a><a class="nav-h3" href="#sec-67">9.4 慢查询优化思路</a><a class="nav-h3" href="#sec-68">9.5 分库分表</a><a class="nav-h2" href="#sec-69">10. Redis 基础</a><a class="nav-h3" href="#sec-70">10.1 数据类型</a><a class="nav-h3" href="#sec-71">10.2 持久化</a><a class="nav-h3" href="#sec-72">10.3 缓存问题</a><a class="nav-h3" href="#sec-73">10.4 内存淘汰策略</a><a class="nav-h3" href="#sec-74">10.5 常见用途</a><a class="nav-h2" href="#sec-75">11. Spring / Spring Boot</a><a class="nav-h3" href="#sec-76">11.1 控制反转（IoC）与依赖注入（DI）</a><a class="nav-h3" href="#sec-77">11.2 Bean 作用域</a><a class="nav-h3" href="#sec-78">11.3 Bean 生命周期</a><a class="nav-h3" href="#sec-79">11.4 AOP</a><a class="nav-h3" href="#sec-80">11.5 Spring 事务</a><a class="nav-h3" href="#sec-81">11.6 Spring Boot 自动配置原理</a><a class="nav-h2" href="#sec-82">12. 计算机网络</a><a class="nav-h3" href="#sec-83">12.1 TCP 三次握手 / 四次挥手</a><a class="nav-h3" href="#sec-84">12.2 TCP 与 UDP 区别</a><a class="nav-h3" href="#sec-85">12.3 HTTP 与 HTTPS</a><a class="nav-h3" href="#sec-86">12.4 常见状态码</a><a class="nav-h3" href="#sec-87">12.5 浏览器输入 URL 到页面显示的过程</a><a class="nav-h2" href="#sec-88">13. 常见算法与数据结构</a><a class="nav-h3" href="#sec-89">13.1 数据结构</a><a class="nav-h3" href="#sec-90">13.2 排序算法速记</a><a class="nav-h3" href="#sec-91">13.3 刷题套路</a></div><div class="nav-group"><div class="nav-h1">第二部分：业务场景实战</div><a class="nav-h2" href="#sec-93">1. 集合：购物车与商品去重</a><a class="nav-h2" href="#sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</a><a class="nav-h2" href="#sec-95">3. synchronized / 锁：秒杀库存扣减</a><a class="nav-h2" href="#sec-96">4. volatile：系统开关与单例配置中心</a><a class="nav-h2" href="#sec-97">5. 线程池：异步通知与批量任务</a><a class="nav-h2" href="#sec-98">6. ThreadLocal：用户上下文与链路追踪</a><a class="nav-h2" href="#sec-99">7. JVM / GC：大促接口超时排查</a><a class="nav-h2" href="#sec-100">8. String：订单号与金额拼接</a><a class="nav-h2" href="#sec-101">9. 设计模式：支付与促销策略</a><a class="nav-h2" href="#sec-102">10. MySQL 索引：订单查询慢 SQL</a><a class="nav-h2" href="#sec-103">11. 事务：下单扣库存与转账</a><a class="nav-h2" href="#sec-104">12. Redis：缓存与分布式锁</a><a class="nav-h2" href="#sec-105">13. Spring：循环依赖 / AOP / 事务失效</a><a class="nav-h2" href="#sec-106">14. 网络：接口超时与 HTTPS</a><a class="nav-h2" href="#sec-107">15. 消息队列：下单异步解耦</a></div><div class="nav-group"><div class="nav-h1">第三部分：分布式与微服务专项</div><a class="nav-h2" href="#sec-109">1. 微服务与 Spring Cloud 生态</a><a class="nav-h3" href="#sec-110">1.1 微服务核心组件</a><a class="nav-h3" href="#sec-111">1.2 服务注册与发现原理</a><a class="nav-h3" href="#sec-112">1.3 网关（Gateway）作用</a><a class="nav-h3" href="#sec-113">1.4 负载均衡：Ribbon vs Nginx</a><a class="nav-h3" href="#sec-114">1.5 熔断、降级、限流</a><a class="nav-h2" href="#sec-115">2. 消息队列（MQ）</a><a class="nav-h3" href="#sec-116">2.1 为什么用 MQ</a><a class="nav-h3" href="#sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</a><a class="nav-h3" href="#sec-118">2.3 消息可靠性（不丢）</a><a class="nav-h3" href="#sec-119">2.4 重复消费与幂等</a><a class="nav-h3" href="#sec-120">2.5 消息积压处理</a><a class="nav-h3" href="#sec-121">2.6 顺序消息</a><a class="nav-h2" href="#sec-122">3. 分布式事务</a><a class="nav-h3" href="#sec-123">3.1 2PC / 3PC</a><a class="nav-h3" href="#sec-124">3.2 TCC（Try-Confirm-Cancel）</a><a class="nav-h3" href="#sec-125">3.3 消息最终一致性（常用）</a><a class="nav-h3" href="#sec-126">3.4 Seata</a><a class="nav-h3" href="#sec-127">3.5 最大努力通知</a><a class="nav-h2" href="#sec-128">4. 分布式锁与缓存一致性</a><a class="nav-h3" href="#sec-129">4.1 分布式锁方案</a><a class="nav-h3" href="#sec-130">4.2 缓存与 DB 一致性</a><a class="nav-h2" href="#sec-131">5. 分布式 ID 与分库分表</a><a class="nav-h3" href="#sec-132">5.1 分布式 ID 方案</a><a class="nav-h3" href="#sec-133">5.2 分库分表</a></div><div class="nav-group"><div class="nav-h1">附录 A：高频追问清单（自查）</div><div class="nav-group"><div class="nav-h1">附录 B：八股 → 业务的回答套路</div></div><div class="nav-group"><div class="nav-h1">Ragent 平台项目知识库（Agentic RAG 企业级实战）</div><a class="nav-h2" href="#sec-137">一、项目定位与技术栈</a><a class="nav-h3" href="#sec-138">1.1 它是什么</a><a class="nav-h3" href="#sec-139">1.2 技术栈全景</a><a class="nav-h3" href="#sec-140">1.3 四大 Maven 模块职责</a><a class="nav-h2" href="#sec-141">二、架构分层思想</a><a class="nav-h3" href="#sec-142">2.1 三层职责链路</a><a class="nav-h3" href="#sec-143">2.2 为什么这么分</a><a class="nav-h2" href="#sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</a><a class="nav-h3" href="#sec-145">3.1 总览（流水线阶段编排）</a><a class="nav-h3" href="#sec-146">3.2 阶段 1：会话记忆加载</a><a class="nav-h3" href="#sec-147">3.3 阶段 2：问题改写与子问题拆分</a><a class="nav-h3" href="#sec-148">3.4 阶段 3：意图识别（树形多级）</a><a class="nav-h3" href="#sec-149">3.5 阶段 4：歧义引导</a><a class="nav-h3" href="#sec-150">3.6 阶段 5：多路检索 ★</a><a class="nav-h3" href="#sec-151">3.7 阶段 6：Prompt 组装与流式输出</a><a class="nav-h3" href="#sec-152">3.8 一张图看懂调用链（文字时序）</a><a class="nav-h2" href="#sec-153">四、知识库入库链路（Ingestion Pipeline）</a><a class="nav-h3" href="#sec-154">4.1 五种节点类型（接口 <code>IngestionNode</code>）</a><a class="nav-h3" href="#sec-155">4.2 链式执行引擎</a><a class="nav-h3" href="#sec-156">4.3 切片策略与写入</a><a class="nav-h2" href="#sec-157">五、模型路由与故障转移</a><a class="nav-h2" href="#sec-158">六、多路检索深挖</a><a class="nav-h3" href="#sec-159">6.1 检索通道</a><a class="nav-h3" href="#sec-160">6.2 后处理责任链</a><a class="nav-h3" href="#sec-161">6.3 向量库双支持</a><a class="nav-h2" href="#sec-162">七、意图识别体系</a><a class="nav-h2" href="#sec-163">八、MCP 工具调用</a><a class="nav-h2" href="#sec-164">九、多租户与管理后台</a><a class="nav-h2" href="#sec-165">十、设计模式实战（对照表）</a><a class="nav-h2" href="#sec-166">十一、生产级工程特性</a><a class="nav-h3" href="#sec-167">11.1 队列式分布式限流</a><a class="nav-h3" href="#sec-168">11.2 8 线程池 + TTL 透传</a><a class="nav-h3" href="#sec-169">11.3 全链路 Trace（AOP）</a><a class="nav-h3" href="#sec-170">11.4 会话记忆压缩</a><a class="nav-h3" href="#sec-171">11.5 认证鉴权</a><a class="nav-h3" href="#sec-172">11.6 其他生产特性</a><a class="nav-h2" href="#sec-173">十二、可扩展性：新增 X 只需实现接口</a><a class="nav-h2" href="#sec-174">十三、学习路线与面试考点（自查）</a></div></div></aside><main class='main'><div class='content'><h1 id="sec-1">Java 面试八股完整知识库（概念 + 业务实战）</h1>
+<blockquote>整理：Java 后端高频面试知识点（八股文）+ 真实业务场景实战 适用：校招 / 社招 Java 开发岗复习 说明： - <strong>第一部分「核心知识点」</strong>：以「题目 + 要点」形式组织，便于背诵与速查。 - <strong>第二部分「业务场景实战」</strong>：把抽象知识点落到真实业务，每个场景给出「业务背景 → 用到的知识点 → 关键实现思路 → 面试追问」。 - 两者打通，既能背概念，又能在面试被问「项目里怎么用的」时张口就来。</blockquote>
+<p>---</p>
+<h2 id="sec-2">总目录</h2>
+<ul><li>[第一部分：核心知识点（八股速查）](#第一部分核心知识点八股速查)</li><li>[1. Java 基础](#1-java-基础)</li><li>[2. 面向对象](#2-面向对象)</li><li>[3. 集合框架](#3-集合框架)</li><li>[4. 并发与多线程（JUC）](#4-并发与多线程juc)</li><li>[5. JVM](#5-jvm)</li><li>[6. Java 8+ 新特性](#6-java-8-新特性)</li><li>[7. I/O 与 NIO](#7-io-与-nio)</li><li>[8. 常见设计模式](#8-常见设计模式)</li><li>[9. MySQL 基础](#9-mysql-基础)</li><li>[10. Redis 基础](#10-redis-基础)</li><li>[11. Spring / Spring Boot](#11-spring--spring-boot)</li><li>[12. 计算机网络](#12-计算机网络)</li><li>[13. 常见算法与数据结构](#13-常见算法与数据结构)</li><li>[第二部分：业务场景实战](#第二部分业务场景实战)</li><li>[1. 集合：购物车与商品去重](#1-集合购物车与商品去重)</li><li>[2. HashMap / ConcurrentHashMap：本地缓存与热点计数](#2-hashmap--concurrenthashmap本地缓存与热点计数)</li><li>[3. synchronized / 锁：秒杀库存扣减](#3-synchronized--锁秒杀库存扣减)</li><li>[4. volatile：系统开关与单例配置中心](#4-volatile系统开关与单例配置中心)</li><li>[5. 线程池：异步通知与批量任务](#5-线程池异步通知与批量任务)</li><li>[6. ThreadLocal：用户上下文与链路追踪](#6-threadlocal用户上下文与链路追踪)</li><li>[7. JVM / GC：大促接口超时排查](#7-jvm--gc大促接口超时排查)</li><li>[8. String：订单号与金额拼接](#8-string订单号与金额拼接)</li><li>[9. 设计模式：支付与促销策略](#9-设计模式支付与促销策略)</li><li>[10. MySQL 索引：订单查询慢 SQL](#10-mysql-索引订单查询慢-sql)</li><li>[11. 事务：下单扣库存与转账](#11-事务下单扣库存与转账)</li><li>[12. Redis：缓存与分布式锁](#12-redis缓存与分布式锁)</li><li>[13. Spring：循环依赖 / AOP / 事务失效](#13-spring循环依赖--aop--事务失效)</li><li>[14. 网络：接口超时与 HTTPS](#14-网络接口超时与-https)</li><li>[15. 消息队列：下单异步解耦](#15-消息队列下单异步解耦)</li><li>[第三部分：分布式与微服务专项](#第三部分分布式与微服务专项)</li><li>[1. 微服务与 Spring Cloud 生态](#1-微服务与-spring-cloud-生态)</li><li>[2. 消息队列（MQ）](#2-消息队列mq)</li><li>[3. 分布式事务](#3-分布式事务)</li><li>[4. 分布式锁与缓存一致性](#4-分布式锁与缓存一致性)</li><li>[5. 分布式 ID 与分库分表](#5-分布式-id-与分库分表)</li><li>[附录 A：高频追问清单（自查）](#附录-a高频追问清单自查)</li><li>[附录 B：八股 → 业务的回答套路](#附录-b八股--业务的回答套路)</li></ul>
+<p>---</p>
+<h1 id="sec-3">第一部分：核心知识点（八股速查）</h1>
+<h2 id="sec-4">1. Java 基础</h2>
+<h3 id="sec-5">1.1 谈谈 Java 的跨平台原理</h3>
+<p>Java 源码编译为字节码（<code>.class</code>），由 JVM 解释/编译执行。不同操作系统安装对应 JVM，字节码无需重新编译即可运行，实现「一次编写，到处运行（Write Once, Run Anywhere）」。</p>
+<h3 id="sec-6">1.2 JDK、JRE、JVM 的关系</h3>
+<ul><li><strong>JVM</strong>：Java 虚拟机，负责执行字节码。</li><li><strong>JRE</strong>：Java 运行时环境，包含 JVM + 核心类库，用于运行程序。</li><li><strong>JDK</strong>：Java 开发工具包，包含 JRE + 编译器（javac）、调试工具等，用于开发。</li><li>关系：<code>JDK ⊃ JRE ⊃ JVM</code>。</li></ul>
+<h3 id="sec-7">1.3 基本数据类型 vs 包装类</h3>
+<table><thead><tr><th>基本类型</th><th>大小</th><th>默认值</th><th>包装类</th></tr></thead><tbody><tr><td>byte</td><td>8 bit</td><td>0</td><td>Byte</td></tr><tr><td>short</td><td>16 bit</td><td>0</td><td>Short</td></tr><tr><td>int</td><td>32 bit</td><td>0</td><td>Integer</td></tr><tr><td>long</td><td>64 bit</td><td>0L</td><td>Long</td></tr><tr><td>float</td><td>32 bit</td><td>0.0f</td><td>Float</td></tr><tr><td>double</td><td>64 bit</td><td>0.0d</td><td>Double</td></tr><tr><td>char</td><td>16 bit</td><td>'\u0000'</td><td>Character</td></tr><tr><td>boolean</td><td>—</td><td>false</td><td>Boolean</td></tr></tbody></table>
+<p>要点：</p>
+<ul><li>基本类型存栈/对象内，包装类存堆（引用）。</li><li><strong>自动装箱/拆箱</strong>是编译期语法糖（<code>Integer a = 1</code> 实际调用 <code>Integer.valueOf(1)</code>）。</li><li><code>Integer</code> 缓存 <code>-128 ~ 127</code>，该区间内 <code>==</code> 比较为 true，区间外为 false（new 出来的除外）。</li></ul>
+<h3 id="sec-8">1.4 == 与 equals 的区别</h3>
+<ul><li><code>==</code>：比较基本类型的值；比较引用类型的地址。</li><li><code>equals</code>：Object 默认等价于 <code>==</code>，但多数类（如 String、Integer）重写了它来比较内容。</li><li>重写 <code>equals</code> 必须重写 <code>hashCode</code>（否则 HashMap 等行为异常）。</li></ul>
+<h3 id="sec-9">1.5 String、StringBuffer、StringBuilder</h3>
+<ul><li><strong>String</strong>：不可变（final char[]），每次拼接产生新对象，线程安全。</li><li><strong>StringBuffer</strong>：可变，方法加 <code>synchronized</code>，线程安全，效率低。</li><li><strong>StringBuilder</strong>：可变，非线程安全，效率高（单线程首选）。</li><li>字符串拼接建议：少量用 <code>+</code>（编译优化为 StringBuilder）；循环内必须用 StringBuilder。</li></ul>
+<h3 id="sec-10">1.6 String 为什么不可变？好处是什么？</h3>
+<ul><li>底层 <code>private final char[]</code>（Java 9 后为 byte[] + coder），final 保证引用不变，private 且无修改方法。</li><li>好处：字符串常量池可复用、线程安全、适合做 HashMap 的 key、类加载安全。</li></ul>
+<h3 id="sec-11">1.7 重写（Override）与重载（Overload）</h3>
+<ul><li><strong>重载</strong>：同一类中，方法名相同、参数列表不同（类型/个数/顺序），与返回值无关。编译期多态。</li><li><strong>重写</strong>：子类重写父类方法，方法签名相同，访问修饰符不能更严格，抛出的异常不能更宽泛。运行期多态。</li></ul>
+<h3 id="sec-12">1.8 异常体系</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Throwable</span>
+ ├── <span class="tok-type">Error</span>（程序无法处理的严重错误，如 OOM、StackOverflow）
+ └── <span class="tok-type">Exception</span>
+      ├── <span class="tok-type">RuntimeException</span>（非受检，如 NPE、除零、下标越界）
+      └── 其他 <span class="tok-type">Exception</span>（受检，如 IOException，必须 <span class="tok-kw">try</span> 或 <span class="tok-kw">throws</span>）</code></pre>
+<ul><li><code>finally</code> 一定执行（除非 <code>System.exit</code>）。<code>try</code> 中有 <code>return</code>，<code>finally</code> 仍先执行；若 finally 也有 return，覆盖前者。</li></ul>
+<h3 id="sec-13">1.9 final、finally、finalize</h3>
+<ul><li><code>final</code>：修饰类不可继承、方法不可重写、变量不可变（引用不可变，对象内容可变）。</li><li><code>finally</code>：异常处理的必定执行块。</li><li><code>finalize</code>：Object 的方法，GC 前调用，已废弃（Java 9+ 标记 deprecated），不要用。</li></ul>
+<h3 id="sec-14">1.10 什么是反射？优缺点？</h3>
+<ul><li>运行时获取类信息并操作对象（Class、Method、Field）。框架（Spring、MyBatis）大量使用。</li><li>优点：解耦、动态加载、提高灵活性。</li><li>缺点：破坏封装、性能略低、安全受限。</li></ul>
+<p>---</p>
+<h2 id="sec-15">2. 面向对象</h2>
+<h3 id="sec-16">2.1 三大特性</h3>
+<ul><li><strong>封装</strong>：隐藏实现细节，暴露接口，提高安全性与可维护性。</li><li><strong>继承</strong>：子类复用父类代码，单继承（类）/ 多实现（接口）。</li><li><strong>多态</strong>：同一接口不同实现，父类引用指向子类对象，运行期绑定。</li></ul>
+<h3 id="sec-17">2.2 面向对象 vs 面向过程</h3>
+<ul><li>面向过程：以函数/步骤为中心，性能略高，适合简单场景。</li><li>面向对象：以对象为中心，易扩展、易维护，适合大型系统。</li></ul>
+<h3 id="sec-18">2.3 接口与抽象类的区别</h3>
+<table><thead><tr><th>维度</th><th>抽象类</th><th>接口</th></tr></thead><tbody><tr><td>关键字</td><td>abstract</td><td>interface</td></tr><tr><td>方法</td><td>可有具体方法</td><td>Java 8+ 可有 default/static</td></tr><tr><td>变量</td><td>普通变量</td><td>默认 public static final</td></tr><tr><td>继承</td><td>单继承</td><td>多实现</td></tr><tr><td>构造器</td><td>有</td><td>无</td></tr></tbody></table>
+<h3 id="sec-19">2.4 深拷贝 vs 浅拷贝</h3>
+<ul><li><strong>浅拷贝</strong>：复制引用，原对象与副本共享内部对象。</li><li><strong>深拷贝</strong>：递归复制所有引用对象，彼此独立。</li><li>实现：实现 <code>Cloneable</code> 重写 <code>clone()</code>；或序列化；或手动 new。</li></ul>
+<p>---</p>
+<h2 id="sec-20">3. 集合框架</h2>
+<h3 id="sec-21">3.1 整体结构</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Collection</span>
+ ├── <span class="tok-type">List</span>（有序、可重复）：<span class="tok-type">ArrayList</span>、<span class="tok-type">LinkedList</span>、Vector、Stack
+ ├── <span class="tok-type">Set</span>（不可重复）：<span class="tok-type">HashSet</span>、LinkedHashSet、TreeSet
+ └── <span class="tok-type">Queue</span>：<span class="tok-type">ArrayDeque</span>、<span class="tok-type">PriorityQueue</span>、BlockingQueue
+<span class="tok-type">Map</span>（键值对）：<span class="tok-type">HashMap</span>、<span class="tok-type">LinkedHashMap</span>、<span class="tok-type">TreeMap</span>、<span class="tok-type">Hashtable</span>、<span class="tok-type">ConcurrentHashMap</span></code></pre>
+<h3 id="sec-22">3.2 ArrayList vs LinkedList</h3>
+<ul><li><strong>ArrayList</strong>：基于动态数组，随机访问 O(1)，插入删除（非尾部）需移动元素 O(n)，扩容 1.5 倍。</li><li><strong>LinkedList</strong>：基于双向链表，插入删除 O(1)（已知节点），随机访问 O(n)，额外内存开销（前后指针）。</li></ul>
+<h3 id="sec-23">3.3 HashMap 原理（重点）</h3>
+<ul><li><strong>JDK 1.7</strong>：数组 + 链表，头插法（多线程易成环）。</li><li><strong>JDK 1.8</strong>：数组 + 链表 + 红黑树。</li><li>默认容量 16，负载因子 0.75，阈值 = 容量 × 负载因子。</li><li>链表长度 ≥ 8 且数组容量 ≥ 64 时转红黑树；树节点 ≤ 6 退化为链表。</li><li>计算下标：<code>(n - 1) &amp; hash</code>，hash 经 <code>hashCode ^ (h &gt;&gt;&gt; 16)</code> 扰动。</li><li>扩容 2 倍，重新分布（低位/高位链表）。</li><li><strong>线程不安全</strong>：并发 put 可能导致数据覆盖、死循环（1.7）。并发场景用 <code>ConcurrentHashMap</code>。</li></ul>
+<h3 id="sec-24">3.4 ConcurrentHashMap</h3>
+<ul><li><strong>JDK 1.7</strong>：Segment 分段锁（ReentrantLock），默认 16 段。</li><li><strong>JDK 1.8</strong>：取消 Segment，使用 <code>Node + CAS + synchronized</code>（锁链表头节点），粒度更细，效率更高。</li></ul>
+<h3 id="sec-25">3.5 HashSet 如何保证不重复</h3>
+<ul><li>基于 HashMap 实现，元素作为 key，value 为固定 Object。靠 <code>hashCode()</code> + <code>equals()</code> 判断重复。</li></ul>
+<h3 id="sec-26">3.6 fail-fast 与 fail-safe</h3>
+<ul><li><strong>fail-fast</strong>：遍历时若集合被修改（非迭代器自身），抛出 <code>ConcurrentModificationException</code>。ArrayList 等默认。</li><li><strong>fail-safe</strong>：基于副本遍历，不抛异常，但读到的是旧数据。CopyOnWriteArrayList、ConcurrentHashMap 迭代器。</li></ul>
+<p>---</p>
+<h2 id="sec-27">4. 并发与多线程（JUC）</h2>
+<h3 id="sec-28">4.1 进程与线程</h3>
+<ul><li>进程：资源分配的最小单位，独立内存空间。</li><li>线程：CPU 调度的最小单位，同进程内线程共享内存。</li></ul>
+<h3 id="sec-29">4.2 创建线程的方式</h3>
+<ol><li>继承 <code>Thread</code> 重写 run。</li><li>实现 <code>Runnable</code>（无返回值）。</li><li>实现 <code>Callable</code>（有返回值，配合 FutureTask）。</li><li>线程池 <code>ExecutorService</code>。</li></ol>
+<h3 id="sec-30">4.3 线程的生命周期</h3>
+<p>新建 → 就绪 → 运行 → 阻塞（wait/sleep/IO/锁）→ 死亡。</p>
+<ul><li><code>sleep</code>：不释放锁，Thread 静态方法。</li><li><code>wait</code>：释放锁，Object 方法，需配合 <code>notify/notifyAll</code>，在 synchronized 内调用。</li></ul>
+<h3 id="sec-31">4.4 synchronized 关键字</h3>
+<ul><li>修饰方法/代码块，保证原子性、可见性、有序性。</li><li>底层：对象头 Mark Word + Monitor（管程）。JDK 1.6 后引入<strong>锁升级</strong>：无锁 → 偏向锁 → 轻量级锁（CAS 自旋）→ 重量级锁（操作系统互斥）。</li></ul>
+<h3 id="sec-32">4.5 volatile</h3>
+<ul><li>保证<strong>可见性</strong>（写立即刷主存，读从主存取）与<strong>有序性</strong>（禁止指令重排）。</li><li><strong>不保证原子性</strong>（如 i++ 仍是三步操作）。</li><li>经典用法：状态标志位、双重检查单例。</li></ul>
+<h3 id="sec-33">4.6 synchronized vs volatile</h3>
+<table><thead><tr><th>维度</th><th>synchronized</th><th>volatile</th></tr></thead><tbody><tr><td>原子性</td><td>保证</td><td>不保证</td></tr><tr><td>可见性</td><td>保证</td><td>保证</td></tr><tr><td>有序性</td><td>保证（锁）</td><td>保证（屏障）</td></tr><tr><td>阻塞</td><td>会</td><td>不会</td></tr></tbody></table>
+<h3 id="sec-34">4.7 锁分类</h3>
+<ul><li><strong>公平/非公平锁</strong>：是否按申请顺序获取（ReentrantLock 可设置，默认非公平）。</li><li><strong>可重入锁</strong>：同一线程可重复获取（synchronized、ReentrantLock）。</li><li><strong>悲观锁/乐观锁</strong>：synchronized 是悲观；CAS 是乐观。</li><li><strong>自旋锁</strong>：失败后忙等一段时间，避免线程切换开销。</li><li><strong>读写锁</strong>：ReadWriteLock，读共享、写独占。</li></ul>
+<h3 id="sec-35">4.8 CAS 是什么？有什么问题？</h3>
+<ul><li>Compare And Swap：比较并交换，无锁原子操作（CPU 指令级）。</li><li>问题：<strong>ABA 问题</strong>（加版本号/时间戳解决，如 AtomicStampedReference）、<strong>自旋开销大</strong>、<strong>只能保证一个变量原子性</strong>。</li></ul>
+<h3 id="sec-36">4.9 线程池</h3>
+<ul><li>核心参数（ThreadPoolExecutor）：</li><li>corePoolSize：核心线程数</li><li>maximumPoolSize：最大线程数</li><li>keepAliveTime：空闲线程存活时间</li><li>workQueue：任务队列（ArrayBlockingQueue、LinkedBlockingQueue、SynchronousQueue）</li><li>threadFactory：线程工厂</li><li>handler：拒绝策略</li><li><strong>执行流程</strong>：核心线程满 → 入队列 → 队列满 → 开非核心线程 → 达最大线程数 → 触发拒绝策略。</li><li><strong>拒绝策略</strong>：AbortPolicy（抛异常，默认）、CallerRunsPolicy（调用者线程执行）、DiscardPolicy（丢弃）、DiscardOldestPolicy（丢弃最老）。</li><li><strong>Executors 的隐患</strong>：FixedThreadPool / SingleThreadPool 用无界队列易 OOM；CachedThreadPool 最大线程数无界易 OOM。建议手动 new ThreadPoolExecutor。</li></ul>
+<h3 id="sec-37">4.10 ThreadLocal</h3>
+<ul><li>线程本地变量，每个线程有独立副本，避免共享。</li><li>原理：Thread 内有 ThreadLocalMap，key 为 ThreadLocal 弱引用。</li><li><strong>内存泄漏</strong>：key 弱引用被 GC 后 value 仍是强引用，需手动 <code>remove()</code>。</li></ul>
+<p>---</p>
+<h2 id="sec-38">5. JVM</h2>
+<h3 id="sec-39">5.1 运行时数据区</h3>
+<ul><li><strong>线程私有</strong>：程序计数器、虚拟机栈、本地方法栈。</li><li><strong>线程共享</strong>：堆、方法区（元空间 Metaspace，JDK 8 取代永久代）。</li></ul>
+<h3 id="sec-40">5.2 堆内存划分</h3>
+<ul><li>新生代（Eden + 两个 Survivor S0/S1）、老年代。</li><li>对象优先在 Eden 分配，Minor GC 后存活的进入 Survivor，年龄达阈值（默认 15）进入老年代。</li></ul>
+<h3 id="sec-41">5.3 垃圾回收算法</h3>
+<ul><li><strong>标记-清除</strong>：简单但有碎片。</li><li><strong>标记-整理</strong>：无碎片，移动对象开销大（老年代）。</li><li><strong>复制算法</strong>：无碎片，浪费一半空间（新生代）。</li><li><strong>分代收集</strong>：新生代用复制，老年代用标记-整理/清除。</li></ul>
+<h3 id="sec-42">5.4 垃圾收集器</h3>
+<ul><li><strong>Serial / Serial Old</strong>：单线程，简单。</li><li><strong>ParNew</strong>：Serial 多线程版，配合 CMS。</li><li><strong>Parallel Scavenge / Parallel Old</strong>：吞吐量优先。</li><li><strong>CMS</strong>：并发标记清除，低停顿，但碎片、CPU 敏感、Concurrent Mode Failure。</li><li><strong>G1</strong>：分 Region，可预测停顿，兼顾吞吐与延迟（JDK 9+ 默认）。</li><li><strong>ZGC / Shenandoah</strong>：超低停顿（毫秒级）。</li></ul>
+<h3 id="sec-43">5.5 如何判断对象可回收？</h3>
+<ul><li><strong>引用计数</strong>：简单但有循环引用问题。</li><li><strong>可达性分析</strong>：GC Roots（栈引用、静态变量、常量、JNI）不可达即为可回收。至少两次标记（finalize 自救一次）。</li></ul>
+<h3 id="sec-44">5.6 双亲委派模型</h3>
+<ul><li>类加载器层级：Bootstrap → Extension → Application → 自定义。</li><li>加载时先委派父加载器，父无法加载才自己加载。</li><li><strong>好处</strong>：避免重复加载、防止核心类被篡改。</li><li><strong>破坏场景</strong>：SPI（JDBC）、热部署、Tomcat WebAppClassLoader。</li></ul>
+<h3 id="sec-45">5.7 常见 OOM / 调优参数</h3>
+<ul><li><code>-Xms</code> / <code>-Xmx</code>：堆初始/最大。</li><li><code>-Xmn</code>：新生代大小。</li><li><code>-XX:MetaspaceSize</code>：元空间。</li><li>排查工具：jps、jstat、jmap、jstack、jvisualvm、Arthas。</li></ul>
+<p>---</p>
+<h2 id="sec-46">6. Java 8+ 新特性</h2>
+<h3 id="sec-47">6.1 Lambda 表达式</h3>
+<ul><li>函数式编程，<code>(参数) -&gt; 表达式/语句块</code>。</li><li>本质是匿名内部类的语法糖 + invokedynamic。</li></ul>
+<h3 id="sec-48">6.2 函数式接口</h3>
+<ul><li>只有一个抽象方法的接口（@FunctionalInterface），如 Runnable、Comparator、Predicate、Function、Supplier、Consumer。</li></ul>
+<h3 id="sec-49">6.3 Stream API</h3>
+<ul><li>流式处理集合：<code>filter</code>、<code>map</code>、<code>sorted</code>、<code>collect</code>、<code>reduce</code>、<code>forEach</code>。</li><li>惰性求值（中间操作）+ 及早求值（终止操作）。</li></ul>
+<h3 id="sec-50">6.4 新日期时间 API</h3>
+<ul><li><code>LocalDate / LocalTime / LocalDateTime / DateTimeFormatter</code>（线程安全，取代 SimpleDateFormat）。</li><li><code>Optional</code> 解决 NPE。</li></ul>
+<h3 id="sec-51">6.5 接口的 default / static 方法</h3>
+<ul><li>default 方法允许接口演进而不破坏实现类；static 提供工具方法。</li></ul>
+<h3 id="sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</h3>
+<ul><li>Record：不可变数据类语法糖（自动生成构造器、getter、equals、hashCode）。</li></ul>
+<p>---</p>
+<h2 id="sec-53">7. I/O 与 NIO</h2>
+<h3 id="sec-54">7.1 BIO / NIO / AIO</h3>
+<ul><li><strong>BIO</strong>：同步阻塞，一连接一线程。</li><li><strong>NIO</strong>：同步非阻塞，基于 Channel + Buffer + Selector（多路复用），一个线程管多个连接。</li><li><strong>AIO</strong>：异步非阻塞（NIO.2），回调通知。</li></ul>
+<h3 id="sec-55">7.2 NIO 核心组件</h3>
+<ul><li><strong>Channel</strong>：双向通道（读写）。</li><li><strong>Buffer</strong>：数据容器（position、limit、capacity）。</li><li><strong>Selector</strong>：多路复用器，监听多个 Channel 事件。</li></ul>
+<p>---</p>
+<h2 id="sec-56">8. 常见设计模式</h2>
+<h3 id="sec-57">8.1 单例模式（双重检查锁）</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> Singleton {
+    <span class="tok-kw">private</span> <span class="tok-kw">static</span> <span class="tok-kw">volatile</span> Singleton instance;
+    <span class="tok-kw">private</span> Singleton() {}
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> Singleton getInstance() {
+        <span class="tok-kw">if</span> (instance == <span class="tok-kw">null</span>) {
+            <span class="tok-kw">synchronized</span> (Singleton.<span class="tok-kw">class</span>) {
+                <span class="tok-kw">if</span> (instance == <span class="tok-kw">null</span>) {
+                    instance = <span class="tok-kw">new</span> Singleton();
+                }
+            }
+        }
+        <span class="tok-kw">return</span> instance;
+    }
+}</code></pre>
+<ul><li>枚举单例最安全（防止反射、序列化破坏）。</li></ul>
+<h3 id="sec-58">8.2 工厂 / 抽象工厂</h3>
+<ul><li>工厂：创建对象不暴露逻辑。</li><li>抽象工厂：创建一组相关对象。</li></ul>
+<h3 id="sec-59">8.3 策略模式</h3>
+<ul><li>定义算法族，封装可互换的行为（如 Comparator、排序策略）。</li></ul>
+<h3 id="sec-60">8.4 观察者模式</h3>
+<ul><li>一对多依赖，状态变化通知所有观察者（Spring 事件、消息订阅）。</li></ul>
+<h3 id="sec-61">8.5 代理模式</h3>
+<ul><li>静态代理、JDK 动态代理（基于接口）、CGLIB（基于继承，asm 字节码）。</li></ul>
+<h3 id="sec-62">8.6 装饰器模式</h3>
+<ul><li>动态给对象加职责（Java I/O 流、Collections.synchronizedXxx）。</li></ul>
+<p>---</p>
+<h2 id="sec-63">9. MySQL 基础</h2>
+<h3 id="sec-64">9.1 索引</h3>
+<ul><li><strong>B+ 树索引</strong>：叶子节点存数据/指针且有序链表，范围查询友好，三层即可存千万级。</li><li><strong>聚簇索引</strong>：叶子存整行（InnoDB 主键），二级索引叶子存主键值（回表）。</li><li><strong>覆盖索引</strong>：查询字段在索引中，无需回表。</li><li><strong>最左前缀原则</strong>：联合索引 (a,b,c) 命中需从左开始。</li><li><strong>不适合索引</strong>：低区分度字段、频繁更新的字段、小表。</li></ul>
+<h3 id="sec-65">9.2 事务四大特性（ACID）</h3>
+<ul><li>原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）。</li></ul>
+<h3 id="sec-66">9.3 事务隔离级别</h3>
+<table><thead><tr><th>级别</th><th>脏读</th><th>不可重复读</th><th>幻读</th></tr></thead><tbody><tr><td>读未提交</td><td>✗</td><td>✗</td><td>✗</td></tr><tr><td>读已提交 RC</td><td>✓</td><td>✗</td><td>✗</td></tr><tr><td>可重复读 RR（默认）</td><td>✓</td><td>✓</td><td>⚠ 部分</td></tr><tr><td>串行化</td><td>✓</td><td>✓</td><td>✓</td></tr></tbody></table>
+<h3 id="sec-67">9.4 慢查询优化思路</h3>
+<ul><li>加合适索引、避免 <code>SELECT *</code>、减少 <code>COUNT(*)</code>、分页优化（延迟关联）、避免索引失效（函数、<code>%</code> 前缀、隐式转换、OR）。</li></ul>
+<h3 id="sec-68">9.5 分库分表</h3>
+<ul><li>垂直：按业务拆库/表。</li><li>水平：按范围/哈希/时间分片（ShardingSphere）。</li></ul>
+<p>---</p>
+<h2 id="sec-69">10. Redis 基础</h2>
+<h3 id="sec-70">10.1 数据类型</h3>
+<ul><li>String、Hash、List、Set、ZSet（有序集合），及 Bitmap、HyperLogLog、Geo、Stream。</li></ul>
+<h3 id="sec-71">10.2 持久化</h3>
+<ul><li><strong>RDB</strong>：快照，恢复快，可能丢数据。</li><li><strong>AOF</strong>：命令日志，数据更安全，文件大。</li></ul>
+<h3 id="sec-72">10.3 缓存问题</h3>
+<ul><li><strong>缓存穿透</strong>：查不存在的数据 → 布隆过滤器 / 空值缓存。</li><li><strong>缓存击穿</strong>：热点 key 过期 → 互斥锁 / 逻辑过期。</li><li><strong>缓存雪崩</strong>：大量 key 同时过期 → 过期时间加随机 / 多级缓存 / 高可用。</li></ul>
+<h3 id="sec-73">10.4 内存淘汰策略</h3>
+<ul><li>LRU、LFU、random、ttl、noeviction（默认不淘汰，写报错）。</li></ul>
+<h3 id="sec-74">10.5 常见用途</h3>
+<ul><li>缓存、分布式锁（SETNX / Redisson）、计数器、排行榜（ZSet）、消息队列（List/Stream）。</li></ul>
+<p>---</p>
+<h2 id="sec-75">11. Spring / Spring Boot</h2>
+<h3 id="sec-76">11.1 控制反转（IoC）与依赖注入（DI）</h3>
+<ul><li>IoC：对象的创建与管理交给容器，而非手动 new。</li><li>DI：容器把依赖注入到对象（构造器、setter、字段）。</li></ul>
+<h3 id="sec-77">11.2 Bean 作用域</h3>
+<ul><li>singleton（默认，单例）、prototype（多例）、request、session、application。</li></ul>
+<h3 id="sec-78">11.3 Bean 生命周期</h3>
+<ul><li>实例化 → 属性填充 → Aware 接口 → BeanPostProcessor 前置 → 初始化（@PostConstruct / init-method）→ BeanPostProcessor 后置 → 就绪 → 销毁（@PreDestroy / destroy-method）。</li></ul>
+<h3 id="sec-79">11.4 AOP</h3>
+<ul><li>面向切面，基于动态代理。核心概念：切点（Pointcut）、通知（Advice：前置/后置/环绕/异常/最终）、切面（Aspect）、连接点（JoinPoint）。</li><li>应用：日志、事务、权限。</li></ul>
+<h3 id="sec-80">11.5 Spring 事务</h3>
+<ul><li>声明式（<code>@Transactional</code>），基于 AOP + 代理。</li><li>失效场景：自调用（同类方法调用）、非 public、异常被 catch、数据库引擎不支持。</li></ul>
+<h3 id="sec-81">11.6 Spring Boot 自动配置原理</h3>
+<ul><li><code>@SpringBootApplication</code> = <code>@SpringBootConfiguration</code> + <code>@EnableAutoConfiguration</code> + <code>@ComponentScan</code>。</li><li><code>EnableAutoConfiguration</code> 通过 <code>spring.factories</code> / <code>AutoConfiguration.imports</code> 加载自动配置类，按条件（<code>@Conditional</code>）装配。</li></ul>
+<p>---</p>
+<h2 id="sec-82">12. 计算机网络</h2>
+<h3 id="sec-83">12.1 TCP 三次握手 / 四次挥手</h3>
+<ul><li>握手：SYN → SYN+ACK → ACK，确认双方收发能力。</li><li>挥手：FIN → ACK → FIN → ACK，因全双工需分别关闭。</li></ul>
+<h3 id="sec-84">12.2 TCP 与 UDP 区别</h3>
+<ul><li>TCP：可靠、面向连接、有序、流量/拥塞控制；UDP：不可靠、无连接、快、适合实时。</li></ul>
+<h3 id="sec-85">12.3 HTTP 与 HTTPS</h3>
+<ul><li>HTTPS = HTTP + TLS/SSL，加密 + 身份认证。</li><li>握手：非对称加密协商对称密钥，后续用对称加密传输。</li></ul>
+<h3 id="sec-86">12.4 常见状态码</h3>
+<ul><li>2xx 成功、3xx 重定向、4xx 客户端错误（400/401/403/404）、5xx 服务端错误（500/502/503）。</li></ul>
+<h3 id="sec-87">12.5 浏览器输入 URL 到页面显示的过程</h3>
+<ul><li>DNS 解析 → TCP 连接 → 发送 HTTP 请求 → 服务器响应 → 浏览器解析渲染 → 断开连接。</li></ul>
+<p>---</p>
+<h2 id="sec-88">13. 常见算法与数据结构</h2>
+<h3 id="sec-89">13.1 数据结构</h3>
+<ul><li>数组、链表、栈、队列、哈希表、二叉树（含 BST、AVL、红黑树）、堆、图、Trie。</li></ul>
+<h3 id="sec-90">13.2 排序算法速记</h3>
+<table><thead><tr><th>算法</th><th>平均</th><th>稳定</th><th>备注</th></tr></thead><tbody><tr><td>冒泡</td><td>O(n²)</td><td>✓</td><td>简单</td></tr><tr><td>快排</td><td>O(n log n)</td><td>✗</td><td>最坏 n²，常用</td></tr><tr><td>归并</td><td>O(n log n)</td><td>✓</td><td>需额外空间</td></tr><tr><td>堆排</td><td>O(n log n)</td><td>✗</td><td>原地</td></tr><tr><td>插入</td><td>O(n²)</td><td>✓</td><td>近乎有序高效</td></tr></tbody></table>
+<h3 id="sec-91">13.3 刷题套路</h3>
+<ul><li>数组/双指针、滑动窗口、哈希表计数、二叉树递归、DFS/BFS、回溯、动态规划、贪心、二分查找。</li></ul>
+<p>---</p>
+<h1 id="sec-92">第二部分：业务场景实战</h1>
+<blockquote>本部分把第一部分抽象知识点落到<strong>真实业务场景</strong>，每个场景给出：业务背景 → 用到的知识点 → 关键实现思路 → 面试追问。 目标：面试被问「这个东西你在项目里怎么用的？」时能张口就来。</blockquote>
+<p>---</p>
+<h2 id="sec-93">1. 集合：购物车与商品去重</h2>
+<p><strong>业务背景</strong> 用户加购同一商品多次，前端可能重复提交；购物车需要展示「不重复的商品 + 各自数量」。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>HashMap</code>：以 <code>skuId</code> 为 key，<code>数量</code> 为 value，天然去重。</li><li><code>LinkedHashMap</code>：需要保持加购顺序时选用。</li><li><code>HashSet</code>：批量校验「已存在的 skuId 集合」。</li><li>不可变对象做 key 时必须正确重写 <code>equals</code> + <code>hashCode</code>（SKU 用 id 即可）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Map</span>&lt;<span class="tok-type">Long</span>, <span class="tok-type">Integer</span>&gt; cart = <span class="tok-kw">new</span> <span class="tok-type">LinkedHashMap</span>&lt;&gt;();
+<span class="tok-kw">for</span> (SkuItem item : items) {
+    cart.merge(item.getSkuId(), item.getCount(), <span class="tok-type">Integer</span>::sum); <span class="tok-cmt">// 合并数量</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么购物车不用 <code>List</code> 而用 <code>Map</code>？（O(1) 查重 vs O(n)）</li><li>如果 skuId 是对象，hashCode 冲突会怎样？（退化成链表/红黑树，性能下降）</li><li>并发加购怎么办？（用 <code>ConcurrentHashMap</code>，或用数据库唯一约束兜底）</li></ul>
+<p>---</p>
+<h2 id="sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</h2>
+<p><strong>业务背景</strong> 商品详情页高频访问，DB 扛不住，加一层本地缓存；同时实时统计「商品被浏览次数」做热门榜单。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>ConcurrentHashMap</code> 做本地缓存（Caffeine 底层也是它 + 近似 LRU）。</li><li>并发计数用 <code>ConcurrentHashMap</code> + <code>LongAdder</code>（分段 CAS，比 AtomicLong 高并发更优）。</li><li>缓存与 Redis 的层级关系（本地缓存 → Redis → DB）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">private</span> <span class="tok-kw">final</span> <span class="tok-type">Map</span>&lt;<span class="tok-type">Long</span>, ProductVO&gt; cache = <span class="tok-kw">new</span> <span class="tok-type">ConcurrentHashMap</span>&lt;&gt;();
+<span class="tok-kw">private</span> <span class="tok-kw">final</span> <span class="tok-type">Map</span>&lt;<span class="tok-type">Long</span>, LongAdder&gt; viewCount = <span class="tok-kw">new</span> <span class="tok-type">ConcurrentHashMap</span>&lt;&gt;();
+
+<span class="tok-kw">public</span> ProductVO getProduct(<span class="tok-type">Long</span> id) {
+    <span class="tok-kw">return</span> cache.computeIfAbsent(id, <span class="tok-kw">this</span>::loadFromDb);
+}
+<span class="tok-kw">public</span> <span class="tok-kw">void</span> incrView(<span class="tok-type">Long</span> id) {
+    viewCount.computeIfAbsent(id, k -&gt; <span class="tok-kw">new</span> LongAdder()).increment();
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>本地缓存和 Redis 缓存各自优缺点？（本地最快但各节点不一致，Redis 集中但有网络开销）</li><li>为什么热点计数用 LongAdder 而不是 AtomicLong？（高并发下 AtomicLong CAS 竞争激烈，LongAdder 分 cell 分散竞争）</li><li>缓存一致性怎么保证？（更新 DB 后删本地缓存 + 发广播/消息让其他节点失效）</li></ul>
+<p>---</p>
+<h2 id="sec-95">3. synchronized / 锁：秒杀库存扣减</h2>
+<p><strong>业务背景</strong> 秒杀活动，1 万人在同一秒抢 100 件商品，必须保证「不超卖、不超扣」。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>单机：<code>synchronized</code> / <code>ReentrantLock</code> 保护库存扣减临界区。</li><li>分布式：必须上分布式锁（Redis <code>SETNX</code> / Redisson）或数据库乐观锁（<code>UPDATE ... WHERE stock &gt; 0</code>）。</li><li>CAS / 原子类在单体场景的替代。</li></ul>
+<p><strong>关键实现思路（单体 + 数据库乐观锁兜底）</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 先 Redis 预扣（Lua 原子脚本保证原子性）</span>
+<span class="tok-type">Long</span> remain = redisTemplate.execute(decrScript, <span class="tok-type">List</span>.of(stockKey));
+<span class="tok-kw">if</span> (remain &lt; <span class="tok-num">0</span>) { redisTemplate.incr(stockKey); <span class="tok-kw">return</span> <span class="tok-str">&quot;售罄&quot;</span>; }
+<span class="tok-cmt">// 异步落库，数据库再 WHERE stock&gt;0 兜底防超卖</span>
+int rows = itemMapper.decrStock(itemId);
+<span class="tok-kw">if</span> (rows == <span class="tok-num">0</span>) { redisTemplate.incr(stockKey); <span class="tok-kw">return</span> <span class="tok-str">&quot;售罄&quot;</span>; }</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>只靠 synchronized 为什么扛不住秒杀？（单机锁，集群多实例各自扣自己的，照样超卖）</li><li>为什么用 Lua 脚本做 Redis 预扣？（保证「判断+扣减」原子，避免 check-then-act 竞态）</li><li>库存扣成负数怎么防？（Lua 返回后判断 + 数据库 WHERE 条件双重保险）</li></ul>
+<p>---</p>
+<h2 id="sec-96">4. volatile：系统开关与单例配置中心</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>运营要临时关闭某个营销活动（如「双11预热」），不想发版就能即时生效。</li><li>配置中心（如 Nacos/Apollo）推送配置后，应用要立刻读到新值。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>volatile</code> 保证可见性：一个线程改了，其他线程立刻可见。</li><li>典型用法：布尔开关 <code>private volatile boolean activityOn;</code>。</li><li>不能保证原子性：开关只是赋值 OK，但 <code>i++</code> 类的计数不行。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>@Component
+<span class="tok-kw">public</span> <span class="tok-kw">class</span> ActivitySwitch {
+    <span class="tok-kw">private</span> <span class="tok-kw">volatile</span> boolean open = <span class="tok-kw">false</span>;
+    @Value(<span class="tok-str">&quot;${activity.open:false}&quot;</span>) <span class="tok-kw">public</span> <span class="tok-kw">void</span> setOpen(boolean v){ <span class="tok-kw">this</span>.open = v; }
+    <span class="tok-kw">public</span> boolean isOpen(){ <span class="tok-kw">return</span> open; }
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么开关用 volatile 而不是 synchronized？（开关只是写读布尔值，volatile 无锁更轻量）</li><li>配置中心推送后为什么能立刻生效？（监听器 set 新值 + volatile 保证可见）</li><li>单例 DCL 为什么必须 volatile？（防止指令重排导致返回半初始化对象）</li></ul>
+<p>---</p>
+<h2 id="sec-97">5. 线程池：异步通知与批量任务</h2>
+<p><strong>业务背景</strong> 用户下单成功后，要发短信、推 App、记积分、写流水——这些不能阻塞下单主流程，且是大批量任务。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>自定义 <code>ThreadPoolExecutor</code>，不用 <code>Executors</code>（防 OOM）。</li><li>核心/最大线程数、队列、拒绝策略选型。</li><li><code>CompletableFuture</code> 编排多个异步任务。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">ExecutorService</span> notifyPool = <span class="tok-kw">new</span> <span class="tok-type">ThreadPoolExecutor</span>(
+    <span class="tok-num">8</span>, <span class="tok-num">32</span>, 60L, <span class="tok-type">TimeUnit</span>.SECONDS,
+    <span class="tok-kw">new</span> ArrayBlockingQueue&lt;&gt;(<span class="tok-num">1024</span>),
+    <span class="tok-kw">new</span> ThreadFactoryBuilder().setNameFormat(<span class="tok-str">&quot;notify-%d&quot;</span>).build(),
+    <span class="tok-kw">new</span> <span class="tok-type">ThreadPoolExecutor</span>.CallerRunsPolicy()); <span class="tok-cmt">// 拒绝时由调用方线程执行，不丢任务</span>
+
+<span class="tok-type">CompletableFuture</span>.runAsync(() -&gt; smsService.send(order), notifyPool)
+    .thenRunAsync(() -&gt; pointService.add(order), notifyPool);</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么不用 <code>newCachedThreadPool</code>？（最大线程数无界，瞬时洪峰直接 OOM）</li><li>拒绝策略为什么选 CallerRunsPolicy？（不下单主链路、不丢通知，压力回灌调用方限流）</li><li>任务执行异常怎么感知？（重写 afterExecute 或 Future.get 捕获）</li></ul>
+<p>---</p>
+<h2 id="sec-98">6. ThreadLocal：用户上下文与链路追踪</h2>
+<p><strong>业务背景</strong> 一次请求里多处需要「当前登录用户」「TraceId」，不想每层方法都传参；同时要避免用户信息串号。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>ThreadLocal</code> 存请求级上下文（UserContext、MDC TraceId）。</li><li>必须 <code>remove()</code>，否则线程池复用导致串数据（内存泄漏 + 串号）。</li><li>Spring MVC 拦截器 <code>preHandle</code> 设值、<code>afterCompletion</code> 清理。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> UserContext {
+    <span class="tok-kw">private</span> <span class="tok-kw">static</span> <span class="tok-kw">final</span> <span class="tok-type">ThreadLocal</span>&lt;User&gt; TL = <span class="tok-kw">new</span> <span class="tok-type">ThreadLocal</span>&lt;&gt;();
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> <span class="tok-kw">void</span> set(User u){ TL.set(u); }
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> User get(){ <span class="tok-kw">return</span> TL.get(); }
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> <span class="tok-kw">void</span> clear(){ TL.remove(); } <span class="tok-cmt">// 关键！</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么线程池里不 remove 会串号？（线程复用，下次请求读到上次的 user）</li><li>ThreadLocal 内存泄漏原因？（key 弱引用被 GC，value 强引用残留，remove 清理）</li><li>TraceId 怎么跨线程传递？（InheritableThreadLocal 或 TransmittableThreadLocal 解决线程池透传）</li></ul>
+<p>---</p>
+<h2 id="sec-99">7. JVM / GC：大促接口超时排查</h2>
+<p><strong>业务背景</strong> 大促期间，订单接口每隔几分钟就出现一波 1~2 秒超时，平时正常。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>GC 日志分析（<code>-Xlog:gc*</code> / <code>-XX:+PrintGCDetails</code>）。</li><li>频繁 Full GC 导致 Stop-The-World，请求被「冻结」。</li><li>排查链路：监控告警 → 看 GC 频次/耗时 → 堆 dump 分析大对象 → 定位内存泄漏/缓存无上限。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code># 抓现场
+jstat -gcutil &lt;pid&gt; <span class="tok-num">1000</span>      # 看各区占用与 GC 次数
+jmap -dump:live,format=b,file=heap.hprof &lt;pid&gt;  # 堆转储
+# 用 MAT / VisualVM / Arthas 分析：谁占了多少</code></pre>
+<ul><li>常见根因：本地缓存 <code>HashMap</code> 无上限、ThreadLocal 未 remove、大对象（一次性读全表）。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>Full GC 和 Young GC 区别？（回收范围、触发条件、停顿时长）</li><li>为什么大促才出问题平时没事？（流量翻倍触发缓存膨胀 / 对象分配速率陡增）</li><li>怎么预防？（缓存加容量上限+过期、压测、监控 GC 告警）</li></ul>
+<p>---</p>
+<h2 id="sec-100">8. String：订单号与金额拼接</h2>
+<p><strong>业务背景</strong> 生成订单号、拼接用户地址、格式化金额展示——字符串处理到处都是。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>循环内拼接用 <code>StringBuilder</code>（不用 <code>+</code>，避免产生大量临时对象）。</li><li>金额绝不用 <code>double</code>（精度丢失），用 <code>BigDecimal</code> + <code>String</code> 构造。</li><li><code>String.format</code> / <code>DecimalFormat</code> 做展示。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 订单号：时间戳 + 用户ID + 随机</span>
+<span class="tok-type">StringBuilder</span> sb = <span class="tok-kw">new</span> <span class="tok-type">StringBuilder</span>();
+sb.append(<span class="tok-type">System</span>.currentTimeMillis()).append(userId).append(ThreadLocalRandom.current().nextInt(<span class="tok-num">1000</span>));
+<span class="tok-cmt">// 金额</span>
+<span class="tok-type">BigDecimal</span> amount = <span class="tok-kw">new</span> <span class="tok-type">BigDecimal</span>(<span class="tok-str">&quot;19.99&quot;</span>); <span class="tok-cmt">// 用字符串构造，避免 0.1+0.2 误差</span>
+<span class="tok-type">String</span> show = amount.setScale(<span class="tok-num">2</span>, RoundingMode.HALF_UP).toString();</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么 <code>0.1 + 0.2 != 0.3</code>？（二进制浮点无法精确表示）</li><li>循环拼接用 + 会怎样？（每次产生新 String，O(n²) 临时对象，GC 压力）</li><li>BigDecimal 的坑？（用 double 构造仍有误差，必须用 String 构造）</li></ul>
+<p>---</p>
+<h2 id="sec-101">9. 设计模式：支付与促销策略</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>支付方式有多种（微信、支付宝、银行卡），新增方式不想改老代码。</li><li>促销活动有多种（满减、折扣、立减券），规则可组合。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li><strong>策略模式</strong>：<code>PayStrategy</code> 接口 + 多个实现，按类型路由（<code>Map&lt;Type, Strategy&gt;</code>）。</li><li><strong>工厂模式</strong>：根据渠道创建对应支付 SDK 实例。</li><li><strong>观察者模式</strong>：订单支付成功后，发消息通知积分、物流、风控（解耦）。</li><li><strong>责任链模式</strong>：风控校验多道关卡串行。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-type">Map</span>&lt;PayType, PayStrategy&gt; strategies = ...; <span class="tok-cmt">// Spring 自动注入所有实现</span>
+<span class="tok-kw">public</span> <span class="tok-type">String</span> pay(PayType type, Order o){
+    <span class="tok-kw">return</span> strategies.get(type).pay(o); <span class="tok-cmt">// 新增支付方式只加实现类</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>策略模式和 if-else 相比好在哪？（开闭原则，免改老逻辑）</li><li>Spring 怎么自动收集所有策略实现？（@Autowired List&lt;PayStrategy&gt; 或 Map 注入）</li><li>观察者模式在这里解决了什么？（支付核心与积分/物流解耦，互不影响）</li></ul>
+<p>---</p>
+<h2 id="sec-102">10. MySQL 索引：订单查询慢 SQL</h2>
+<p><strong>业务背景</strong> 运营后台「查某用户最近 3 个月订单」，未加索引时全表扫描，接口 5 秒。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>联合索引 <code>(user_id, create_time)</code> 命中<strong>最左前缀</strong>，既能按用户又能按时间范围。</li><li>避免索引失效：不要在字段上套函数（<code>WHERE DATE(create_time)=...</code> 会失效）、避免 <code>%前缀</code> 模糊。</li><li>覆盖索引避免回表（<code>SELECT</code> 只取索引列）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>-- 建联合索引
+ALTER TABLE orders ADD INDEX idx_user_time (user_id, create_time);
+-- 查询（走索引，范围在右列）
+SELECT id, amount FROM orders
+WHERE user_id = <span class="tok-num">123</span> AND create_time &gt;= <span class="tok-str">&#x27;2026-05-01&#x27;</span>
+ORDER BY create_time DESC LIMIT <span class="tok-num">20</span>;</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么联合索引顺序是 user_id 在前？（高频等值查询在前，范围在后，否则索引失效）</li><li>怎么验证走没走索引？（<code>EXPLAIN</code> 看 type/key/rows/extra）</li><li>回表是什么？（二级索引存主键，需再用主键查整行；覆盖索引可免）</li></ul>
+<p>---</p>
+<h2 id="sec-103">11. 事务：下单扣库存与转账</h2>
+<p><strong>业务背景</strong> 下单要「扣库存 + 创建订单 + 扣余额」要么全成功要么全失败；银行转账 A 减 B 加必须原子。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li><code>@Transactional</code> 声明式事务（AOP 代理）。</li><li>事务隔离级别解决脏读/不可重复读/幻读。</li><li>事务失效场景：同类自调用、非 public、异常被吞。</li><li>跨服务用分布式事务（Seata TCC / 消息最终一致性）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>@Transactional(rollbackFor = <span class="tok-type">Exception</span>.<span class="tok-kw">class</span>, isolation = Isolation.REPEATABLE_READ)
+<span class="tok-kw">public</span> <span class="tok-kw">void</span> createOrder(OrderCmd cmd){
+    stockMapper.decr(cmd.getSkuId(), cmd.getCount()); <span class="tok-cmt">// 扣库存</span>
+    orderMapper.insert(cmd.toOrder());                <span class="tok-cmt">// 建订单</span>
+    accountMapper.decr(cmd.getUserId(), cmd.getAmount()); <span class="tok-cmt">// 扣款</span>
+    <span class="tok-cmt">// 任一异常整体回滚</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么自调用事务不生效？（Spring 走代理，内部调用没过代理，没织入事务）</li><li>扣库存和扣款不在同一个库怎么办？（跨库 → 分布式事务 / 最终一致 + 补偿）</li><li>大事务有什么危害？（锁久、连接占用、回滚慢，应拆解 + 异步）</li></ul>
+<p>---</p>
+<h2 id="sec-104">12. Redis：缓存与分布式锁</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>商品详情缓存，扛读流量。</li><li>秒杀 / 定时任务防止集群多节点重复执行。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li>缓存三大坑：穿透（布隆过滤器）、击穿（互斥锁/逻辑过期）、雪崩（过期时间加随机）。</li><li>分布式锁：<code>SET key value NX EX</code> 原子加锁 + Lua 释放（防误删）+ Redisson 看门狗自动续期。</li><li>缓存与 DB 一致性：先更新 DB 再删缓存（Cache-Aside）。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 加锁（Redisson 简化写法）</span>
+RLock lock = redissonClient.getLock(<span class="tok-str">&quot;task:sync&quot;</span>);
+<span class="tok-kw">if</span> (lock.tryLock(<span class="tok-num">0</span>, <span class="tok-num">30</span>, <span class="tok-type">TimeUnit</span>.SECONDS)) {
+    <span class="tok-kw">try</span> { doSync(); } <span class="tok-kw">finally</span> { lock.unlock(); }
+}
+<span class="tok-cmt">// 缓存读取</span>
+Product p = redis.get(key);
+<span class="tok-kw">if</span> (p == <span class="tok-kw">null</span>) {
+    p = db.load(id);
+    redis.setex(key, <span class="tok-num">300</span> + RandomUtil.randomInt(<span class="tok-num">60</span>), p); <span class="tok-cmt">// 过期加随机防雪崩</span>
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>为什么释放锁要用 Lua？（判断+删除必须原子，否则可能删掉别人的锁）</li><li>缓存和数据库不一致怎么解决？（更新 DB 后删缓存；延迟双删兜底）</li><li>Redisson 看门狗做什么？（锁快过期时自动续期，防止业务没跑完锁没了）</li></ul>
+<p>---</p>
+<h2 id="sec-105">13. Spring：循环依赖 / AOP / 事务失效</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>支付服务 A 依赖风控服务 B，B 又依赖 A（循环依赖）。</li><li>统一记录接口耗时、统一登录校验。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li><strong>循环依赖</strong>：Spring 用<strong>三级缓存</strong>解决（singletonObjects / earlySingletonObjects / singletonFactories），允许「提前暴露半成品 bean」注入。</li><li><strong>AOP</strong>：用动态代理织入日志、鉴权、事务（JDK 代理基于接口，CGLIB 基于继承）。</li><li><strong>事务失效</strong>：自调用、异常被 catch、非 public、数据库引擎不支持。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>@Aspect @Component
+<span class="tok-kw">public</span> <span class="tok-kw">class</span> LogAspect {
+    @Around(<span class="tok-str">&quot;execution(* com.x..service..*(..))&quot;</span>)
+    <span class="tok-kw">public</span> <span class="tok-type">Object</span> log(ProceedingJoinPoint pjp) <span class="tok-kw">throws</span> <span class="tok-type">Throwable</span> {
+        long s = <span class="tok-type">System</span>.currentTimeMillis();
+        <span class="tok-kw">try</span> { <span class="tok-kw">return</span> pjp.proceed(); }
+        <span class="tok-kw">finally</span> { log.info(<span class="tok-str">&quot;{} 耗时{}ms&quot;</span>, pjp.getSignature(), <span class="tok-type">System</span>.currentTimeMillis()-s); }
+    }
+}</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>三级缓存具体怎么破循环依赖？（一二三级分别存成品/早期引用/工厂，提前曝光解决）</li><li>构造器注入的循环依赖能解决吗？（不能，需 @Lazy 或改设计）</li><li>为什么 CGLIB 能代理类而 JDK 只能代理接口？（CGLIB 生成子类，JDK 用 InvocationHandler）</li></ul>
+<p>---</p>
+<h2 id="sec-106">14. 网络：接口超时与 HTTPS</h2>
+<p><strong>业务背景</strong></p>
+<ul><li>调用第三方支付接口偶发超时，需要合理设置连接/读超时。</li><li>用户登录、支付走 HTTPS 防中间人。</li></ul>
+<p><strong>用到的知识点</strong></p>
+<ul><li>TCP 三次握手 / 四次挥手（连接建立与关闭成本）。</li><li>HTTP 超时：connectTimeout、readTimeout 必须设，不然线程一直挂起。</li><li>HTTPS = HTTP + TLS，非对称加密协商对称密钥，后续对称加密传输。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>RequestConfig cfg = RequestConfig.custom()
+    .setConnectTimeout(<span class="tok-num">1000</span>)   <span class="tok-cmt">// 建连最多 1s</span>
+    .setSocketTimeout(<span class="tok-num">3000</span>)    <span class="tok-cmt">// 读响应最多 3s</span>
+    .build();</code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>不设超时会有什么后果？（第三方卡死，线程池打满，雪崩）</li><li>为什么 HTTPS 握手后用对称加密？（非对称慢，对称快，握手阶段用非对称安全协商密钥）</li><li>TIME_WAIT 太多怎么处理？（连接复用、调内核参数、短连接改长连接）</li></ul>
+<p>---</p>
+<h2 id="sec-107">15. 消息队列：下单异步解耦</h2>
+<p><strong>业务背景</strong> 下单成功后要做 5 件周边事（发券、积分、通知、风控、对账）。若同步做，任一失败则下单失败，且慢。</p>
+<p><strong>用到的知识点</strong></p>
+<ul><li>消息队列解耦 + 异步 + 削峰（Kafka / RabbitMQ / RocketMQ）。</li><li>可靠投递：本地消息表 / 事务消息，保证「下单成功必发消息」。</li><li>消费幂等：用业务唯一键（订单号）防重复消费。</li></ul>
+<p><strong>关键实现思路</strong></p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 事务消息 / 本地消息表，确保下单与发消息一致</span>
+orderTx.execute(() -&gt; {
+    orderMapper.insert(order);
+    messageMapper.insert(order.toMessage()); <span class="tok-cmt">// 同库事务</span>
+});
+<span class="tok-cmt">// 异步任务把 message 发到 MQ，下游各自消费（幂等：按 orderId 去重）</span></code></pre>
+<p><strong>面试追问</strong></p>
+<ul><li>下单和发消息怎么保证都不丢？（本地消息表 / RocketMQ 事务消息）</li><li>消费者重复收到消息怎么办？（幂等：唯一键 / 状态机，重复处理无副作用）</li><li>MQ 挂了订单还能下吗？（降级：消息落本地表，恢复后补偿发送）</li></ul>
+<p>---</p>
+<h1 id="sec-108">第三部分：分布式与微服务专项</h1>
+<blockquote>校招 / 社招中高级岗必考。本部分覆盖微服务治理、消息队列、分布式事务、分布式锁与一致性、分布式 ID 与分库分表。每个主题给出「核心概念 + 对比 + 高频追问」。</blockquote>
+<p>---</p>
+<h2 id="sec-109">1. 微服务与 Spring Cloud 生态</h2>
+<h3 id="sec-110">1.1 微服务核心组件</h3>
+<ul><li><strong>注册中心</strong>：Eureka（AP，CAP 中保证可用）、Nacos（AP/CP 可切换，集注册+配置）、Consul、ZooKeeper（CP）。</li><li><strong>配置中心</strong>：Nacos、Apollo（携程）、Spring Cloud Config。</li><li><strong>网关</strong>：Spring Cloud Gateway（WebFlux、断言+过滤器）、Zuul（1.x 阻塞，已淘汰）。</li><li><strong>负载均衡</strong>：Spring Cloud LoadBalancer / Ribbon（轮询、随机、加权、一致性哈希）。</li><li><strong>熔断降级限流</strong>：Sentinel（滑动窗口、熔断规则、热点限流）、Hystrix（已停更）。</li><li><strong>链路追踪</strong>：Sleuth + Zipkin / SkyWalking（无侵入字节码插桩）。</li></ul>
+<h3 id="sec-111">1.2 服务注册与发现原理</h3>
+<ul><li>服务启动时向注册中心<strong>注册</strong>元数据（IP、端口、服务名）。</li><li>消费者<strong>拉取/订阅</strong>服务列表（推拉结合 + 心跳续约）。</li><li>注册中心通过<strong>心跳</strong>判断实例存活，剔除失效节点。</li><li>客户端缓存服务列表，注册中心宕机仍可短期调用（最终一致）。</li></ul>
+<h3 id="sec-112">1.3 网关（Gateway）作用</h3>
+<ul><li><strong>路由</strong>：根据断言（Path、Header、Cookie）转发到对应服务。</li><li><strong>鉴权</strong>：统一 JWT / OAuth2 校验，拦截非法请求。</li><li><strong>限流</strong>：基于令牌桶 / 计数器，保护后端。</li><li><strong>灰度 / 熔断</strong>：按版本路由、集成 Sentinel 熔断。</li></ul>
+<h3 id="sec-113">1.4 负载均衡：Ribbon vs Nginx</h3>
+<ul><li><strong>Ribbon</strong>：客户端负载均衡（进程内，知道所有实例，选一个再调）。</li><li><strong>Nginx</strong>：服务端负载均衡（独立节点，集中转发）。</li><li>区别：Ribbon 减少一跳、支持更细策略；Nginx 与语言无关、可做 L4/L7。</li></ul>
+<h3 id="sec-114">1.5 熔断、降级、限流</h3>
+<ul><li><strong>熔断</strong>：错误率/慢调用超阈值，打开熔断器，一段时间后半开探测（Sentinel 三种状态）。</li><li><strong>降级</strong>：流量激增或依赖故障时，返回兜底（默认值 / 缓存 / 静态页）。</li><li><strong>限流算法</strong>：</li><li>计数器（固定窗口，有临界突刺问题）。</li><li>滑动窗口（细分时间片，更平滑）。</li><li>漏桶（恒定速率流出，整形）。</li><li>令牌桶（恒定速率发令牌，允许突发，最常用）。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>Eureka 与 Nacos 在 CAP 上的取舍？（Eureka 选 AP 保证可用；Nacos 可切 CP 保证强一致）</li><li>Sentinel 和 Hystrix 区别？（Hystrix 线程池隔离资源占用大；Sentinel 信号量 + 滑动窗口，更轻量）</li><li>网关为什么要做限流而不是只靠服务自身？（边缘拦截，避免无效流量打到内网）</li></ul>
+<p>---</p>
+<h2 id="sec-115">2. 消息队列（MQ）</h2>
+<h3 id="sec-116">2.1 为什么用 MQ</h3>
+<ul><li><strong>解耦</strong>：生产者不关心谁消费（如下单后发券、积分、通知各自订阅）。</li><li><strong>异步</strong>：非核心链路异步化，主流程快返回。</li><li><strong>削峰</strong>：突发流量先入队，消费者按能力平稳处理（如秒杀）。</li></ul>
+<h3 id="sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</h3>
+<table><thead><tr><th>维度</th><th>Kafka</th><th>RabbitMQ</th><th>RocketMQ</th></tr></thead><tbody><tr><td>定位</td><td>高吞吐日志/流</td><td>低延迟、路由灵活</td><td>业务消息、事务</td></tr><tr><td>吞吐量</td><td>极高</td><td>中</td><td>高</td></tr><tr><td>延迟</td><td>低（批）</td><td>极低</td><td>低</td></tr><tr><td>事务消息</td><td>无（0.11+ 有幂等）</td><td>无</td><td>有（半事务）</td></tr><tr><td>顺序消息</td><td>分区有序</td><td>队列有序</td><td>队列有序</td></tr><tr><td>典型场景</td><td>日志、大数据</td><td>企业总线、任务</td><td>电商交易</td></tr></tbody></table>
+<h3 id="sec-118">2.3 消息可靠性（不丢）</h3>
+<ul><li><strong>生产端</strong>：confirm 机制（RabbitMQ）、acks=all + 重试（Kafka）。</li><li><strong>服务端</strong>：刷盘（同步/异步）+ 主从复制。</li><li><strong>消费端</strong>：先处理业务再手动 ack，处理失败不 ack（重回队列 / 死信）。</li></ul>
+<h3 id="sec-119">2.4 重复消费与幂等</h3>
+<ul><li>原因：网络重试、rebalance、消费超时。</li><li>幂等方案：业务唯一键（订单号）去重表、Redis <code>SETNX</code>、状态机（已处理则跳过）、数据库唯一索引。</li></ul>
+<h3 id="sec-120">2.5 消息积压处理</h3>
+<ul><li>临时扩容消费者实例 + 提升消费并发。</li><li>如果消费慢：开启多线程消费 / 批量消费。</li><li>极端：新建临时 Topic，把积压消息转发后快速消费。</li></ul>
+<h3 id="sec-121">2.6 顺序消息</h3>
+<ul><li>Kafka：同一业务 key 发到同一 partition，单 partition 内有序。</li><li>RocketMQ：同一 MessageQueue 有序，用顺序发送 + 加锁消费。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>如何保证消息不丢失？（三端确认：生产 confirm + 服务端持久化 + 消费手动 ack）</li><li>RocketMQ 事务消息原理？（Half Message → 执行本地事务 → Commit/Rollback，回查保证最终一致）</li><li>Kafka 为什么快？（顺序写磁盘、零拷贝 sendfile、批量压缩、页缓存）</li></ul>
+<p>---</p>
+<h2 id="sec-122">3. 分布式事务</h2>
+<h3 id="sec-123">3.1 2PC / 3PC</h3>
+<ul><li><strong>2PC（两阶段提交）</strong>：准备阶段（各参与者锁资源投票）+ 提交阶段（协调者统一提交/回滚）。缺点：同步阻塞、单点、数据不一致（协调者宕机）。</li><li><strong>3PC</strong>：引入超时与预询问，降低阻塞，但网络分区仍可能不一致，工业界少用。</li></ul>
+<h3 id="sec-124">3.2 TCC（Try-Confirm-Cancel）</h3>
+<ul><li><strong>Try</strong>：预留资源（如冻结库存）。</li><li><strong>Confirm</strong>：真正提交（幂等）。</li><li><strong>Cancel</strong>：释放预留（幂等）。</li><li>优点：无长事务锁，性能好；缺点：业务侵入强，需手写三阶段。</li></ul>
+<h3 id="sec-125">3.3 消息最终一致性（常用）</h3>
+<ul><li><strong>本地消息表</strong>：业务与消息同库事务，后台任务投递到 MQ，消费者幂等处理。</li><li><strong>事务消息</strong>（RocketMQ）：Half Message + 本地事务 + 回查，保证「本地成功必发消息」。</li><li>特点：最终一致、性能好、容忍短暂不一致。</li></ul>
+<h3 id="sec-126">3.4 Seata</h3>
+<ul><li><strong>AT 模式</strong>：自动生成回滚日志（undo_log），两阶段：一阶段提交本地事务+写undo，二阶段异步清理或回滚（无侵入，最常用）。</li><li><strong>TCC / SAGA / XA</strong> 模式按需选择。</li></ul>
+<h3 id="sec-127">3.5 最大努力通知</h3>
+<ul><li>多次重试通知 + 对账，适用于跨系统（如支付结果通知），不保证强一致，但尽力送达。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>你们项目用哪种分布式事务？为什么？（电商常用 消息最终一致 / Seata AT，避免 2PC 长锁）</li><li>TCC 的空回滚 / 防悬挂是什么？（Try 未收到但收到 Cancel → 记录空回滚；防悬挂：Cancel 先于 Try 到达要拒绝）</li><li>Seata AT 为什么无侵入？（代理数据源，自动解析 SQL 生成前后镜像）</li></ul>
+<p>---</p>
+<h2 id="sec-128">4. 分布式锁与缓存一致性</h2>
+<h3 id="sec-129">4.1 分布式锁方案</h3>
+<ul><li><strong>Redis 实现</strong>：<code>SET key value NX EX</code> 原子加锁；Lua 脚本释放（防误删）；Redisson 看门狗自动续期。</li><li>优点：高性能；缺点：主从切换可能丢锁（RedLock 争议大）。</li><li><strong>ZooKeeper 实现</strong>：临时有序节点 + 最小节点获锁 + watch 下一节点。</li><li>优点：强一致、锁一定不丢；缺点：性能较低、依赖 ZK 集群。</li><li><strong>数据库实现</strong>：唯一索引 / <code>SELECT ... FOR UPDATE</code>。</li><li>优点：简单；缺点：性能差、连接占用。</li></ul>
+<h3 id="sec-130">4.2 缓存与 DB 一致性</h3>
+<ul><li><strong>Cache-Aside（旁路）</strong>：读时回填，写时「先更新 DB 再删缓存」。</li><li><strong>延迟双删</strong>：更新 DB → 删缓存 → 延迟再删一次（防更新期间旧值回填）。</li><li><strong>binlog 订阅（Canal）</strong>：监听 binlog 异步删/更新缓存，解耦业务。</li><li>取舍：强一致几乎不可能，追求「最终一致 + 缩短不一致窗口」。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>Redis 锁和 ZK 锁怎么选？（高并发选 Redis；强一致选 ZK）</li><li>为什么「先更新 DB 再删缓存」仍可能不一致？（删缓存后、DB 提交前读请求回填旧值 → 延迟双删/订阅 binlog 兜底）</li><li>Redisson 看门狗原理？（加锁后定时续期，业务完成才释放，防止锁提前过期）</li></ul>
+<p>---</p>
+<h2 id="sec-131">5. 分布式 ID 与分库分表</h2>
+<h3 id="sec-132">5.1 分布式 ID 方案</h3>
+<ul><li><strong>UUID</strong>：简单无序，作为 DB 主键导致索引碎片化，不推荐。</li><li><strong>雪花算法（Snowflake）</strong>：时间戳+机器ID+序列号，趋势递增、高性能；依赖时钟（时钟回拨问题）。</li><li><strong>号段模式（Leaf-segment）</strong>：DB 批量取号段，内存发号，性能好。</li><li><strong>Leaf-snowflake</strong>：解决时钟回拨的雪花改进。</li><li>要求：全局唯一、趋势递增（利 B+ 树）、高可用、高性能。</li></ul>
+<h3 id="sec-133">5.2 分库分表</h3>
+<ul><li><strong>垂直分库</strong>：按业务（订单库、用户库）拆分，解耦。</li><li><strong>水平分表</strong>：单表数据过大，按 <strong>分片键</strong>（用户ID、订单ID）哈希/范围/时间分片。</li><li><strong>中间件</strong>：ShardingSphere（JDBC 层 / Proxy）。</li><li><strong>带来的问题</strong>：</li><li>分布式事务（跨库）。</li><li>跨分片查询 / 分页 / 排序困难（需归并）。</li><li>分片键选择不慎导致数据倾斜。</li><li>扩容需迁移数据（一致性哈希可缓解）。</li></ul>
+<p><strong>面试追问</strong></p>
+<ul><li>分片键怎么选？（高频查询字段、区分度高、避免热点，如订单表用 user_id 或 order_id）</li><li>雪花算法时钟回拨怎么办？（等待、记录上次时间、或切换机器位）</li><li>分库分表后怎么做跨片分页？（各分片查 TopN 后在应用层归并排序）</li></ul>
+<p>---</p>
+<h1 id="sec-134">附录 A：高频追问清单（自查）</h1>
+<ul><li>HashMap 1.7 与 1.8 的区别？为什么转红黑树阈值是 8？</li><li>synchronized 锁升级全过程？</li><li>volatile 为什么不能保证原子性？DCL 单例为什么要 volatile？</li><li>JVM 为什么分代？G1 与 CMS 的区别？</li><li>MySQL 为什么用 B+ 树而不是 B 树 / 红黑树？</li><li>可重复读如何解决的幻读（MVCC + 间隙锁）？</li><li>Redis 分布式锁如何防止误删？Redisson 看门狗原理？</li><li>Spring 循环依赖如何解决（三级缓存）？</li><li>线程池为什么不建议用 Executors？</li><li>TCP 为什么是三次握手而不是两次？</li><li>RocketMQ 事务消息 / 本地消息表如何保证「下单必发消息」？</li><li>分布式锁 Redis 与 ZK 怎么选？Redisson 看门狗原理？</li><li>缓存与 DB 一致性怎么保证（Cache-Aside / 延迟双删 / binlog）？</li><li>分布式事务 2PC、TCC、消息最终一致各自适用什么场景？</li><li>雪花算法时钟回拨怎么办？分库分表分片键怎么选？</li></ul>
+<p>---</p>
+<h1 id="sec-135">附录 B：八股 → 业务的回答套路</h1>
+<p>被问到任何知识点，按这个结构答，立刻显得有实战经验：</p>
+<ol><li><strong>概念一句话讲清</strong>（是什么）。</li><li><strong>我项目中哪里用过</strong>（真实场景）。</li><li><strong>当时怎么实现的</strong>（关键代码/方案）。</li><li><strong>踩过什么坑 / 为什么这么选</strong>（深度）。</li><li><strong>如果换成 XX 场景会怎样</strong>（举一反三）。</li></ol>
+<p>---</p>
+<blockquote>本文档整合「核心知识点速查」与「业务场景实战」于一体，建议结合源码与实战加深理解。祝面试顺利 🚀</blockquote>
+<h1 id="sec-136">Ragent 平台项目知识库（Agentic RAG 企业级实战）</h1>
+<blockquote>整理自 <code>ragent-main</code> 开源项目（nageoffer/ragent）：Java 17 + Spring Boot 3 + React 18 的企业级 <strong>Agentic RAG</strong> 平台。 定位：「后端程序员转型 AI 工程师的第一站」。覆盖从<strong>文档入库 → 智能问答 → 工具调用</strong>的完整链路。 学习理念：<strong>源码即文档</strong>——下面每个知识点都对应真实可调试的类与方法，建议配合断点跟一次请求走完整条链路。</blockquote>
+<p>---</p>
+<h2 id="sec-137">一、项目定位与技术栈</h2>
+<h3 id="sec-138">1.1 它是什么</h3>
+<p>Ragent 是一个面向 <strong>Agentic RAG 演进</strong>的企业级 RAG 平台，核心能力：</p>
+<ul><li><strong>多路检索</strong>：多渠道并行检索，去重重排兼顾精准与召回。</li><li><strong>意图识别</strong>：树形多级分类，置信度不足主动引导澄清；节点区分「知识库 / 系统应答 / 工具调用」三类。</li><li><strong>模型引擎</strong>：模型调度、首包探测、健康检查、自动降级，模型故障不影响服务。</li><li><strong>MCP 集成</strong>：非知识类意图自动提参调用业务工具，检索与工具无缝融合。</li></ul>
+<blockquote>它解决的不是「调个 API 就叫 RAG」，而是企业落地 RAG 真实会踩的坑：文档解析、分块策略、召回率、多路融合、幻觉控制、限流熔断、多租户隔离、可观测性。</blockquote>
+<h3 id="sec-139">1.2 技术栈全景</h3>
+<table><thead><tr><th>层</th><th>选型</th></tr></thead><tbody><tr><td>语言 / 框架</td><td><strong>Java 17 + Spring Boot 3.5.7</strong>；前端 <strong>React 18 + TypeScript 5 + Vite 5</strong></td></tr><tr><td>向量库</td><td><strong>Milvus 2.6.6（默认）</strong> 与 <strong>PGVector（PostgreSQL 扩展）</strong> 双支持；关键词检索走 <strong>Elasticsearch</strong></td></tr><tr><td>ORM</td><td>MyBatis-Plus 3.5.14</td></tr><tr><td>LLM 接入</td><td><strong>自研 <code>infra-ai</code> 层</strong>，未用 Spring AI / LangChain4j（统一抽象 <code>ChatClient</code>/<code>EmbeddingClient</code>/<code>RerankClient</code>，自解析 OpenAI 风格 SSE）</td></tr><tr><td>模型供应商</td><td>通义百炼 <code>BaiLianChatClient</code>、硅基流动 <code>SiliconFlowChatClient</code>、<code>AIHubMixChatClient</code>、本地 <code>OllamaChatClient</code></td></tr><tr><td>MCP</td><td><code>io.modelcontextprotocol.sdk</code> 1.1.2（独立进程）</td></tr><tr><td>存储 / 消息</td><td>阿里云 OSS / AWS S3、RocketMQ、Redis / Redisson、Sa-Token 1.43</td></tr><tr><td>文档解析</td><td>Apache Tika 3.2.3、MinerU（API）、Apache POI、batik（SVG/图片）</td></tr><tr><td>并发</td><td><strong>8 个专用线程池</strong> + Transmittable-Thread-Local 2.14.5（上下文透传）</td></tr><tr><td>图谱</td><td>LightRAG 微服务（知识图谱检索通道）；前端 <code>@antv/g6</code> 可视化</td></tr><tr><td>数据库</td><td>PostgreSQL 主库，23 张 <code>t_</code> 业务表</td></tr></tbody></table>
+<h3 id="sec-140">1.3 四大 Maven 模块职责</h3>
+<table><thead><tr><th>模块</th><th>包根</th><th>职责</th></tr></thead><tbody><tr><td><code>framework</code></td><td><code>com.nageoffer.ai.ragent.framework</code></td><td>与业务无关的通用基建：统一响应、三级异常体系、分布式 ID（Snowflake）、双维度幂等、用户上下文、Trace 上下文、SSE 封装、Redis 键序列化、RocketMQ 封装</td></tr><tr><td><code>infra-ai</code></td><td><code>com.nageoffer.ai.ragent.infra</code></td><td>AI 基础设施层，屏蔽模型供应商差异：chat / embedding / rerank / vlm 客户端、模型路由与熔断、Token 计数</td></tr><tr><td><code>bootstrap</code></td><td><code>com.nageoffer.ai.ragent</code></td><td>业务装配与编排入口：RAG 检索 / 意图 / 记忆 / 提示词、知识库、入库流水线、权限、管理后台</td></tr><tr><td><code>mcp-server</code></td><td><code>com.nageoffer.ai.ragent.mcp</code></td><td>独立 MCP 服务进程，暴露业务工具给 Agent 调用</td></tr></tbody></table>
+<p>---</p>
+<h2 id="sec-141">二、架构分层思想</h2>
+<h3 id="sec-142">2.1 三层职责链路</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>framework  →  infra-ai  →  bootstrap
+(横切能力)    (屏蔽供应商)   (业务逻辑)</code></pre>
+<ul><li><strong>framework</strong>：提供与业务无关的通用能力（异常、ID、幂等、上下文透传、SSE）。换业务逻辑不动它。</li><li><strong>infra-ai</strong>：把不同模型供应商的差异收敛到统一接口后面。换模型供应商不碰业务代码。</li><li><strong>bootstrap</strong>：专注业务编排（RAG 流水线、意图、知识库、入库、权限）。</li></ul>
+<h3 id="sec-143">2.2 为什么这么分</h3>
+<p>分层不是为了炫技，而是解决实际问题：<strong>换模型供应商不用改业务代码，换业务逻辑不用动基础设施</strong>。<code>infra-ai</code> 里实现 <code>ChatClient</code> 接口即可参与路由，<code>bootstrap</code> 完全无感知。</p>
+<p>---</p>
+<h2 id="sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</h2>
+<h3 id="sec-145">3.1 总览（流水线阶段编排）</h3>
+<p>入口：<code>RAGChatController</code> → <code>RAGChatServiceImpl.streamChat()</code>，主流程由 <strong><code>StreamChatPipeline</code></strong>（<code>rag/service/pipeline/StreamChatPipeline.java</code>）按阶段串联，采用「私有阶段方法 + boolean 短路返回」的轻量编排：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>streamChat()
+ ├─ ChatQueueLimiter.enqueue()          <span class="tok-cmt">// 队列式分布式限流</span>
+ ├─ StreamChatTraceRunner.run()         <span class="tok-cmt">// 全链路 Trace 包裹</span>
+ └─ StreamChatPipeline.execute(ctx)     <span class="tok-cmt">// 流水线编排</span>
+     ├─ <span class="tok-num">1</span>. loadMemory(ctx)              <span class="tok-cmt">// 会话记忆加载</span>
+     ├─ <span class="tok-num">2</span>. rewriteQuery(ctx)            <span class="tok-cmt">// 问题改写 + 子问题拆分</span>
+     ├─ <span class="tok-num">3</span>. resolveIntents(ctx)          <span class="tok-cmt">// 意图识别</span>
+     ├─ <span class="tok-num">4</span>. handleGuidance(ctx)          <span class="tok-cmt">// 歧义引导（置信度不足追问）</span>
+     ├─ <span class="tok-num">5</span>. handleSystemOnly(ctx)        <span class="tok-cmt">// 纯 SYSTEM 意图：直连 LLM 回复</span>
+     ├─ <span class="tok-num">6</span>. retrieve(ctx)                <span class="tok-cmt">// 多路检索</span>
+     └─ <span class="tok-num">7</span>. streamRagResponse(ctx)       <span class="tok-cmt">// 组装 Prompt + 流式输出</span></code></pre>
+<h3 id="sec-146">3.2 阶段 1：会话记忆加载</h3>
+<p><code>ConversationMemoryService.loadAndAppend</code> 加载历史消息。难点不是「存」，而是<strong>记忆压缩</strong>：20 轮对话全塞给模型 Token 成本扛不住；只带最近几轮又可能丢关键信息。Ragent 用「滑动窗口 + 自动摘要压缩 + TTL 过期」平衡，避免长对话 OOM / Token 爆炸。</p>
+<h3 id="sec-147">3.3 阶段 2：问题改写与子问题拆分</h3>
+<p><code>QueryRewriteService.rewriteWithSplit</code>（及 <code>MultiQuestionRewriteService</code>）把用户口语 / 多轮上下文重写为规范子问题：</p>
+<ul><li>用户输入「报销咋整」→ 改写为规范查询；</li><li>多轮里说「怎么申请」→ 补上下文，否则系统不知道在问啥；</li><li>复杂问题拆分为多个子问题分别检索，再融合。</li><li>另有 <code>QueryTermMappingService</code> 做同义词 / 术语映射（如「墨盒」↔「墨盒更换」），提升召回。</li></ul>
+<h3 id="sec-148">3.4 阶段 3：意图识别（树形多级）</h3>
+<ul><li>意图节点 <code>IntentNode</code>：<code>id / parentId / children / level / description / examples / kind</code>，<code>kind</code> 分三类：</li><li><strong>KB</strong>：走知识库检索；</li><li><strong>SYSTEM</strong>：系统应答（直连 LLM，不走检索）；</li><li><strong>MCP</strong>：调用业务工具。</li><li>分类器 <code>DefaultIntentClassifier</code>：一次性把全部叶子节点喂给 LLM 打分（<code>temperature=0.1</code>），返回 <code>List&lt;NodeScore&gt;</code>，结果缓存于 Redis（<code>IntentTreeCacheManager</code>）。</li><li>解析器 <code>IntentResolver.resolve</code>：按子问题并发分类，过滤 <code>score &gt;= INTENT_MIN_SCORE</code>、上限 <code>MAX_INTENT_COUNT</code>，按 KB / MCP 拆成 <code>IntentGroup</code>。</li><li>新增意图节点只需建库，<code>IntentNodeRegistry</code> 自动注册。</li></ul>
+<h3 id="sec-149">3.5 阶段 4：歧义引导</h3>
+<p><code>IntentGuidanceService</code> + <code>AmbiguityLLMChecker</code>：当置信度不足时返回澄清提示，让用户补充信息，<strong>不直接检索</strong>。这是「RAG 常见误区」里强调的工程细节——走错路答案必错。</p>
+<h3 id="sec-150">3.6 阶段 5：多路检索 ★</h3>
+<p>引擎 <code>MultiChannelRetrievalEngine.retrieveKnowledgeChannels</code>：</p>
+<ul><li><strong>检索通道接口 <code>SearchChannel</code></strong>，实现类：</li><li><code>VectorSearchChannel</code>（向量，内部按意图置信度二选一：命中库 <code>IntentParallelRetriever</code> / 全库 <code>CollectionParallelRetriever</code>）</li><li><code>KeywordSearchChannel</code>（ES 关键词，精确匹配订单号等向量弱项）</li><li><code>WebSearchChannel</code>（联网检索）</li><li><code>GraphSearchChannel</code>（知识图谱，接 LightRAG）</li><li>所有通道通过 <code>CompletableFuture</code> + <code>ragRetrievalExecutor</code> 线程池<strong>并行</strong>执行。</li><li><strong>后处理责任链</strong>（接口 <code>SearchResultPostProcessor</code>，按 <code>getOrder()</code> 排序）：</li><li><code>DeduplicationPostProcessor</code>（去重）</li><li><code>FusionPostProcessor</code>（多通道融合，<strong>RRF 倒数排名融合</strong>）</li><li><code>RerankPostProcessor</code>（精排，调 <code>RerankClient</code>）</li><li><code>MetadataEnrichmentPostProcessor</code>（元数据富化，补文档标题等）</li></ul>
+<blockquote>纯向量检索对精确匹配很弱（用户问订单号找不到），所以必须<strong>混合检索 + 重排序</strong>。</blockquote>
+<h3 id="sec-151">3.7 阶段 6：Prompt 组装与流式输出</h3>
+<p><code>streamRagResponse</code> 把检索到的上下文 + 会话记忆 + 系统提示组装成 Prompt，通过 <code>SseEmitterSender</code>（framework 提供的线程安全 SSE 封装）实时推送。<code>RoutingLLMService</code> 流式调用时用 <code>ProbeStreamBridge</code> + <code>LlmFirstPacketProbe</code> 做<strong>首包探测</strong>——首个模型首包超时即切换下一个，用户无感知。</p>
+<h3 id="sec-152">3.8 一张图看懂调用链（文字时序）</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Code</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>用户 → Controller.streamChat
+     → ChatQueueLimiter 入队（Redis ZSET + Lua 原子判队头）
+     → StreamChatTraceRunner（AOP 全链路 Trace 开始）
+     → Pipeline:
+        记忆 ← MySQL
+        改写 ← LLM
+        意图 ← LLM（Redis 缓存意图树）
+        检索 ← 向量/关键词/联网/图谱 并行 → 去重→融合(RRF)→重排→富化
+        生成 ← LLM（首包探测 + 降级） → SSE 流式回前端
+     → Trace 落库（t_rag_trace_run / t_rag_trace_node）</code></pre>
+<p>---</p>
+<h2 id="sec-153">四、知识库入库链路（Ingestion Pipeline）</h2>
+<p>文档从上传到可检索，经过一条<strong>基于节点编排的 Pipeline</strong>：</p>
+<h3 id="sec-154">4.1 五种节点类型（接口 <code>IngestionNode</code>）</h3>
+<table><thead><tr><th>节点</th><th>作用</th><th>关键类</th></tr></thead><tbody><tr><td><code>FetcherNode</code></td><td>拉取（本地 / HTTP / 飞书）</td><td><code>strategy/fetcher/</code></td></tr><tr><td><code>ParserNode</code></td><td>解析（Tika / Markdown / Excel / CSV / MinerU / 图片）</td><td><code>core/parser/</code></td></tr><tr><td><code>ChunkerNode</code></td><td>分块（固定长度 / 结构感知）</td><td><code>StructuredChunkingService</code></td></tr><tr><td><code>EnhancerNode</code></td><td>LLM 增强（如 QA 生成）</td><td>—</td></tr><tr><td><code>IndexerNode</code></td><td>生成 embedding → 写入向量库</td><td><code>VectorStoreAdmin</code> / <code>VectorStoreService</code></td></tr></tbody></table>
+<h3 id="sec-155">4.2 链式执行引擎</h3>
+<p><code>IngestionEngine</code> 基于「节点连线」链式执行（非 DAG）：<code>PipelineDefinition</code> 描述节点与 <code>nextNodeId</code>，从起始节点顺链执行；<code>validatePipeline</code> 检测环；支持 <code>ConditionEvaluator</code> 条件执行、<code>NodeOutputExtractor</code> 输出链式传递。<strong>每个节点和任务都有独立 <code>NodeLog</code></strong>，出问题能精确定位到哪一步。</p>
+<h3 id="sec-156">4.3 切片策略与写入</h3>
+<p><code>BlockAwareChunkerDispatcher</code> 按块类型（标题 / 段落 / 代码 / 表格 / 列表 / 图片）智能切分；<code>ChunkingStrategyFactory</code> 选择策略。Embedding 由 <code>ChunkEmbeddingService</code> 调用 <code>RoutingEmbeddingService</code> 生成，再写入 Milvus / PGVector（支持增量更新，不每次全量重建索引）。</p>
+<p>---</p>
+<h2 id="sec-157">五、模型路由与故障转移</h2>
+<p>全部在 <code>infra-ai/.../model/</code> 与 <code>infra/chat/</code>：</p>
+<ul><li><strong>模型选择器 <code>ModelSelector</code></strong>：chat 组走<strong>档位（Tier）</strong>机制（<code>defaultTier</code> / <code>deepThinkingTier</code>，深度思考路由到支持 thinking 的模型）；embedding / rerank / vlm 走 <code>defaultModel + priority</code> 排序。</li><li><strong>三态断路器 <code>ModelHealthStore</code></strong>：<code>CLOSED → OPEN → HALF_OPEN</code>，<code>consecutiveFailures &gt;= failureThreshold</code> 自动熔断，冷却期后放行探测，成功恢复失败继续熔断。</li><li><strong>路由执行器 <code>ModelRoutingExecutor.executeWithFallback</code></strong>：遍历候选，调用前 <code>healthStore.allowCall</code>，失败 <code>markFailure</code> 切下一个，全失败抛 <code>RemoteException</code>。</li><li><strong>首包探测 <code>RoutingLLMService</code> + <code>LlmFirstPacketProbe</code></strong>：流式首个模型首包超时 / 无内容即 <code>markFailure</code> 并切换下一个，业务层无感知。</li></ul>
+<p>---</p>
+<h2 id="sec-158">六、多路检索深挖</h2>
+<h3 id="sec-159">6.1 检索通道</h3>
+<table><thead><tr><th>通道</th><th>解决什么</th><th>实现</th></tr></thead><tbody><tr><td>向量检索</td><td>语义理解（「墨盒」≈「墨盒更换」）</td><td><code>VectorSearchChannel</code></td></tr><tr><td>关键词检索</td><td>精确匹配（订单号、专有名词）</td><td><code>KeywordSearchChannel</code>（ES）</td></tr><tr><td>联网检索</td><td>库外实时信息</td><td><code>WebSearchChannel</code></td></tr><tr><td>图谱检索</td><td>实体关系推理</td><td><code>GraphSearchChannel</code>（LightRAG）</td></tr></tbody></table>
+<h3 id="sec-160">6.2 后处理责任链</h3>
+<p>多通道结果通过责任链逐步精炼：<strong>去重 → RRF 倒数排名融合 → 重排（RerankClient）→ 元数据富化</strong>。<code>RerankClient</code> 有 <code>BaiLianRerankClient</code>（通义）与 <code>NoopRerankClient</code>（空操作）两种实现。</p>
+<h3 id="sec-161">6.3 向量库双支持</h3>
+<p><code>VectorStoreService</code> 两个实现 <code>MilvusVectorStoreService</code> / <code>PgVectorVectorStoreService</code>；门面 <code>VectorRetrieverService</code> 支持 <code>supportsGlobalRetrieval()</code>（PG 单 SQL 跨库，Milvus 逐库 fan-out）。</p>
+<p>---</p>
+<h2 id="sec-162">七、意图识别体系</h2>
+<ul><li><strong>意图树</strong>：<code>IntentNode</code> 多级分类，<code>kind ∈ {KB, SYSTEM, MCP}</code>，数据来自 <code>IntentNodeMapper</code> → 组装成树 → Redis 缓存。</li><li><strong>分类器</strong>：<code>DefaultIntentClassifier</code> 一次性 LLM 打分（温度 0.1）。</li><li><strong>解析器</strong>：<code>IntentResolver.resolve</code> 按子问题并发分类、过滤低分、按类型分组。</li><li><strong>注册表</strong>：<code>IntentNodeRegistry</code> 自动发现，新增意图零配置。</li><li><code>init_intent_node.sql</code> 是意图树种子数据。</li></ul>
+<p>---</p>
+<h2 id="sec-163">八、MCP 工具调用</h2>
+<p><code>mcp-server</code> 是<strong>独立 Spring Boot 进程</strong>，暴露的工具（<code>mcp/executor/</code>，均注册为 <code>McpServerFeatures.SyncToolSpecification</code>）：</p>
+<ul><li><code>WeatherMcpExecutor</code>（<code>weather_query</code>，城市天气）</li><li><code>SalesMcpExecutor</code>（销售类业务工具）</li><li><code>TicketMcpExecutor</code>（工单类工具）</li><li><code>YouComSearchMcpExecutor</code>（You.com 搜索）</li></ul>
+<p>Agent 侧（<code>bootstrap</code> 的 <code>rag/core/mcp/</code>）：</p>
+<ul><li><code>DefaultMcpToolRegistry</code>：注册表自动发现；</li><li><code>LLMMcpParameterExtractor</code>：用 LLM 从问题提取工具参数（缺必填参 → 注入澄清提示让 LLM 追问，不调用）；</li><li><code>RetrievalEngine.executeMcpTools</code> 按 <code>mcpBatchExecutor</code> 线程池并发调用，结果经 <code>ContextFormatter.formatMcpContext</code> 进入 Prompt。</li></ul>
+<p>意图树中 <code>kind=MCP</code> 节点绑定 <code>mcpToolId</code>，检索阶段筛选后自动提参调用，实现「检索与工具无缝融合」。</p>
+<p>---</p>
+<h2 id="sec-164">九、多租户与管理后台</h2>
+<ul><li><strong>多租户隔离</strong>：知识库维度隔离——每个 KB 对应独立 <code>collectionName</code>（Milvus collection / PGVector 表），<code>IntentNode.kbId + collectionName</code> 绑定；<code>VectorSearchChannel</code> 按意图置信度收窄到命中库或全库兜底。</li><li><strong>知识库管理</strong>：<code>KnowledgeBaseController</code> / <code>KnowledgeDocumentController</code> / <code>KnowledgeChunkController</code>，实体 <code>t_knowledge_base</code> / <code>t_knowledge_document</code> / <code>t_knowledge_chunk</code> / <code>t_knowledge_vector</code>。</li><li><strong>全链路 Trace</strong>：AOP <code>@RagTraceNode</code>（<code>framework/trace/</code> + <code>rag/aop/RagTraceAspect.java</code>），运行记录落 <code>t_rag_trace_run</code> / <code>t_rag_trace_node</code>。</li><li><strong>管理后台（前端）</strong>：基于 React 18 + TypeScript + Vite 的管控台，覆盖仪表盘、知识库、意图树、入库流水线、Trace、用户与审计等页面（<code>frontend/src/pages/admin/</code>）。前端部分你已熟悉，此处不做展开，重点放在后端编排与数据模型上。</li><li><strong>鉴权</strong>：<code>user/</code> 包基于 <strong>Sa-Token</strong>，<code>UserRole</code> 区分普通 / 管理员用户。</li></ul>
+<p>---</p>
+<h2 id="sec-165">十、设计模式实战（对照表）</h2>
+<p>Ragent 每个模式都对应一个具体工程问题：</p>
+<table><thead><tr><th>设计模式</th><th>应用场景</th><th>解决的问题</th></tr></thead><tbody><tr><td>策略模式</td><td><code>SearchChannel</code>、<code>SearchResultPostProcessor</code>、<code>MCPToolExecutor</code></td><td>检索通道 / 后处理器 / MCP 工具可插拔替换</td></tr><tr><td>工厂模式</td><td><code>IntentTreeFactory</code>、<code>StreamCallbackFactory</code></td><td>复杂对象创建逻辑集中管理</td></tr><tr><td>注册表模式</td><td><code>MCPToolRegistry</code>、<code>IntentNodeRegistry</code></td><td>组件自动发现与注册，新增工具零配置</td></tr><tr><td>模板方法</td><td><code>IngestionNode</code> 基类</td><td>入库节点统一执行流程，子类只关注核心逻辑</td></tr><tr><td>装饰器模式</td><td><code>ProbeBufferingCallback</code></td><td>不修改原有回调的前提下增加首包探测能力</td></tr><tr><td>责任链模式</td><td>后处理器链、模型降级链</td><td>多个处理步骤按顺序串联，灵活组合</td></tr><tr><td>观察者模式</td><td><code>StreamCallback</code></td><td>流式事件的异步通知</td></tr><tr><td>AOP</td><td><code>@RagTraceNode</code>、<code>@ChatRateLimit</code></td><td>链路追踪和限流逻辑与业务代码解耦</td></tr></tbody></table>
+<p>---</p>
+<h2 id="sec-166">十一、生产级工程特性</h2>
+<h3 id="sec-167">11.1 队列式分布式限流</h3>
+<p><code>ChatQueueLimiter</code>：<strong>Redis 信号 + 有序集合（ZSET）+ Pub/Sub 通知</strong>。请求先入 ZSET 排队，通过 <strong>Lua 脚本原子判断是否在队头窗口内</strong>再出队，信号量控制最大并发数并支持许可自动过期（防死锁）。跨实例通过 Pub/Sub 广播唤醒，本地合并通知避免惊群；排队超时自动踢出，全程 SSE 推送排队状态。</p>
+<h3 id="sec-168">11.2 8 线程池 + TTL 透传</h3>
+<p>按工作负载特征配置 <strong>8 个独立线程池</strong>（MCP 批量调用、RAG 上下文组装、多路检索、内部检索、意图分类、记忆摘要、模型流式输出、对话入口），队列类型和拒绝策略各不相同。所有线程池用 <code>TtlExecutors</code> 包装，确保用户上下文和 Trace 信息在异步线程中不丢失。</p>
+<h3 id="sec-169">11.3 全链路 Trace（AOP）</h3>
+<p><code>@RagTraceNode</code> + <code>@RagTraceAspect</code>：每个环节的耗时、输入输出、异常信息都有记录，落 <code>t_rag_trace_run</code> / <code>t_rag_trace_node</code>，可视化排查。</p>
+<h3 id="sec-170">11.4 会话记忆压缩</h3>
+<p>滑动窗口 + 自动摘要压缩 + TTL 过期，避免长对话 OOM / Token 爆炸。</p>
+<h3 id="sec-171">11.5 认证鉴权</h3>
+<p>基于 <strong>Sa-Token</strong> 的用户认证体系，不是裸奔的 API；<code>UserRole</code> 区分普通 / 管理员。</p>
+<h3 id="sec-172">11.6 其他生产特性</h3>
+<table><thead><tr><th>特性</th><th>说明</th></tr></thead><tbody><tr><td>限流</td><td>全局并发限制 + 用户级限流，防模型调用被打爆</td></tr><tr><td>熔断</td><td>模型健康检查 + 失败计数，自动熔断不可用模型</td></tr><tr><td>流式输出</td><td>SSE 实时推送，首包探测保证模型切换用户无感知</td></tr><tr><td>可观测性</td><td>基于 AOP 的全链路 Trace</td></tr></tbody></table>
+<p>---</p>
+<h2 id="sec-173">十二、可扩展性：新增 X 只需实现接口</h2>
+<p>核心模块都预留扩展点，<strong>不需要改框架代码、不需要改配置文件硬编码列表</strong>，加个实现类就完事：</p>
+<ul><li>新增检索通道：实现 <code>SearchChannel</code> 接口，注册为 Spring Bean，自动生效；</li><li>新增后处理器：实现 <code>SearchResultPostProcessor</code> 接口，自动加入处理链；</li><li>新增 MCP 工具：实现 <code>MCPToolExecutor</code> 接口，自动被 <code>DefaultMCPToolRegistry</code> 发现；</li><li>新增入库节点：实现 <code>IngestionNode</code> 接口，可插入 Pipeline 任意位置；</li><li>新增模型供应商：在 <code>infra-ai</code> 层实现 <code>ChatClient</code> 接口，配置候选列表即可参与路由。</li></ul>
+<p>---</p>
+<h2 id="sec-174">十三、学习路线与面试考点（自查）</h2>
+<p><strong>建议学习顺序</strong>：先把 <code>StreamChatPipeline</code> 的 7 个阶段断点跟一遍（理解一次问答全链路）→ 再深入 <code>MultiChannelRetrievalEngine</code> 多路检索与后处理责任链 → 然后啃 <code>IngestionEngine</code> 入库流水线 → 最后补 <code>ModelHealthStore</code> 模型容错与 <code>ChatQueueLimiter</code> 限流。</p>
+<p><strong>高频面试考点</strong>：</p>
+<ul><li>RAG 的完整链路有哪些环节？为什么不能「检索 + 生成」两步走？</li><li>多路检索为什么要并行？融合排序用什么算法（RRF）？</li><li>向量检索和关键词检索各自短板是什么？怎么互补？</li><li>意图识别为什么用树形 + LLM 打分？置信度不足怎么处理？</li><li>模型故障怎么做到业务无感知？（三态熔断 + 首包探测 + 降级链）</li><li>分布式限流怎么实现？（Redis ZSET + Lua + Pub/Sub）</li><li>异步线程池怎么保证 Trace / 用户上下文不丢？（TTL 透传）</li><li>文档入库为什么要用可编排 Pipeline 而不是写死脚本？</li><li>为什么自研 <code>infra-ai</code> 而不用 Spring AI / LangChain4j？</li></ul>
+<blockquote>把上面这些讲清楚，比背「我用了 GPT-4」有说服力得多——面试官要的是工程深度，不是模型名字。</blockquote></div></main><button class='to-top' id='toTop' onclick='scrollTopFn()'>↑</button><script>
+// ===== JS 增强（不执行时内容/目录/锚点跳转仍正常） =====
+const map = {};
+document.querySelectorAll('.nav-h2, .nav-h3').forEach(l => {
+  const id = l.getAttribute('href').slice(1);
+  const el = document.getElementById(id);
+  if (el) map[id] = l;
+});
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.nav-h2.active,.nav-h3.active').forEach(l => l.classList.remove('active'));
+      const a = map[e.target.id];
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '0px 0px -72% 0px', threshold: 0 });
+document.querySelectorAll('.content h1[id],.content h2[id],.content h3[id],.content h4[id]').forEach(h => obs.observe(h));
+
+const progress = document.getElementById('progress');
+const toTop = document.getElementById('toTop');
+function onScroll(){
+  const h = document.documentElement;
+  const sc = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+  progress.style.width = (sc * 100) + '%';
+  toTop.classList.toggle('show', window.scrollY > 420);
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+
+function onSearch(q){
+  q = q.trim().toLowerCase();
+  document.querySelectorAll('.nav-h2, .nav-h3').forEach(a => {
+    const t = a.textContent.toLowerCase();
+    a.style.display = (!q || t.indexOf(q) >= 0) ? '' : 'none';
+  });
+}
+
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  const b = document.getElementById('themeBtn');
+  if (b) b.innerHTML = (t === 'dark') ? '☀️ 亮色' : '🌙 暗色';
+  try { localStorage.setItem('jb_theme', t); } catch(e){}
+}
+function toggleTheme(){
+  const cur = (document.documentElement.dataset.theme === 'dark') ? 'light' : 'dark';
+  applyTheme(cur);
+}
+
+function buildFolds(){
+  const c = document.querySelector('.content');
+  if (!c || c.dataset.fb) return;
+  const nodes = Array.from(c.children);
+  let cur = null;
+  nodes.forEach(n => {
+    const t = n.tagName.toLowerCase();
+    if (t === 'h3') {
+      cur = document.createElement('div'); cur.className = 'fold';
+      c.insertBefore(cur, n.nextSibling); cur.appendChild(n);
+    } else if (t === 'h2' || t === 'h1') {
+      cur = null;
+    } else if (cur) {
+      cur.appendChild(n);
+    }
+  });
+  c.dataset.fb = '1';
+  c.querySelectorAll('h3').forEach(h => {
+    h.addEventListener('click', () => {
+      if (!document.body.classList.contains('review')) return;
+      const f = h.parentElement;
+      if (f && f.classList.contains('fold')) { f.classList.toggle('collapsed'); h.classList.toggle('open'); }
+    });
+  });
+}
+function toggleReview(){
+  const on = document.body.classList.toggle('review');
+  const b = document.getElementById('reviewBtn');
+  if (b) b.classList.toggle('on', on);
+  if (on) {
+    buildFolds();
+    document.querySelectorAll('.fold').forEach(f => f.classList.add('collapsed'));
+    document.querySelectorAll('.content h3').forEach(h => h.classList.remove('open'));
+  } else {
+    document.querySelectorAll('.fold').forEach(f => f.classList.remove('collapsed'));
+    document.querySelectorAll('.content h3').forEach(h => h.classList.remove('open'));
+  }
+  try { localStorage.setItem('jb_review', on ? '1' : '0'); } catch(e){}
+}
+
+function scrollTopFn(){ window.scrollTo({ top:0, behavior:'smooth' }); }
+function toggleMenu(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
+function closeMenu(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+
+(function(){
+  let t = 'light'; try { t = localStorage.getItem('jb_theme') || 'light'; } catch(e){} applyTheme(t);
+  let r = '0'; try { r = localStorage.getItem('jb_review') || '0'; } catch(e){} if (r === '1') toggleReview();
+  onScroll();
+})();
+</script></body></html>

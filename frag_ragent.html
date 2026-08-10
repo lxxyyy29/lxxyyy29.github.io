@@ -1,0 +1,77 @@
+<h2 id="sec-300">十四、源码导览：核心类速查表</h2>
+<p>对照源码逐类断点，比看十篇博客都管用。以下为各环节的<strong>真实类名与位置</strong>（包根 <code>com.nageoffer.ai.ragent</code>）：</p>
+<table><thead><tr><th>环节</th><th>核心类</th><th>关键方法 / 说明</th></tr></thead><tbody>
+<tr><td>入口</td><td><code>RAGChatController</code>（rag/controller/）</td><td><code>GET /rag/v3/chat</code>（SSE，<code>@IdempotentSubmit</code> 按 userId 防重）、<code>POST /rag/v3/stop</code></td></tr>
+<tr><td>服务编排</td><td><code>RAGChatServiceImpl</code></td><td>雪花 ID → <code>ChatQueueLimiter.enqueue</code> 排队 → <code>StreamChatTraceRunner</code> Trace 包裹 → <code>StreamChatPipeline.execute</code></td></tr>
+<tr><td>流水线</td><td><code>StreamChatPipeline</code>（rag/service/pipeline/）</td><td>loadMemory → rewriteQuery → resolveIntents → handleGuidance → handleSystemOnly → retrieve → handleEmptyRetrieval → streamRagResponse</td></tr>
+<tr><td>SSE 推送</td><td><code>SseEmitterSender</code>（framework/web/）</td><td>线程安全封装；事件枚举 <code>SSEEventType</code>：META / MESSAGE / FINISH / DONE / CANCEL / REJECT</td></tr>
+<tr><td>限流</td><td><code>FairDistributedRateLimiter</code>（rag/service/ratelimit/）</td><td>装配于 <code>ChatRateLimiterConfig</code>，限流器名 <code>rag:global:chat</code></td></tr>
+<tr><td>多路检索</td><td><code>MultiChannelRetrievalEngine</code></td><td>通道按 <code>getType().ordinal()</code> 排序，<code>CompletableFuture</code> 并行</td></tr>
+<tr><td>意图分类</td><td><code>DefaultIntentClassifier</code> / <code>IntentResolver</code></td><td>Prompt 模板 <code>prompt/intent-classifier.st</code>；结果缓存 <code>IntentTreeCacheManager</code></td></tr>
+<tr><td>入库引擎</td><td><code>IngestionEngine</code>（ingestion/）</td><td>按 <code>NodeConfig</code> 连线执行，<code>validatePipeline</code> 校验环</td></tr>
+<tr><td>模型路由</td><td><code>RoutingLLMService</code>（@Primary，infra-ai）</td><td>候选遍历 + 首包探测；非流式走 <code>ModelRoutingExecutor.executeWithFallback</code></td></tr>
+<tr><td>熔断</td><td><code>ModelHealthStore</code>（infra/model/）</td><td>三态 CLOSED / OPEN / HALF_OPEN</td></tr>
+<tr><td>记忆</td><td><code>DefaultConversationMemoryService</code></td><td><code>memoryLoadExecutor</code> 并行加载摘要与历史</td></tr>
+<tr><td>认证</td><td><code>SaTokenConfig</code> / <code>UserContextInterceptor</code></td><td>Sa-Token 拦截 <code>/**</code>，排除 <code>/auth/**</code>；用户上下文走 TTL</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-301">十五、关键机制深挖（源码级参数）</h2>
+<h3 id="sec-302">15.1 队列式限流的完整实现 ★</h3>
+<ul><li>Redis 键族（前缀 <code>rag:global:chat</code>）：<code>:semaphore</code>（<code>RPermitExpirableSemaphore</code> 带租约许可）、<code>:queue</code>（ZSET，score=队列序号）、<code>:queue:seq</code>（RAtomicLong 发号器）、<code>:queue:notify</code>（Pub-Sub 唤醒）、<code>:entry:&lt;requestId&gt;</code>（存活标记，TTL=等待预算+5s 缓冲）。</li>
+<li>Lua 脚本 <code>resources/lua/queue_claim_atomic.lua</code>：取队头窗口（maxRank+16 冗余），遍历中 <code>EXISTS</code> 校验存活标记，<strong>僵尸请求就地 ZREM 清理</strong>；存活名次在窗口内则原子出队并返回原 score（支持按原位次重入队）。</li>
+<li>Ticket 状态机：<code>PENDING → GRANTED / TIMED_OUT / CANCELLED</code>，单 CAS 保证终态互斥；超时轮询间隔 200ms，<code>PollNotifier</code> 合并通知防惊群。</li>
+<li>默认参数（<code>RAGRateLimitProperties</code>）：<code>max-concurrent=50</code>、<code>max-wait-seconds=20</code>、permit 租约 <code>lease-seconds=600</code>（兜底防许可泄漏）。被拒时回写会话记忆并推送 <code>REJECT</code> 事件（文案「系统繁忙，请稍后再试」）。</li></ul>
+<h3 id="sec-303">15.2 RRF 融合与后处理责任链（精确参数）</h3>
+<ul><li>后处理器顺序（<code>getOrder()</code>）：去重 <code>DeduplicationPostProcessor</code>=1 → 融合 <code>FusionPostProcessor</code>=5 → 精排 <code>RerankPostProcessor</code>=10 → 元数据富化 <code>MetadataEnrichmentPostProcessor</code>=20。</li>
+<li>RRF 公式（<code>FusionPostProcessor.fuseByRrf</code>）：<code>score = Σ weight_channel / (k + rank + 1)</code>，k 取配置 <code>fusion.rrfK</code>，各通道权重来自 <code>fusion.channel-weights</code>（vector / keyword / graph / webSearch / default）；融合后按 <code>candidateLimit</code> 截断再送 Rerank。</li>
+<li>Rerank 链路：<code>RerankPostProcessor</code> → <code>RoutingRerankService</code> → <code>RerankClient</code>（<code>BaiLianRerankClient</code> / <code>NoopRerankClient</code>），总开关 <code>rag.rerank-enabled</code>。</li></ul>
+<h3 id="sec-304">15.3 模型熔断与首包探测（精确参数）</h3>
+<ul><li>三态熔断：<code>CLOSED → OPEN</code>（连续失败达 <code>ai.selection.failureThreshold=2</code>）→ 30s（<code>openDurationMs=30000</code>）后进 <code>HALF_OPEN</code>，半开<strong>只放单个探针</strong>，成功即闭合。</li>
+<li>流式容错：<code>RoutingLLMService.streamChat</code> 按 <code>ModelSelector</code> 给出的候选顺序逐个尝试，每个候选用 <code>ProbeStreamBridge</code> 包装回调，<code>LlmFirstPacketProbe</code> 以该模型 <code>timeoutMs</code> 为首包预算；ERROR / TIMEOUT / NO_CONTENT 一律 markFailure 并切换下一个，全部失败才 onError。</li>
+<li>降级顺序配置：<code>ai.chat.tiers.&lt;tier&gt;.candidates</code> 有序列表，顺序即降级顺序；分 <code>defaultTier</code> / <code>deepThinkingTier</code> 档位。</li></ul>
+<h3 id="sec-305">15.4 意图识别阈值与缓存</h3>
+<ul><li>阈值常量（<code>RAGConstant</code>）：<code>INTENT_MIN_SCORE = 0.35</code>、<code>MAX_INTENT_COUNT = 3</code>；分类采样 <code>temperature=0.1 / topP=0.3</code> 求稳。</li>
+<li><code>IntentResolver</code> 对子问题并行分类（<code>intentClassifyExecutor</code>），超限时「每子问题保底 1 个最高分 + 剩余按分数配额」。</li>
+<li>意图树缓存：Redis 键 <code>ragent:intent:tree</code>，TTL 7 天，节点增删改时主动失效。</li></ul>
+<h3 id="sec-306">15.5 会话记忆压缩参数</h3>
+<ul><li>配置前缀 <code>rag.memory</code>：<code>historyKeepTurns=8</code>（保留最近 8 轮原文）、<code>summaryStartTurns=9</code>（达到 9 条用户消息开始摘要）、<code>summaryMaxChars=200</code>、<code>summaryEnabled</code> 默认关闭。</li>
+<li>摘要覆盖约一半原文窗口（取中点 cutoff），滑出窗口后才重新生成；摘要调用用 <code>Tier.FAST</code> 档位模型、<code>temperature=0.3</code>。</li>
+<li>并发安全：摘要生成加分布式锁（键前缀 <code>ragent:memory:summary:lock:</code>），仅在 assistant 回复后异步触发。</li></ul>
+<hr class="sep">
+<h2 id="sec-307">十六、数据模型：核心表速查（PostgreSQL，23 张）</h2>
+<table><thead><tr><th>域</th><th>表</th><th>用途</th></tr></thead><tbody>
+<tr><td>会话</td><td><code>t_conversation</code> / <code>t_conversation_summary</code> / <code>t_message</code> / <code>t_message_feedback</code></td><td>会话、摘要、消息、点赞点踩反馈</td></tr>
+<tr><td>知识库</td><td><code>t_knowledge_base</code> / <code>t_knowledge_document</code> / <code>t_knowledge_chunk</code> / <code>t_knowledge_vector</code></td><td>库-文档-分块-向量（PGVector 落库）四级模型</td></tr>
+<tr><td>知识库运维</td><td><code>t_knowledge_document_chunk_log</code> / <code>t_knowledge_document_schedule(+_exec)</code></td><td>分块日志、文档定时刷新任务与执行记录</td></tr>
+<tr><td>意图</td><td><code>t_intent_node</code>（intentCode/parentCode 树形）</td><td>意图树持久化，启动时加载进 Redis</td></tr>
+<tr><td>入库</td><td><code>t_ingestion_pipeline(+_node)</code> / <code>t_ingestion_task(+_node)</code></td><td>Pipeline 定义与运行实例（节点级状态）</td></tr>
+<tr><td>观测</td><td><code>t_rag_trace_run</code> / <code>t_rag_trace_node</code> / <code>t_biz_change_log</code></td><td>链路追踪 run/节点两级 + 业务变更审计</td></tr>
+<tr><td>其他</td><td><code>t_user</code> / <code>t_sample_question</code> / <code>t_query_term_mapping</code></td><td>用户、示例问题、查询词同义映射</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-308">十七、线程池配置清单（面试可直接背）</h2>
+<p>定义于 <code>ThreadPoolExecutorConfig</code>（rag/config/），全部经 <code>TtlExecutors</code> 包装保证用户上下文 / Trace 跨线程透传：</p>
+<table><thead><tr><th>线程池</th><th>core / max</th><th>队列</th><th>拒绝策略</th><th>用途</th></tr></thead><tbody>
+<tr><td><code>mcpBatchExecutor</code></td><td>CPU / 2CPU</td><td>SynchronousQueue</td><td>CallerRuns</td><td>MCP 工具批量调用</td></tr>
+<tr><td><code>ragContextExecutor</code> / <code>ragRetrievalExecutor</code></td><td>4CPU / 4CPU</td><td>SynchronousQueue</td><td>CallerRuns</td><td>RAG 上下文组装 / 多路检索</td></tr>
+<tr><td><code>innerRetrievalExecutor</code></td><td>2CPU / 4CPU</td><td>LinkedBlockingQueue(100)</td><td>CallerRuns</td><td>库内并行检索</td></tr>
+<tr><td><code>intentClassifyExecutor</code></td><td>CPU / 2CPU</td><td>SynchronousQueue</td><td>CallerRuns</td><td>意图分类</td></tr>
+<tr><td><code>memorySummaryExecutor</code></td><td>1 / max(2,CPU/2)</td><td>LBQ(200)</td><td>CallerRuns</td><td>记忆摘要（刻意小并发保护 LLM）</td></tr>
+<tr><td><code>modelStreamExecutor</code> / <code>knowledgeChunkExecutor</code></td><td>max(2,CPU/2) / max(4,CPU)</td><td>LBQ(200)</td><td>AbortPolicy</td><td>模型流式输出 / 分块处理</td></tr>
+<tr><td><code>chatEntryExecutor</code></td><td>max-concurrent / max-concurrent</td><td>SynchronousQueue</td><td>AbortPolicy</td><td>对话入口，与限流许可数对齐</td></tr>
+</tbody></table>
+<ul><li><strong>设计要点</strong>：IO 密集池子大（4CPU）、保 LLM 的池子小（摘要）、入口池与限流许可严格对齐——「按工作负载特征隔离，而不是一个大池子打天下」。</li></ul>
+<hr class="sep">
+<h2 id="sec-309">十八、本地跑起来：中间件与启动顺序</h2>
+<ul><li>一键中间件 <code>docker-compose.local.yaml</code>：PostgreSQL 17 + pgvector（自动执行 <code>schema_pg.sql</code> + 初始化数据）、Redis 7、RustFS（S3 兼容对象存储）、RocketMQ 5.2.0（namesrv + broker，健康检查保证启动顺序）。</li>
+<li>可选栈：<code>milvus-stack-2.6.6.compose.yaml</code>（默认向量库）；ES 仅在 <code>rag.keyword.type=es</code> 时需要。</li>
+<li>启动顺序：compose 起中间件 → <code>RagentApplication</code>（bootstrap 主应用）→ 可选 <code>McpServerApplication</code>（端口 9099，端点 <code>/mcp</code>）。</li>
+<li>关键配置（<code>application.yaml</code>）：<code>ai.*</code>（模型/档位/熔断阈值）、<code>rag.rate-limit.global.*</code>、<code>rag.memory.*</code>、<code>rag.keyword.type</code>、<code>rag.storage.type</code>（oss/s3）、<code>fusion.rrfK</code> / <code>fusion.channel-weights</code>。</li>
+<li>内置 MCP 工具（mcp-server，实现类各带 <code>TOOL_ID</code>）：<code>weather_query</code>（天气）、<code>ticket_query</code>（工单）、<code>sales_query</code>（销售）、<code>youcom_search</code>（搜索）；bootstrap 侧 <code>DefaultMcpToolRegistry</code> 启动自动收集所有 <code>McpToolExecutor</code> Bean。</li></ul>
+<hr class="sep">
+<h2 id="sec-310">十九、面试怎么讲这个项目（加分话术）</h2>
+<ul><li><strong>讲链路不讲概念</strong>：「一次问答经过排队限流 → Trace 包裹 → 记忆加载 → 改写拆分 → 意图识别 → 多路检索 → RRF 融合 → Rerank → 首包探测流式输出」，一口气说完再问面试官想深入哪段。</li>
+<li><strong>讲数字不讲形容词</strong>：意图阈值 0.35、最多 3 个意图、熔断连续失败 2 次进入 OPEN 持续 30s、限流全局并发 50 排队 20s、记忆保留 8 轮——数字说明你真读过源码。</li>
+<li><strong>讲取舍不讲堆砌</strong>：为什么自研 infra-ai 不用 Spring AI（统一抽象 + 自主可控的熔断/首包探测）；为什么意图分类一次性打分而不是逐级调用（省 N 次 LLM 调用）；为什么混合检索（向量弱于精确匹配）。</li>
+<li><strong>主动暴露边界</strong>：记忆摘要默认关闭、红锁没用（Redisson 看门狗够用）、ES 可选——知道「哪里做了简化」比假装完美更可信。</li></ul>
+<blockquote>建议打开 IDE 对照本章类名逐个断点跟一遍 <code>StreamChatPipeline.execute</code>，一小时就能建立全链路肌肉记忆。</blockquote>

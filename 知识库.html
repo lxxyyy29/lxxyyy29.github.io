@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>知识库 · Java 八股 / Ragent / LangChain 1.0+ / Embabel / Spring AI</title><style>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>知识库 · Java 八股 / Ragent / LangChain 1.0+ / Embabel / Spring AI / 业务开发模板</title><style>
 :root{
   --bg:#f2efe7; --card:#fffdf8; --ink:#222a33; --ink2:#3d4650; --muted:#7a828c;
   --line:#e5dfcf; --gold:#a87c2a; --gold-2:#cfa553; --gold-soft:rgba(168,124,42,.10);
@@ -116,12 +116,23 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
 .search input:focus{border-color:var(--gold-2);background:rgba(255,255,255,.12);box-shadow:0 0 0 3px rgba(207,165,83,.18);}
 .search-hint{margin:6px 2px 0;font-size:11.5px;color:var(--gold-2);cursor:pointer;display:none;}
 .search-hint:hover{text-decoration:underline;}
-.tools{display:flex;gap:8px;padding:8px 16px 12px;}
+.tools{display:flex;flex-wrap:wrap;gap:8px;padding:8px 16px 12px;}
 .tools button{flex:1;padding:8px 6px;border:1px solid rgba(255,255,255,.16);border-radius:11px;
   background:rgba(255,255,255,.05);color:#dbe3ea;font-size:12.5px;cursor:pointer;transition:.16s;
   display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;}
 .tools button:hover{background:rgba(255,255,255,.13);}
 .tools button.on{background:var(--grad);border-color:transparent;color:#2a1f08;font-weight:700;}
+
+.search{position:relative;}
+.search-global{display:flex;align-items:center;gap:4px;padding:0 4px 0 2px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap;}
+.search-global input{width:14px;height:14px;accent-color:var(--gold);cursor:pointer;}
+.search-results{display:none;position:absolute;left:10px;right:10px;top:46px;max-height:62vh;overflow-y:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);z-index:60;padding:6px;}
+.search-results .sr-head{font-size:12px;color:var(--muted);padding:4px 8px 6px;}
+.search-results .sr-item{display:flex;gap:8px;align-items:baseline;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:13.5px;line-height:1.5;}
+.search-results .sr-item:hover{background:var(--gold-soft);}
+.search-results .sr-lib{flex:0 0 auto;font-weight:700;color:var(--gold);font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.search-results .sr-text{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.search-results .sr-more,.search-results .sr-empty{font-size:12px;color:var(--muted);padding:6px 8px;}
 
 .nav-scroll{padding:6px 12px 44px;overflow-y:auto;flex:1;position:relative;}
 .nav-scroll::-webkit-scrollbar{width:6px;}
@@ -177,6 +188,47 @@ h3{font-size:16.5px;font-weight:700;margin:26px 0 10px;color:var(--ink2);}
 .h3-prac:hover{background:var(--grad);color:#2a1f08;border-color:transparent;}
 .h3-prac.active{background:var(--gold);color:#fff;border-color:transparent;}
 h4{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--muted);}
+/* 标题上的收藏/笔记按钮 */
+.h-actions{display:inline-flex;gap:4px;margin-left:10px;vertical-align:middle;}
+.h-actions button{all:unset;cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;border-radius:7px;
+  opacity:.3;transition:.15s;filter:grayscale(1);}
+.h-actions button:hover{opacity:1;filter:none;background:var(--gold-soft);}
+.h-actions button.on{opacity:1;filter:none;}
+.h-fav.on{color:#f4c430;}
+.h-note.on{color:var(--gold);}
+/* 我的笔记与收藏 */
+.mn-sub{font-size:13px;font-weight:500;color:var(--muted);margin-left:6px;}
+.mn-tabs{display:flex;gap:8px;margin:12px 0 4px;}
+.mn-tab{flex:1;padding:8px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink2);
+  font-family:inherit;font-size:13px;cursor:pointer;transition:.15s;}
+.mn-tab:hover{background:var(--gold-soft);}
+.mn-tab.on{background:var(--grad);border-color:transparent;color:#2a1f08;font-weight:700;}
+.mn-tip{font-size:12.5px;color:var(--muted);margin:4px 2px 10px;}
+.mn-list{max-height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.mn-row{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:9px;transition:.12s;}
+.mn-row:hover{background:var(--gold-soft);}
+.mn-star{flex:0 0 auto;border:none;background:transparent;cursor:pointer;font-size:15px;opacity:.4;transition:.15s;}
+.mn-star.on{opacity:1;}
+.mn-title{flex:1;cursor:pointer;font-size:14px;color:var(--ink);line-height:1.45;}
+.mn-title:hover{color:var(--gold);text-decoration:underline;}
+.mn-note-badge{flex:0 0 auto;font-size:14px;min-width:18px;text-align:center;opacity:.4;cursor:pointer;}
+.mn-note-badge.on{opacity:1;}
+.mn-empty{color:var(--muted);font-size:13.5px;padding:18px 6px;text-align:center;}
+.note-area{width:100%;min-height:160px;resize:vertical;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+  background:var(--code-bg);color:var(--ink);font-family:inherit;font-size:14px;line-height:1.6;box-sizing:border-box;}
+.mn-favrow{display:flex;align-items:center;gap:7px;margin:12px 2px 4px;font-size:13.5px;color:var(--ink2);cursor:pointer;}
+.mn-favrow input{accent-color:var(--gold);width:15px;height:15px;}
+.m-btn.danger{color:#ff8a8a;}
+/* 最小可运行片段 */
+.kb-snippet{margin:16px 0;border:1px solid var(--code-bd);border-radius:12px;overflow:hidden;background:#0d141b;}
+.kb-snippet .sn-head{display:flex;justify-content:space-between;gap:10px;padding:6px 12px;background:#161b22;color:#c8a55e;
+  font-size:11.5px;font-family:"SFMono-Regular",Consolas,monospace;border-bottom:1px solid #202d39;}
+.kb-snippet .sn-head .sn-tag{color:#7fd1a6;}
+.kb-snippet pre{margin:0;padding:12px 14px;overflow-x:auto;color:#cfd8e0;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:12.5px;line-height:1.6;white-space:pre;}
+.kb-fig{margin:18px 0;text-align:center;}
+.kb-fig svg{max-width:100%;height:auto;}
+.kb-fig .fig-cap{font-size:12px;color:var(--muted);margin-top:8px;}
 p{margin:12px 0;}
 a{color:var(--gold);text-decoration:none;}
 a:hover{text-decoration:underline;}
@@ -521,6 +573,22 @@ body.review h3.open::before{content:"\25BE  ";}
   .ai-fab{right:16px;bottom:84px;}
   .to-top{right:16px;}
   .resume-tip{left:50%;top:64px;}
+  .monaco-mount{height:170px;}
+  .h-actions{margin-left:6px;}
+}
+@media (max-width:560px){
+  main.main{padding:60px 8px 36px;}
+  .content{padding:20px 14px;border-radius:13px;}
+  .page > h1{font-size:20px;}
+  h2{font-size:18px;padding-left:10px;}
+  h3{font-size:15px;}
+  .tools{gap:6px;padding:8px 12px 12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+  .tools button{flex:0 0 auto;font-size:11.5px;padding:7px 9px;}
+  .monaco-mount{height:150px;}
+  .prac .ed .lh{font-size:10px;}
+  .modal{max-width:100%;}
+  .mn-row{padding:9px 6px;}
+  .mn-title{font-size:13px;}
 }
 </style></head><body>
 <div class="progress" id="progress"></div>
@@ -529,23 +597,13 @@ body.review h3.open::before{content:"\25BE  ";}
 <aside class="sidebar" id="sidebar">
   <div class="brand"><div class="logo">📚</div><div><div class="t">知识库</div><div class="s" id="brandSub">Java 面试八股</div></div></div>
   <div class="lib-tabs" id="libTabs">
-    <button type="button" class="lib-tab active" data-lib="0" onclick="switchLib('0')"><span class="ic">☕</span><span class="nm">Java 八股</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'0')">×</span></button>
-    <button type="button" class="lib-tab" data-lib="1" onclick="switchLib('1')"><span class="ic">🤖</span><span class="nm">Ragent 项目</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'1')">×</span></button>
-    <button type="button" class="lib-tab" data-lib="2" onclick="switchLib('2')"><span class="ic">🔗</span><span class="nm">LangChain 1.0+</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'2')">×</span></button>
-    <button type="button" class="lib-tab" data-lib="3" onclick="switchLib('3')"><span class="ic">🤖</span><span class="nm">Embabel Agent</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'3')">×</span></button>
-    <button type="button" class="lib-tab" data-lib="4" onclick="switchLib('4')"><span class="ic">🌱</span><span class="nm">Spring AI</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'4')">×</span></button>
-    <button type="button" class="lib-tab" data-lib="5" onclick="switchLib('5')"><span class="ic">🧭</span><span class="nm">业务开发模板</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'5')">×</span></button>
+    <button type="button" class="lib-tab active" data-lib="0" onclick="switchLib('0')"><span class="ic">☕</span><span class="nm">Java 八股</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'0')">×</span></button><button type="button" class="lib-tab" data-lib="1" onclick="switchLib('1')"><span class="ic">🤖</span><span class="nm">Ragent 项目</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'1')">×</span></button><button type="button" class="lib-tab" data-lib="2" onclick="switchLib('2')"><span class="ic">🔗</span><span class="nm">LangChain 1.0+</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'2')">×</span></button><button type="button" class="lib-tab" data-lib="3" onclick="switchLib('3')"><span class="ic">🤖</span><span class="nm">Embabel Agent</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'3')">×</span></button><button type="button" class="lib-tab" data-lib="4" onclick="switchLib('4')"><span class="ic">🌱</span><span class="nm">Spring AI</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'4')">×</span></button><button type="button" class="lib-tab" data-lib="5" onclick="switchLib('5')"><span class="ic">🧭</span><span class="nm">业务开发模板</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'5')">×</span></button>
     <button type="button" class="lib-add" onclick="openLibModal()">＋ 新建知识库</button>
   </div>
-  <div class="search"><input id="search" type="text" placeholder="🔍 搜索当前知识库…" oninput="onSearch(this.value)"><div class="search-hint" id="searchHint" onclick="jumpOtherLib()"></div></div>
-  <div class="tools"><button id="themeBtn" onclick="toggleTheme()">🌙 暗色</button><button id="planBtn" onclick="openPlan()" title="AI 生成学习计划">📋 计划</button><button id="cardsBtn" onclick="startCards()" title="闪卡速记">🃏 闪卡</button><button id="dueBtn" onclick="openReview()" title="今日待复习">📅 复习<span class="badge" id="dueBadge" style="display:none"></span></button><button id="progBtn" onclick="resetProgress()" title="清空当前库的学习进度">↺ 重置</button></div>
+  <div class="search"><input id="search" type="text" placeholder="🔍 搜索当前知识库…" oninput="onSearch(this.value)"><label class="search-global" title="跨全部知识库搜索"><input type="checkbox" id="searchGlobal" onchange="onSearch(document.getElementById('search').value)">全局</label><div class="search-hint" id="searchHint" onclick="jumpOtherLib()"></div><div class="search-results" id="searchResults"></div></div>
+  <div class="tools"><button id="themeBtn" onclick="toggleTheme()">🌙 暗色</button><button id="planBtn" onclick="openPlan()" title="AI 生成学习计划">📋 计划</button><button id="cardsBtn" onclick="startCards()" title="闪卡速记">🃏 闪卡</button><button id="dueBtn" onclick="openReview()" title="今日待复习">📅 复习<span class="badge" id="dueBadge" style="display:none"></span></button><button id="progBtn" onclick="resetProgress()" title="清空当前库的学习进度">↺ 重置</button><button id="expBtn" onclick="exportData()" title="导出备份（自建库/进度/笔记/设置）">⬇ 备份</button><button id="impBtn" onclick="importData()" title="从备份文件恢复">⬆ 恢复</button><button id="myNotesBtn" onclick="openMyNotes()" title="我的笔记与收藏">📝 我的</button></div>
   <div class="nav-scroll">
-    <div class="nav-list show" data-lib="0"><div class="nav-group"><div class="nav-h1">Java 面试八股完整知识库（概念 + 业务实战）</div><a class="nav-h2" href="#sec-2">总目录</a></div><div class="nav-group"><div class="nav-h1">第一部分：核心知识点（八股速查）</div><a class="nav-h2" href="#sec-4">1. Java 基础</a><a class="nav-h3" href="#sec-5">1.1 谈谈 Java 的跨平台原理</a><a class="nav-h3" href="#sec-6">1.2 JDK、JRE、JVM 的关系</a><a class="nav-h3" href="#sec-7">1.3 基本数据类型 vs 包装类</a><a class="nav-h3" href="#sec-8">1.4 == 与 equals 的区别</a><a class="nav-h3" href="#sec-9">1.5 String、StringBuffer、StringBuilder</a><a class="nav-h3" href="#sec-10">1.6 String 为什么不可变？好处是什么？</a><a class="nav-h3" href="#sec-11">1.7 重写（Override）与重载（Overload）</a><a class="nav-h3" href="#sec-12">1.8 异常体系</a><a class="nav-h3" href="#sec-13">1.9 final、finally、finalize</a><a class="nav-h3" href="#sec-14">1.10 什么是反射？优缺点？</a><a class="nav-h2" href="#sec-15">2. 面向对象</a><a class="nav-h3" href="#sec-16">2.1 三大特性</a><a class="nav-h3" href="#sec-17">2.2 面向对象 vs 面向过程</a><a class="nav-h3" href="#sec-18">2.3 接口与抽象类的区别</a><a class="nav-h3" href="#sec-19">2.4 深拷贝 vs 浅拷贝</a><a class="nav-h2" href="#sec-20">3. 集合框架</a><a class="nav-h3" href="#sec-21">3.1 整体结构</a><a class="nav-h3" href="#sec-22">3.2 ArrayList vs LinkedList</a><a class="nav-h3" href="#sec-23">3.3 HashMap 原理（重点）</a><a class="nav-h3" href="#sec-24">3.4 ConcurrentHashMap</a><a class="nav-h3" href="#sec-25">3.5 HashSet 如何保证不重复</a><a class="nav-h3" href="#sec-26">3.6 fail-fast 与 fail-safe</a><a class="nav-h2" href="#sec-27">4. 并发与多线程（JUC）</a><a class="nav-h3" href="#sec-28">4.1 进程与线程</a><a class="nav-h3" href="#sec-29">4.2 创建线程的方式</a><a class="nav-h3" href="#sec-30">4.3 线程的生命周期</a><a class="nav-h3" href="#sec-31">4.4 synchronized 关键字</a><a class="nav-h3" href="#sec-32">4.5 volatile</a><a class="nav-h3" href="#sec-33">4.6 synchronized vs volatile</a><a class="nav-h3" href="#sec-34">4.7 锁分类</a><a class="nav-h3" href="#sec-35">4.8 CAS 是什么？有什么问题？</a><a class="nav-h3" href="#sec-36">4.9 线程池</a><a class="nav-h3" href="#sec-37">4.10 ThreadLocal</a><a class="nav-h2" href="#sec-38">5. JVM</a><a class="nav-h3" href="#sec-39">5.1 运行时数据区</a><a class="nav-h3" href="#sec-40">5.2 堆内存划分</a><a class="nav-h3" href="#sec-41">5.3 垃圾回收算法</a><a class="nav-h3" href="#sec-42">5.4 垃圾收集器</a><a class="nav-h3" href="#sec-43">5.5 如何判断对象可回收？</a><a class="nav-h3" href="#sec-44">5.6 双亲委派模型</a><a class="nav-h3" href="#sec-45">5.7 常见 OOM / 调优参数</a><a class="nav-h2" href="#sec-46">6. Java 8+ 新特性</a><a class="nav-h3" href="#sec-47">6.1 Lambda 表达式</a><a class="nav-h3" href="#sec-48">6.2 函数式接口</a><a class="nav-h3" href="#sec-49">6.3 Stream API</a><a class="nav-h3" href="#sec-50">6.4 新日期时间 API</a><a class="nav-h3" href="#sec-51">6.5 接口的 default / static 方法</a><a class="nav-h3" href="#sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</a><a class="nav-h2" href="#sec-53">7. I/O 与 NIO</a><a class="nav-h3" href="#sec-54">7.1 BIO / NIO / AIO</a><a class="nav-h3" href="#sec-55">7.2 NIO 核心组件</a><a class="nav-h2" href="#sec-56">8. 常见设计模式</a><a class="nav-h3" href="#sec-57">8.1 单例模式（双重检查锁）</a><a class="nav-h3" href="#sec-58">8.2 工厂 / 抽象工厂</a><a class="nav-h3" href="#sec-59">8.3 策略模式</a><a class="nav-h3" href="#sec-60">8.4 观察者模式</a><a class="nav-h3" href="#sec-61">8.5 代理模式</a><a class="nav-h3" href="#sec-62">8.6 装饰器模式</a><a class="nav-h2" href="#sec-63">9. MySQL 基础</a><a class="nav-h3" href="#sec-64">9.1 索引</a><a class="nav-h3" href="#sec-65">9.2 事务四大特性（ACID）</a><a class="nav-h3" href="#sec-66">9.3 事务隔离级别</a><a class="nav-h3" href="#sec-67">9.4 慢查询优化思路</a><a class="nav-h3" href="#sec-68">9.5 分库分表</a><a class="nav-h2" href="#sec-69">10. Redis 基础</a><a class="nav-h3" href="#sec-70">10.1 数据类型</a><a class="nav-h3" href="#sec-71">10.2 持久化</a><a class="nav-h3" href="#sec-72">10.3 缓存问题</a><a class="nav-h3" href="#sec-73">10.4 内存淘汰策略</a><a class="nav-h3" href="#sec-74">10.5 常见用途</a><a class="nav-h2" href="#sec-75">11. Spring / Spring Boot</a><a class="nav-h3" href="#sec-76">11.1 控制反转（IoC）与依赖注入（DI）</a><a class="nav-h3" href="#sec-77">11.2 Bean 作用域</a><a class="nav-h3" href="#sec-78">11.3 Bean 生命周期</a><a class="nav-h3" href="#sec-79">11.4 AOP</a><a class="nav-h3" href="#sec-80">11.5 Spring 事务</a><a class="nav-h3" href="#sec-81">11.6 Spring Boot 自动配置原理</a><a class="nav-h2" href="#sec-82">12. 计算机网络</a><a class="nav-h3" href="#sec-83">12.1 TCP 三次握手 / 四次挥手</a><a class="nav-h3" href="#sec-84">12.2 TCP 与 UDP 区别</a><a class="nav-h3" href="#sec-85">12.3 HTTP 与 HTTPS</a><a class="nav-h3" href="#sec-86">12.4 常见状态码</a><a class="nav-h3" href="#sec-87">12.5 浏览器输入 URL 到页面显示的过程</a><a class="nav-h2" href="#sec-88">13. 常见算法与数据结构</a><a class="nav-h3" href="#sec-89">13.1 数据结构</a><a class="nav-h3" href="#sec-90">13.2 排序算法速记</a><a class="nav-h3" href="#sec-91">13.3 刷题套路</a></div><div class="nav-group"><div class="nav-h1">第二部分：业务场景实战</div><a class="nav-h2" href="#sec-93">1. 集合：购物车与商品去重</a><a class="nav-h2" href="#sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</a><a class="nav-h2" href="#sec-95">3. synchronized / 锁：秒杀库存扣减</a><a class="nav-h2" href="#sec-96">4. volatile：系统开关与单例配置中心</a><a class="nav-h2" href="#sec-97">5. 线程池：异步通知与批量任务</a><a class="nav-h2" href="#sec-98">6. ThreadLocal：用户上下文与链路追踪</a><a class="nav-h2" href="#sec-99">7. JVM / GC：大促接口超时排查</a><a class="nav-h2" href="#sec-100">8. String：订单号与金额拼接</a><a class="nav-h2" href="#sec-101">9. 设计模式：支付与促销策略</a><a class="nav-h2" href="#sec-102">10. MySQL 索引：订单查询慢 SQL</a><a class="nav-h2" href="#sec-103">11. 事务：下单扣库存与转账</a><a class="nav-h2" href="#sec-104">12. Redis：缓存与分布式锁</a><a class="nav-h2" href="#sec-105">13. Spring：循环依赖 / AOP / 事务失效</a><a class="nav-h2" href="#sec-106">14. 网络：接口超时与 HTTPS</a><a class="nav-h2" href="#sec-107">15. 消息队列：下单异步解耦</a></div><div class="nav-group"><div class="nav-h1">第三部分：分布式与微服务专项</div><a class="nav-h2" href="#sec-109">1. 微服务与 Spring Cloud 生态</a><a class="nav-h3" href="#sec-110">1.1 微服务核心组件</a><a class="nav-h3" href="#sec-111">1.2 服务注册与发现原理</a><a class="nav-h3" href="#sec-112">1.3 网关（Gateway）作用</a><a class="nav-h3" href="#sec-113">1.4 负载均衡：Ribbon vs Nginx</a><a class="nav-h3" href="#sec-114">1.5 熔断、降级、限流</a><a class="nav-h2" href="#sec-115">2. 消息队列（MQ）</a><a class="nav-h3" href="#sec-116">2.1 为什么用 MQ</a><a class="nav-h3" href="#sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</a><a class="nav-h3" href="#sec-118">2.3 消息可靠性（不丢）</a><a class="nav-h3" href="#sec-119">2.4 重复消费与幂等</a><a class="nav-h3" href="#sec-120">2.5 消息积压处理</a><a class="nav-h3" href="#sec-121">2.6 顺序消息</a><a class="nav-h2" href="#sec-122">3. 分布式事务</a><a class="nav-h3" href="#sec-123">3.1 2PC / 3PC</a><a class="nav-h3" href="#sec-124">3.2 TCC（Try-Confirm-Cancel）</a><a class="nav-h3" href="#sec-125">3.3 消息最终一致性（常用）</a><a class="nav-h3" href="#sec-126">3.4 Seata</a><a class="nav-h3" href="#sec-127">3.5 最大努力通知</a><a class="nav-h2" href="#sec-128">4. 分布式锁与缓存一致性</a><a class="nav-h3" href="#sec-129">4.1 分布式锁方案</a><a class="nav-h3" href="#sec-130">4.2 缓存与 DB 一致性</a><a class="nav-h2" href="#sec-131">5. 分布式 ID 与分库分表</a><a class="nav-h3" href="#sec-132">5.1 分布式 ID 方案</a><a class="nav-h3" href="#sec-133">5.2 分库分表</a></div><div class="nav-group"><div class="nav-h1">附录 A：高频追问清单（自查）</div></div><div class="nav-group"><div class="nav-h1">附录 B：八股 → 业务的回答套路</div></div><div class="nav-group"><div class="nav-h1">第四部分：进阶高频补充（2026 新版考点）</div><a class="nav-h2" href="#sec-201">1. JDK 17 / 21 新特性（T0 必考）</a><a class="nav-h3" href="#sec-202">1.1 虚拟线程（Virtual Threads，Project Loom）★</a><a class="nav-h3" href="#sec-203">1.2 Sealed Classes / Records / Pattern Matching</a><a class="nav-h3" href="#sec-204">1.3 Structured Concurrency 与 Scoped Values</a><a class="nav-h2" href="#sec-205">2. 并发进阶（手写 AQS 是高频要求）</a><a class="nav-h3" href="#sec-206">2.1 AQS 原理 ★</a><a class="nav-h3" href="#sec-207">2.2 ReentrantLock vs synchronized</a><a class="nav-h3" href="#sec-208">2.3 CountDownLatch / CyclicBarrier / Semaphore</a><a class="nav-h3" href="#sec-209">2.4 原子类、LongAdder 与 StampedLock</a><a class="nav-h3" href="#sec-210">2.5 CompletableFuture 编排</a><a class="nav-h2" href="#sec-211">3. JVM 深入</a><a class="nav-h3" href="#sec-212">3.1 类加载过程与对象创建细节</a><a class="nav-h3" href="#sec-213">3.2 CMS / G1 / ZGC 对比与选型</a><a class="nav-h3" href="#sec-214">3.3 线上问题排查四板斧 ★</a><a class="nav-h2" href="#sec-215">4. MySQL 深入</a><a class="nav-h3" href="#sec-216">4.1 MVCC 原理 ★</a><a class="nav-h3" href="#sec-217">4.2 redo log / undo log / binlog 与两阶段提交</a><a class="nav-h3" href="#sec-218">4.3 行锁、间隙锁与死锁</a><a class="nav-h2" href="#sec-219">5. Redis 深入</a><a class="nav-h3" href="#sec-220">5.1 底层数据结构</a><a class="nav-h3" href="#sec-221">5.2 主从 / 哨兵 / Cluster</a><a class="nav-h3" href="#sec-222">5.3 bigkey 与 hotkey 治理</a><a class="nav-h3" href="#sec-223">5.4 分布式锁的正确姿势 ★</a><a class="nav-h2" href="#sec-224">6. Spring 深入</a><a class="nav-h3" href="#sec-225">6.1 循环依赖与三级缓存 ★</a><a class="nav-h3" href="#sec-226">6.2 Spring MVC 请求处理流程</a><a class="nav-h3" href="#sec-227">6.3 Spring Boot 3.x 变化（新版必问）</a><a class="nav-h3" href="#sec-228">6.4 AI 工程化趋势：Spring AI 与 RAG</a><a class="nav-h2" href="#sec-229">7. 高频场景题（设计思路模板）</a><a class="nav-h3" href="#sec-230">7.1 秒杀系统完整链路 ★</a><a class="nav-h3" href="#sec-231">7.2 短链系统</a><a class="nav-h3" href="#sec-232">7.3 排行榜与高并发计数</a><a class="nav-h3" href="#sec-233">7.4 百万数据导出</a><a class="nav-h3" href="#sec-234">7.5 接口幂等设计</a><a class="nav-h2" href="#sec-235">8. 2026 面试趋势与答题策略</a></div></div>
-    <div class="nav-list" data-lib="1"><div class="nav-group"><div class="nav-h1">Ragent 平台项目知识库（Agentic RAG 企业级实战）</div><a class="nav-h2" href="#sec-137">一、项目定位与技术栈</a><a class="nav-h3" href="#sec-138">1.1 它是什么</a><a class="nav-h3" href="#sec-139">1.2 技术栈全景</a><a class="nav-h3" href="#sec-140">1.3 四大 Maven 模块职责</a><a class="nav-h2" href="#sec-141">二、架构分层思想</a><a class="nav-h3" href="#sec-142">2.1 三层职责链路</a><a class="nav-h3" href="#sec-143">2.2 为什么这么分</a><a class="nav-h2" href="#sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</a><a class="nav-h3" href="#sec-145">3.1 总览（流水线阶段编排）</a><a class="nav-h3" href="#sec-146">3.2 阶段 1：会话记忆加载</a><a class="nav-h3" href="#sec-147">3.3 阶段 2：问题改写与子问题拆分</a><a class="nav-h3" href="#sec-148">3.4 阶段 3：意图识别（树形多级）</a><a class="nav-h3" href="#sec-149">3.5 阶段 4：歧义引导</a><a class="nav-h3" href="#sec-150">3.6 阶段 5：多路检索 ★</a><a class="nav-h3" href="#sec-151">3.7 阶段 6：Prompt 组装与流式输出</a><a class="nav-h3" href="#sec-152">3.8 一张图看懂调用链（文字时序）</a><a class="nav-h2" href="#sec-153">四、知识库入库链路（Ingestion Pipeline）</a><a class="nav-h3" href="#sec-154">4.1 五种节点类型（接口 IngestionNode）</a><a class="nav-h3" href="#sec-155">4.2 链式执行引擎</a><a class="nav-h3" href="#sec-156">4.3 切片策略与写入</a><a class="nav-h2" href="#sec-157">五、模型路由与故障转移</a><a class="nav-h2" href="#sec-158">六、多路检索深挖</a><a class="nav-h3" href="#sec-159">6.1 检索通道</a><a class="nav-h3" href="#sec-160">6.2 后处理责任链</a><a class="nav-h3" href="#sec-161">6.3 向量库双支持</a><a class="nav-h2" href="#sec-162">七、意图识别体系</a><a class="nav-h2" href="#sec-163">八、MCP 工具调用</a><a class="nav-h2" href="#sec-164">九、多租户与管理后台</a><a class="nav-h2" href="#sec-165">十、设计模式实战（对照表）</a><a class="nav-h2" href="#sec-166">十一、生产级工程特性</a><a class="nav-h3" href="#sec-167">11.1 队列式分布式限流</a><a class="nav-h3" href="#sec-168">11.2 8 线程池 + TTL 透传</a><a class="nav-h3" href="#sec-169">11.3 全链路 Trace（AOP）</a><a class="nav-h3" href="#sec-170">11.4 会话记忆压缩</a><a class="nav-h3" href="#sec-171">11.5 认证鉴权</a><a class="nav-h3" href="#sec-172">11.6 其他生产特性</a><a class="nav-h2" href="#sec-173">十二、可扩展性：新增 X 只需实现接口</a><a class="nav-h2" href="#sec-174">十三、学习路线与面试考点（自查）</a><a class="nav-h2" href="#sec-300">十四、源码导览：核心类速查表</a><a class="nav-h2" href="#sec-301">十五、关键机制深挖（源码级参数）</a><a class="nav-h3" href="#sec-302">15.1 队列式限流的完整实现 ★</a><a class="nav-h3" href="#sec-303">15.2 RRF 融合与后处理责任链（精确参数）</a><a class="nav-h3" href="#sec-304">15.3 模型熔断与首包探测（精确参数）</a><a class="nav-h3" href="#sec-305">15.4 意图识别阈值与缓存</a><a class="nav-h3" href="#sec-306">15.5 会话记忆压缩参数</a><a class="nav-h2" href="#sec-307">十六、数据模型：核心表速查（PostgreSQL，23 张）</a><a class="nav-h2" href="#sec-308">十七、线程池配置清单（面试可直接背）</a><a class="nav-h2" href="#sec-309">十八、本地跑起来：中间件与启动顺序</a><a class="nav-h2" href="#sec-310">十九、面试怎么讲这个项目（加分话术）</a></div></div>
-    <div class="nav-list" data-lib="2"><div class="nav-group"><div class="nav-h1">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</div><a class="nav-h2" href="#sec-401">一、定位与设计哲学</a><a class="nav-h3" href="#sec-4011">1.1 发布背景与时间线</a><a class="nav-h3" href="#sec-4012">1.2 设计哲学：一个 Agent 抽象</a><a class="nav-h2" href="#sec-402">二、包结构精简</a><a class="nav-h3" href="#sec-4021">2.1 主包 langchain 的命名空间</a><a class="nav-h3" href="#sec-4022">2.2 langchain-classic（旧代码救生艇）</a><a class="nav-h3" href="#sec-4023">2.3 安装与环境要求</a><a class="nav-h2" href="#sec-403">三、模型初始化 init_chat_model</a><a class="nav-h3" href="#sec-4031">3.1 统一初始化与多模型切换</a><a class="nav-h3" href="#sec-4032">3.2 厂商包与对接国产 / OpenAI 兼容模型</a><a class="nav-h2" href="#sec-404">四、工具定义 @tool</a><a class="nav-h3" href="#sec-4041">4.1 基础用法</a><a class="nav-h3" href="#sec-4042">4.2 结构化入参与状态注入</a><a class="nav-h2" href="#sec-405">五、消息与标准内容块 content_blocks</a><a class="nav-h3" href="#sec-4051">5.1 content_blocks：跨供应商统一</a><a class="nav-h3" href="#sec-4052">5.2 多模态消息</a><a class="nav-h3" href="#sec-4053">5.3 序列化与 LC_OUTPUT_VERSION</a><a class="nav-h2" href="#sec-406">六、构建智能体 create_agent</a><a class="nav-h3" href="#sec-4061">6.1 最小可运行的 Agent</a><a class="nav-h3" href="#sec-4062">6.2 system_prompt 与运行时 context</a><a class="nav-h3" href="#sec-4063">6.3 流式调用</a><a class="nav-h2" href="#sec-407">七、智能体中间件 Middleware</a><a class="nav-h3" href="#sec-4071">7.1 内置中间件</a><a class="nav-h3" href="#sec-4072">7.2 自定义中间件</a><a class="nav-h2" href="#sec-408">八、结构化输出 Structured Output</a><a class="nav-h3" href="#sec-4081">8.1 response_format + ToolStrategy</a><a class="nav-h3" href="#sec-4082">8.2 厂商原生结构化输出</a><a class="nav-h2" href="#sec-409">九、持久化与 LangGraph 运行时</a><a class="nav-h3" href="#sec-4091">9.1 Durable State 与断点恢复</a><a class="nav-h3" href="#sec-4092">9.2 人在回路 HITL</a><a class="nav-h2" href="#sec-410">十、RAG 与检索（1.0 的变化）</a><a class="nav-h3" href="#sec-4101">10.1 检索器迁移到 classic</a><a class="nav-h3" href="#sec-4102">10.2 用 create_agent + 检索工具做 RAG</a><a class="nav-h2" href="#sec-411">十一、迁移指南（0.x → 1.0）</a><a class="nav-h3" href="#sec-4111">11.1 常见 import 对照</a><a class="nav-h3" href="#sec-4112">11.2 升级步骤建议</a><a class="nav-h2" href="#sec-412">十二、实战：工具调用 Agent 完整示例</a><a class="nav-h2" href="#sec-413">十三、1.1 与版本演进（model profiles）</a><a class="nav-h2" href="#sec-414">十四、最佳实践与常见坑</a></div></div>
-    <div class="nav-list" data-lib="3"><div class="nav-group"><div class="nav-h1">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</div><a class="nav-h2" href="#sec-501">一、定位与背景</a><a class="nav-h3" href="#sec-5011">1.1 它解决什么问题</a><a class="nav-h3" href="#sec-5012">1.2 与 Spring AI / LangChain 的关系</a><a class="nav-h2" href="#sec-502">二、核心概念</a><a class="nav-h3" href="#sec-5021">2.1 五大支柱</a><a class="nav-h3" href="#sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</a><a class="nav-h2" href="#sec-503">三、快速开始</a><a class="nav-h3" href="#sec-5031">3.1 项目脚手架</a><a class="nav-h3" href="#sec-5032">3.2 配置与运行</a><a class="nav-h2" href="#sec-504">四、领域模型（强类型基石）</a><a class="nav-h3" href="#sec-5041">4.1 用 record / data class 表达类型</a><a class="nav-h3" href="#sec-5042">4.2 把行为暴露给 LLM</a><a class="nav-h2" href="#sec-505">五、@Agent / @Action / @AchievesGoal</a><a class="nav-h3" href="#sec-5051">5.1 Kotlin 示例：StarNewsFinder</a><a class="nav-h3" href="#sec-5052">5.2 Java 示例：BlogWriterAgent</a><a class="nav-h3" href="#sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</a><a class="nav-h2" href="#sec-506">六、AI 与 LLM 抽象</a><a class="nav-h3" href="#sec-5061">6.1 Ai 与 OperationContext</a><a class="nav-h3" href="#sec-5062">6.2 模型提供商与自定义 LLM</a><a class="nav-h2" href="#sec-507">七、规划引擎（GOAP / A*）</a><a class="nav-h3" href="#sec-5071">7.1 工作原理</a><a class="nav-h3" href="#sec-5072">7.2 为什么不是状态机</a><a class="nav-h2" href="#sec-508">八、工具与 ToolGroup</a><a class="nav-h3" href="#sec-5081">8.1 声明工具组</a><a class="nav-h3" href="#sec-5082">8.2 安全提示</a><a class="nav-h2" href="#sec-509">九、MCP 集成</a><a class="nav-h3" href="#sec-5091">9.1 作为 MCP 服务器暴露</a><a class="nav-h3" href="#sec-5092">9.2 消费 MCP 服务器</a><a class="nav-h2" href="#sec-510">十、RAG 与向量检索</a><a class="nav-h3" href="#sec-5101">10.1 embabel-agent-rag 模块</a><a class="nav-h2" href="#sec-511">十一、多智能体与 A2A</a><a class="nav-h3" href="#sec-5111">11.1 Agent 联邦</a><a class="nav-h2" href="#sec-512">十二、运行、调试与测试</a><a class="nav-h3" href="#sec-5121">12.1 Spring Shell 命令</a><a class="nav-h3" href="#sec-5122">12.2 单元测试</a><a class="nav-h2" href="#sec-513">十三、成本与预算意识</a><a class="nav-h3" href="#sec-5131">13.1 预算感知 Agent</a><a class="nav-h2" href="#sec-514">十四、最佳实践与常见坑</a><a class="nav-h3" href="#sec-5141">14.1 实践清单</a><a class="nav-h3" href="#sec-5142">14.2 迁移 / 版本注意</a></div></div>
-    <div class="nav-list" data-lib="4"><div class="nav-group"><div class="nav-h1">Spring AI 知识库（Java 生态的 AI 工程框架）</div><a class="nav-h2" href="#sec-601">一、定位与版本</a><a class="nav-h3" href="#sec-6011">1.1 设计目标</a><a class="nav-h3" href="#sec-6012">1.2 版本与模块</a><a class="nav-h2" href="#sec-602">二、核心 API 全景</a><a class="nav-h3" href="#sec-6021">2.1 能力矩阵</a><a class="nav-h3" href="#sec-6022">2.2 支持的厂商</a><a class="nav-h2" href="#sec-603">三、快速开始</a><a class="nav-h3" href="#sec-6031">3.1 起步依赖</a><a class="nav-h3" href="#sec-6032">3.2 第一个调用</a><a class="nav-h2" href="#sec-604">四、ChatClient Fluent API</a><a class="nav-h3" href="#sec-6041">4.1 链式调用</a><a class="nav-h3" href="#sec-6042">4.2 流式与默认值</a><a class="nav-h2" href="#sec-605">五、结构化输出</a><a class="nav-h3" href="#sec-6051">5.1 entity 映射到 POJO</a><a class="nav-h3" href="#sec-6052">5.2 让模型理解字段</a><a class="nav-h2" href="#sec-606">六、PromptTemplate</a><a class="nav-h3" href="#sec-6061">6.1 变量与外部资源</a><a class="nav-h2" href="#sec-607">七、模型提供商与 ChatOptions</a><a class="nav-h3" href="#sec-6071">7.1 切换模型与参数</a><a class="nav-h2" href="#sec-608">八、Embedding 与 VectorStore</a><a class="nav-h3" href="#sec-6081">8.1 注入与检索</a><a class="nav-h3" href="#sec-6082">8.2 可移植的元数据过滤</a><a class="nav-h2" href="#sec-609">九、文档 ETL 流水线</a><a class="nav-h3" href="#sec-6091">9.1 读 → 切 → 嵌 → 写</a><a class="nav-h2" href="#sec-610">十、工具调用（Tool Calling）</a><a class="nav-h3" href="#sec-6101">10.1 用 @Tool 定义工具</a><a class="nav-h3" href="#sec-6102">10.2 注册为 ToolCallback 并接线</a><a class="nav-h3" href="#sec-6103">10.3 2.0 的工具循环</a><a class="nav-h2" href="#sec-611">十一、Advisors API</a><a class="nav-h3" href="#sec-6111">11.1 拦截器链模式</a><a class="nav-h2" href="#sec-612">十二、对话记忆（Chat Memory）</a><a class="nav-h3" href="#sec-6121">12.1 记忆仓库与窗口</a><a class="nav-h2" href="#sec-613">十三、RAG 实战</a><a class="nav-h3" href="#sec-6131">13.1 RAG 与工具天然可组合</a><a class="nav-h3" href="#sec-6132">13.2 给模型明确指引</a><a class="nav-h2" href="#sec-614">十四、MCP 集成</a><a class="nav-h3" href="#sec-6141">14.1 暴露为 MCP 工具服务器</a><a class="nav-h3" href="#sec-6142">14.2 消费远程 MCP 服务器</a><a class="nav-h2" href="#sec-615">十五、评估（Evaluation）</a><a class="nav-h3" href="#sec-6151">15.1 相关性评估器</a><a class="nav-h2" href="#sec-616">十六、可观测性</a><a class="nav-h3" href="#sec-6161">16.1 开启观测</a><a class="nav-h2" href="#sec-617">十七、Spring Boot 自动配置与 Starters</a><a class="nav-h3" href="#sec-6171">17.1 约定优于配置</a><a class="nav-h2" href="#sec-618">十八、最佳实践与常见坑</a><a class="nav-h3" href="#sec-6181">18.1 实践清单</a><a class="nav-h3" href="#sec-6182">18.2 版本注意</a></div></div>
-    <div class="nav-list" data-lib="5"><div class="nav-group"><div class="nav-h1">后端业务项目开发模板（以 Ragent 为蓝本）</div><a class="nav-h2" href="#sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</a><a class="nav-h2" href="#sec-7001">一、阶段一：需求梳理与范围界定</a><a class="nav-h3" href="#sec-7002">1.1 功能需求：用「用户故事」拆，而不是用「我要做个系统」</a><a class="nav-h3" href="#sec-7003">1.2 非功能需求（NFR）：决定技术难度的往往是它</a><a class="nav-h3" href="#sec-7004">1.3 以 Ragent 模拟：需求怎么拆</a><a class="nav-h2" href="#sec-7005">二、阶段二：技术选型的总原则</a><a class="nav-h3" href="#sec-7006">2.1 先定约束，再选技术</a><a class="nav-h3" href="#sec-7007">2.2 自研 vs 开源 vs 云服务的权衡</a><a class="nav-h3" href="#sec-7008">2.3 选型要留「演进后路」</a><a class="nav-h2" href="#sec-7009">三、阶段三：总体架构设计</a><a class="nav-h3" href="#sec-7010">3.1 经典四层（自顶向下）</a><a class="nav-h3" href="#sec-7011">3.2 模块边界：用「限界上下文」思路分</a><a class="nav-h3" href="#sec-7012">3.3 以 Ragent 模拟：一次问答的数据流</a><a class="nav-h2" href="#sec-7013">四、阶段四：逐功能技术拆解（核心，含优缺点）</a><a class="nav-h3" href="#sec-7014">4.1 对话问答核心链路：SSE 还是 WebSocket？</a><a class="nav-h3" href="#sec-7015">4.2 并发限流：队列式限流 vs 令牌桶</a><a class="nav-h3" href="#sec-7016">4.3 检索增强（RAG）：向量 / 关键词 / 混合，怎么选？</a><a class="nav-h3" href="#sec-7017">4.4 意图识别：LLM 分类 vs 传统 ML/NLP</a><a class="nav-h3" href="#sec-7018">4.5 会话记忆与上下文压缩</a><a class="nav-h3" href="#sec-7019">4.6 模型路由与容错：多模型 / 熔断 / 降级 / 首包探测</a><a class="nav-h3" href="#sec-7020">4.7 知识库管理与文档入库 Pipeline</a><a class="nav-h3" href="#sec-7021">4.8 认证授权与多租户</a><a class="nav-h3" href="#sec-7022">4.9 可观测性：Trace / 日志 / 指标 / 审计</a><a class="nav-h3" href="#sec-7023">4.10 异步与消息队列（RocketMQ / Kafka）</a><a class="nav-h3" href="#sec-7024">4.11 文件与对象存储（S3 兼容）</a><a class="nav-h3" href="#sec-7025">4.12 多级缓存（Redis）</a><a class="nav-h2" href="#sec-7026">五、阶段五：数据存储设计</a><a class="nav-h3" href="#sec-7027">5.1 关系型库：PostgreSQL vs MySQL</a><a class="nav-h3" href="#sec-7028">5.2 向量库选型</a><a class="nav-h3" href="#sec-7029">5.3 表设计要点（以 Ragent 23 张表为参考）</a><a class="nav-h2" href="#sec-7030">六、阶段六：工程化与并发治理</a><a class="nav-h3" href="#sec-7031">6.1 线程池隔离：别一个大池子打天下</a><a class="nav-h3" href="#sec-7032">6.2 配置中心与环境管理</a><a class="nav-h3" href="#sec-7033">6.3 幂等与防重</a><a class="nav-h2" href="#sec-7034">七、阶段七：部署与运维</a><a class="nav-h3" href="#sec-7035">7.1 容器化起步</a><a class="nav-h3" href="#sec-7036">7.2 编排与高可用（K8s）</a><a class="nav-h3" href="#sec-7037">7.3 灰度与回滚</a><a class="nav-h3" href="#sec-7038">7.4 监控告警</a><a class="nav-h2" href="#sec-7039">八、阶段八：上线 Checklist 与复盘</a><a class="nav-h3" href="#sec-7040">8.1 上线前清单（逐项打勾）</a><a class="nav-h3" href="#sec-7041">8.2 复盘模板（每次上线后必做）</a><a class="nav-h2" href="#sec-7042">九、速查表：功能 → 技术 → 优缺点（一页背完）</a></div></div>
+    <div class="nav-list show" data-lib="0"><div class="nav-group"><div class="nav-h1">Java 面试八股完整知识库（概念 + 业务实战）</div><a class="nav-h2" href="#sec-2">总目录</a></div><div class="nav-group"><div class="nav-h1">第一部分：核心知识点（八股速查）</div><a class="nav-h2" href="#sec-4">1. Java 基础</a><a class="nav-h3" href="#sec-5">1.1 谈谈 Java 的跨平台原理</a><a class="nav-h3" href="#sec-6">1.2 JDK、JRE、JVM 的关系</a><a class="nav-h3" href="#sec-7">1.3 基本数据类型 vs 包装类</a><a class="nav-h3" href="#sec-8">1.4 == 与 equals 的区别</a><a class="nav-h3" href="#sec-9">1.5 String、StringBuffer、StringBuilder</a><a class="nav-h3" href="#sec-10">1.6 String 为什么不可变？好处是什么？</a><a class="nav-h3" href="#sec-11">1.7 重写（Override）与重载（Overload）</a><a class="nav-h3" href="#sec-12">1.8 异常体系</a><a class="nav-h3" href="#sec-13">1.9 final、finally、finalize</a><a class="nav-h3" href="#sec-14">1.10 什么是反射？优缺点？</a><a class="nav-h2" href="#sec-15">2. 面向对象</a><a class="nav-h3" href="#sec-16">2.1 三大特性</a><a class="nav-h3" href="#sec-17">2.2 面向对象 vs 面向过程</a><a class="nav-h3" href="#sec-18">2.3 接口与抽象类的区别</a><a class="nav-h3" href="#sec-19">2.4 深拷贝 vs 浅拷贝</a><a class="nav-h2" href="#sec-20">3. 集合框架</a><a class="nav-h3" href="#sec-21">3.1 整体结构</a><a class="nav-h3" href="#sec-22">3.2 ArrayList vs LinkedList</a><a class="nav-h3" href="#sec-23">3.3 HashMap 原理（重点）</a><a class="nav-h3" href="#sec-24">3.4 ConcurrentHashMap</a><a class="nav-h3" href="#sec-25">3.5 HashSet 如何保证不重复</a><a class="nav-h3" href="#sec-26">3.6 fail-fast 与 fail-safe</a><a class="nav-h2" href="#sec-27">4. 并发与多线程（JUC）</a><a class="nav-h3" href="#sec-28">4.1 进程与线程</a><a class="nav-h3" href="#sec-29">4.2 创建线程的方式</a><a class="nav-h3" href="#sec-30">4.3 线程的生命周期</a><a class="nav-h3" href="#sec-31">4.4 synchronized 关键字</a><a class="nav-h3" href="#sec-32">4.5 volatile</a><a class="nav-h3" href="#sec-33">4.6 synchronized vs volatile</a><a class="nav-h3" href="#sec-34">4.7 锁分类</a><a class="nav-h3" href="#sec-35">4.8 CAS 是什么？有什么问题？</a><a class="nav-h3" href="#sec-36">4.9 线程池</a><a class="nav-h3" href="#sec-37">4.10 ThreadLocal</a><a class="nav-h2" href="#sec-38">5. JVM</a><a class="nav-h3" href="#sec-39">5.1 运行时数据区</a><a class="nav-h3" href="#sec-40">5.2 堆内存划分</a><a class="nav-h3" href="#sec-41">5.3 垃圾回收算法</a><a class="nav-h3" href="#sec-42">5.4 垃圾收集器</a><a class="nav-h3" href="#sec-43">5.5 如何判断对象可回收？</a><a class="nav-h3" href="#sec-44">5.6 双亲委派模型</a><a class="nav-h3" href="#sec-45">5.7 常见 OOM / 调优参数</a><a class="nav-h2" href="#sec-46">6. Java 8+ 新特性</a><a class="nav-h3" href="#sec-47">6.1 Lambda 表达式</a><a class="nav-h3" href="#sec-48">6.2 函数式接口</a><a class="nav-h3" href="#sec-49">6.3 Stream API</a><a class="nav-h3" href="#sec-50">6.4 新日期时间 API</a><a class="nav-h3" href="#sec-51">6.5 接口的 default / static 方法</a><a class="nav-h3" href="#sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</a><a class="nav-h2" href="#sec-53">7. I/O 与 NIO</a><a class="nav-h3" href="#sec-54">7.1 BIO / NIO / AIO</a><a class="nav-h3" href="#sec-55">7.2 NIO 核心组件</a><a class="nav-h2" href="#sec-56">8. 常见设计模式</a><a class="nav-h3" href="#sec-57">8.1 单例模式（双重检查锁）</a><a class="nav-h3" href="#sec-58">8.2 工厂 / 抽象工厂</a><a class="nav-h3" href="#sec-59">8.3 策略模式</a><a class="nav-h3" href="#sec-60">8.4 观察者模式</a><a class="nav-h3" href="#sec-61">8.5 代理模式</a><a class="nav-h3" href="#sec-62">8.6 装饰器模式</a><a class="nav-h2" href="#sec-63">9. MySQL 基础</a><a class="nav-h3" href="#sec-64">9.1 索引</a><a class="nav-h3" href="#sec-65">9.2 事务四大特性（ACID）</a><a class="nav-h3" href="#sec-66">9.3 事务隔离级别</a><a class="nav-h3" href="#sec-67">9.4 慢查询优化思路</a><a class="nav-h3" href="#sec-68">9.5 分库分表</a><a class="nav-h2" href="#sec-69">10. Redis 基础</a><a class="nav-h3" href="#sec-70">10.1 数据类型</a><a class="nav-h3" href="#sec-71">10.2 持久化</a><a class="nav-h3" href="#sec-72">10.3 缓存问题</a><a class="nav-h3" href="#sec-73">10.4 内存淘汰策略</a><a class="nav-h3" href="#sec-74">10.5 常见用途</a><a class="nav-h2" href="#sec-75">11. Spring / Spring Boot</a><a class="nav-h3" href="#sec-76">11.1 控制反转（IoC）与依赖注入（DI）</a><a class="nav-h3" href="#sec-77">11.2 Bean 作用域</a><a class="nav-h3" href="#sec-78">11.3 Bean 生命周期</a><a class="nav-h3" href="#sec-79">11.4 AOP</a><a class="nav-h3" href="#sec-80">11.5 Spring 事务</a><a class="nav-h3" href="#sec-81">11.6 Spring Boot 自动配置原理</a><a class="nav-h2" href="#sec-82">12. 计算机网络</a><a class="nav-h3" href="#sec-83">12.1 TCP 三次握手 / 四次挥手</a><a class="nav-h3" href="#sec-84">12.2 TCP 与 UDP 区别</a><a class="nav-h3" href="#sec-85">12.3 HTTP 与 HTTPS</a><a class="nav-h3" href="#sec-86">12.4 常见状态码</a><a class="nav-h3" href="#sec-87">12.5 浏览器输入 URL 到页面显示的过程</a><a class="nav-h2" href="#sec-88">13. 常见算法与数据结构</a><a class="nav-h3" href="#sec-89">13.1 数据结构</a><a class="nav-h3" href="#sec-90">13.2 排序算法速记</a><a class="nav-h3" href="#sec-91">13.3 刷题套路</a></div><div class="nav-group"><div class="nav-h1">第二部分：业务场景实战</div><a class="nav-h2" href="#sec-93">1. 集合：购物车与商品去重</a><a class="nav-h2" href="#sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</a><a class="nav-h2" href="#sec-95">3. synchronized / 锁：秒杀库存扣减</a><a class="nav-h2" href="#sec-96">4. volatile：系统开关与单例配置中心</a><a class="nav-h2" href="#sec-97">5. 线程池：异步通知与批量任务</a><a class="nav-h2" href="#sec-98">6. ThreadLocal：用户上下文与链路追踪</a><a class="nav-h2" href="#sec-99">7. JVM / GC：大促接口超时排查</a><a class="nav-h2" href="#sec-100">8. String：订单号与金额拼接</a><a class="nav-h2" href="#sec-101">9. 设计模式：支付与促销策略</a><a class="nav-h2" href="#sec-102">10. MySQL 索引：订单查询慢 SQL</a><a class="nav-h2" href="#sec-103">11. 事务：下单扣库存与转账</a><a class="nav-h2" href="#sec-104">12. Redis：缓存与分布式锁</a><a class="nav-h2" href="#sec-105">13. Spring：循环依赖 / AOP / 事务失效</a><a class="nav-h2" href="#sec-106">14. 网络：接口超时与 HTTPS</a><a class="nav-h2" href="#sec-107">15. 消息队列：下单异步解耦</a></div><div class="nav-group"><div class="nav-h1">第三部分：分布式与微服务专项</div><a class="nav-h2" href="#sec-109">1. 微服务与 Spring Cloud 生态</a><a class="nav-h3" href="#sec-110">1.1 微服务核心组件</a><a class="nav-h3" href="#sec-111">1.2 服务注册与发现原理</a><a class="nav-h3" href="#sec-112">1.3 网关（Gateway）作用</a><a class="nav-h3" href="#sec-113">1.4 负载均衡：Ribbon vs Nginx</a><a class="nav-h3" href="#sec-114">1.5 熔断、降级、限流</a><a class="nav-h2" href="#sec-115">2. 消息队列（MQ）</a><a class="nav-h3" href="#sec-116">2.1 为什么用 MQ</a><a class="nav-h3" href="#sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</a><a class="nav-h3" href="#sec-118">2.3 消息可靠性（不丢）</a><a class="nav-h3" href="#sec-119">2.4 重复消费与幂等</a><a class="nav-h3" href="#sec-120">2.5 消息积压处理</a><a class="nav-h3" href="#sec-121">2.6 顺序消息</a><a class="nav-h2" href="#sec-122">3. 分布式事务</a><a class="nav-h3" href="#sec-123">3.1 2PC / 3PC</a><a class="nav-h3" href="#sec-124">3.2 TCC（Try-Confirm-Cancel）</a><a class="nav-h3" href="#sec-125">3.3 消息最终一致性（常用）</a><a class="nav-h3" href="#sec-126">3.4 Seata</a><a class="nav-h3" href="#sec-127">3.5 最大努力通知</a><a class="nav-h2" href="#sec-128">4. 分布式锁与缓存一致性</a><a class="nav-h3" href="#sec-129">4.1 分布式锁方案</a><a class="nav-h3" href="#sec-130">4.2 缓存与 DB 一致性</a><a class="nav-h2" href="#sec-131">5. 分布式 ID 与分库分表</a><a class="nav-h3" href="#sec-132">5.1 分布式 ID 方案</a><a class="nav-h3" href="#sec-133">5.2 分库分表</a></div><div class="nav-group"><div class="nav-h1">附录 A：高频追问清单（自查）</div></div><div class="nav-group"><div class="nav-h1">附录 B：八股 → 业务的回答套路</div></div><div class="nav-group"><div class="nav-h1">第四部分：进阶高频补充（2026 新版考点）</div><a class="nav-h2" href="#sec-201">1. JDK 17 / 21 新特性（T0 必考）</a><a class="nav-h3" href="#sec-202">1.1 虚拟线程（Virtual Threads，Project Loom）★</a><a class="nav-h3" href="#sec-203">1.2 Sealed Classes / Records / Pattern Matching</a><a class="nav-h3" href="#sec-204">1.3 Structured Concurrency 与 Scoped Values</a><a class="nav-h2" href="#sec-205">2. 并发进阶（手写 AQS 是高频要求）</a><a class="nav-h3" href="#sec-206">2.1 AQS 原理 ★</a><a class="nav-h3" href="#sec-207">2.2 ReentrantLock vs synchronized</a><a class="nav-h3" href="#sec-208">2.3 CountDownLatch / CyclicBarrier / Semaphore</a><a class="nav-h3" href="#sec-209">2.4 原子类、LongAdder 与 StampedLock</a><a class="nav-h3" href="#sec-210">2.5 CompletableFuture 编排</a><a class="nav-h2" href="#sec-211">3. JVM 深入</a><a class="nav-h3" href="#sec-212">3.1 类加载过程与对象创建细节</a><a class="nav-h3" href="#sec-213">3.2 CMS / G1 / ZGC 对比与选型</a><a class="nav-h3" href="#sec-214">3.3 线上问题排查四板斧 ★</a><a class="nav-h2" href="#sec-215">4. MySQL 深入</a><a class="nav-h3" href="#sec-216">4.1 MVCC 原理 ★</a><a class="nav-h3" href="#sec-217">4.2 redo log / undo log / binlog 与两阶段提交</a><a class="nav-h3" href="#sec-218">4.3 行锁、间隙锁与死锁</a><a class="nav-h2" href="#sec-219">5. Redis 深入</a><a class="nav-h3" href="#sec-220">5.1 底层数据结构</a><a class="nav-h3" href="#sec-221">5.2 主从 / 哨兵 / Cluster</a><a class="nav-h3" href="#sec-222">5.3 bigkey 与 hotkey 治理</a><a class="nav-h3" href="#sec-223">5.4 分布式锁的正确姿势 ★</a><a class="nav-h2" href="#sec-224">6. Spring 深入</a><a class="nav-h3" href="#sec-225">6.1 循环依赖与三级缓存 ★</a><a class="nav-h3" href="#sec-226">6.2 Spring MVC 请求处理流程</a><a class="nav-h3" href="#sec-227">6.3 Spring Boot 3.x 变化（新版必问）</a><a class="nav-h3" href="#sec-228">6.4 AI 工程化趋势：Spring AI 与 RAG</a><a class="nav-h2" href="#sec-229">7. 高频场景题（设计思路模板）</a><a class="nav-h3" href="#sec-230">7.1 秒杀系统完整链路 ★</a><a class="nav-h3" href="#sec-231">7.2 短链系统</a><a class="nav-h3" href="#sec-232">7.3 排行榜与高并发计数</a><a class="nav-h3" href="#sec-233">7.4 百万数据导出</a><a class="nav-h3" href="#sec-234">7.5 接口幂等设计</a><a class="nav-h2" href="#sec-235">8. 2026 面试趋势与答题策略</a></div></div><div class="nav-list" data-lib="1"><div class="nav-group"><div class="nav-h1">Ragent 平台项目知识库（Agentic RAG 企业级实战）</div><a class="nav-h2" href="#sec-137">一、项目定位与技术栈</a><a class="nav-h3" href="#sec-138">1.1 它是什么</a><a class="nav-h3" href="#sec-139">1.2 技术栈全景</a><a class="nav-h3" href="#sec-140">1.3 四大 Maven 模块职责</a><a class="nav-h2" href="#sec-141">二、架构分层思想</a><a class="nav-h3" href="#sec-142">2.1 三层职责链路</a><a class="nav-h3" href="#sec-143">2.2 为什么这么分</a><a class="nav-h2" href="#sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</a><a class="nav-h3" href="#sec-145">3.1 总览（流水线阶段编排）</a><a class="nav-h3" href="#sec-146">3.2 阶段 1：会话记忆加载</a><a class="nav-h3" href="#sec-147">3.3 阶段 2：问题改写与子问题拆分</a><a class="nav-h3" href="#sec-148">3.4 阶段 3：意图识别（树形多级）</a><a class="nav-h3" href="#sec-149">3.5 阶段 4：歧义引导</a><a class="nav-h3" href="#sec-150">3.6 阶段 5：多路检索 ★</a><a class="nav-h3" href="#sec-151">3.7 阶段 6：Prompt 组装与流式输出</a><a class="nav-h3" href="#sec-152">3.8 一张图看懂调用链（文字时序）</a><a class="nav-h2" href="#sec-153">四、知识库入库链路（Ingestion Pipeline）</a><a class="nav-h3" href="#sec-154">4.1 五种节点类型（接口 IngestionNode）</a><a class="nav-h3" href="#sec-155">4.2 链式执行引擎</a><a class="nav-h3" href="#sec-156">4.3 切片策略与写入</a><a class="nav-h2" href="#sec-157">五、模型路由与故障转移</a><a class="nav-h2" href="#sec-158">六、多路检索深挖</a><a class="nav-h3" href="#sec-159">6.1 检索通道</a><a class="nav-h3" href="#sec-160">6.2 后处理责任链</a><a class="nav-h3" href="#sec-161">6.3 向量库双支持</a><a class="nav-h2" href="#sec-162">七、意图识别体系</a><a class="nav-h2" href="#sec-163">八、MCP 工具调用</a><a class="nav-h2" href="#sec-164">九、多租户与管理后台</a><a class="nav-h2" href="#sec-165">十、设计模式实战（对照表）</a><a class="nav-h2" href="#sec-166">十一、生产级工程特性</a><a class="nav-h3" href="#sec-167">11.1 队列式分布式限流</a><a class="nav-h3" href="#sec-168">11.2 8 线程池 + TTL 透传</a><a class="nav-h3" href="#sec-169">11.3 全链路 Trace（AOP）</a><a class="nav-h3" href="#sec-170">11.4 会话记忆压缩</a><a class="nav-h3" href="#sec-171">11.5 认证鉴权</a><a class="nav-h3" href="#sec-172">11.6 其他生产特性</a><a class="nav-h2" href="#sec-173">十二、可扩展性：新增 X 只需实现接口</a><a class="nav-h2" href="#sec-174">十三、学习路线与面试考点（自查）</a><a class="nav-h2" href="#sec-300">十四、源码导览：核心类速查表</a><a class="nav-h2" href="#sec-301">十五、关键机制深挖（源码级参数）</a><a class="nav-h3" href="#sec-302">15.1 队列式限流的完整实现 ★</a><a class="nav-h3" href="#sec-303">15.2 RRF 融合与后处理责任链（精确参数）</a><a class="nav-h3" href="#sec-304">15.3 模型熔断与首包探测（精确参数）</a><a class="nav-h3" href="#sec-305">15.4 意图识别阈值与缓存</a><a class="nav-h3" href="#sec-306">15.5 会话记忆压缩参数</a><a class="nav-h2" href="#sec-307">十六、数据模型：核心表速查（PostgreSQL，23 张）</a><a class="nav-h2" href="#sec-308">十七、线程池配置清单（面试可直接背）</a><a class="nav-h2" href="#sec-309">十八、本地跑起来：中间件与启动顺序</a><a class="nav-h2" href="#sec-310">十九、面试怎么讲这个项目（加分话术）</a></div></div><div class="nav-list" data-lib="2"><div class="nav-group"><div class="nav-h1">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</div><a class="nav-h2" href="#sec-401">一、定位与设计哲学</a><a class="nav-h3" href="#sec-4011">1.1 发布背景与时间线</a><a class="nav-h3" href="#sec-4012">1.2 设计哲学：一个 Agent 抽象</a><a class="nav-h2" href="#sec-402">二、包结构精简</a><a class="nav-h3" href="#sec-4021">2.1 主包 langchain 的命名空间</a><a class="nav-h3" href="#sec-4022">2.2 langchain-classic（旧代码救生艇）</a><a class="nav-h3" href="#sec-4023">2.3 安装与环境要求</a><a class="nav-h2" href="#sec-403">三、模型初始化 init_chat_model</a><a class="nav-h3" href="#sec-4031">3.1 统一初始化与多模型切换</a><a class="nav-h3" href="#sec-4032">3.2 厂商包与对接国产 / OpenAI 兼容模型</a><a class="nav-h2" href="#sec-404">四、工具定义 @tool</a><a class="nav-h3" href="#sec-4041">4.1 基础用法</a><a class="nav-h3" href="#sec-4042">4.2 结构化入参与状态注入</a><a class="nav-h2" href="#sec-405">五、消息与标准内容块 content_blocks</a><a class="nav-h3" href="#sec-4051">5.1 content_blocks：跨供应商统一</a><a class="nav-h3" href="#sec-4052">5.2 多模态消息</a><a class="nav-h3" href="#sec-4053">5.3 序列化与 LC_OUTPUT_VERSION</a><a class="nav-h2" href="#sec-406">六、构建智能体 create_agent</a><a class="nav-h3" href="#sec-4061">6.1 最小可运行的 Agent</a><a class="nav-h3" href="#sec-4062">6.2 system_prompt 与运行时 context</a><a class="nav-h3" href="#sec-4063">6.3 流式调用</a><a class="nav-h2" href="#sec-407">七、智能体中间件 Middleware</a><a class="nav-h3" href="#sec-4071">7.1 内置中间件</a><a class="nav-h3" href="#sec-4072">7.2 自定义中间件</a><a class="nav-h2" href="#sec-408">八、结构化输出 Structured Output</a><a class="nav-h3" href="#sec-4081">8.1 response_format + ToolStrategy</a><a class="nav-h3" href="#sec-4082">8.2 厂商原生结构化输出</a><a class="nav-h2" href="#sec-409">九、持久化与 LangGraph 运行时</a><a class="nav-h3" href="#sec-4091">9.1 Durable State 与断点恢复</a><a class="nav-h3" href="#sec-4092">9.2 人在回路 HITL</a><a class="nav-h2" href="#sec-410">十、RAG 与检索（1.0 的变化）</a><a class="nav-h3" href="#sec-4101">10.1 检索器迁移到 classic</a><a class="nav-h3" href="#sec-4102">10.2 用 create_agent + 检索工具做 RAG</a><a class="nav-h2" href="#sec-411">十一、迁移指南（0.x → 1.0）</a><a class="nav-h3" href="#sec-4111">11.1 常见 import 对照</a><a class="nav-h3" href="#sec-4112">11.2 升级步骤建议</a><a class="nav-h2" href="#sec-412">十二、实战：工具调用 Agent 完整示例</a><a class="nav-h2" href="#sec-413">十三、1.1 与版本演进（model profiles）</a><a class="nav-h2" href="#sec-414">十四、最佳实践与常见坑</a></div></div><div class="nav-list" data-lib="3"><div class="nav-group"><div class="nav-h1">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</div><a class="nav-h2" href="#sec-501">一、定位与背景</a><a class="nav-h3" href="#sec-5011">1.1 它解决什么问题</a><a class="nav-h3" href="#sec-5012">1.2 与 Spring AI / LangChain 的关系</a><a class="nav-h2" href="#sec-502">二、核心概念</a><a class="nav-h3" href="#sec-5021">2.1 五大支柱</a><a class="nav-h3" href="#sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</a><a class="nav-h2" href="#sec-503">三、快速开始</a><a class="nav-h3" href="#sec-5031">3.1 项目脚手架</a><a class="nav-h3" href="#sec-5032">3.2 配置与运行</a><a class="nav-h2" href="#sec-504">四、领域模型（强类型基石）</a><a class="nav-h3" href="#sec-5041">4.1 用 record / data class 表达类型</a><a class="nav-h3" href="#sec-5042">4.2 把行为暴露给 LLM</a><a class="nav-h2" href="#sec-505">五、@Agent / @Action / @AchievesGoal</a><a class="nav-h3" href="#sec-5051">5.1 Kotlin 示例：StarNewsFinder</a><a class="nav-h3" href="#sec-5052">5.2 Java 示例：BlogWriterAgent</a><a class="nav-h3" href="#sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</a><a class="nav-h2" href="#sec-506">六、AI 与 LLM 抽象</a><a class="nav-h3" href="#sec-5061">6.1 Ai 与 OperationContext</a><a class="nav-h3" href="#sec-5062">6.2 模型提供商与自定义 LLM</a><a class="nav-h2" href="#sec-507">七、规划引擎（GOAP / A*）</a><a class="nav-h3" href="#sec-5071">7.1 工作原理</a><a class="nav-h3" href="#sec-5072">7.2 为什么不是状态机</a><a class="nav-h2" href="#sec-508">八、工具与 ToolGroup</a><a class="nav-h3" href="#sec-5081">8.1 声明工具组</a><a class="nav-h3" href="#sec-5082">8.2 安全提示</a><a class="nav-h2" href="#sec-509">九、MCP 集成</a><a class="nav-h3" href="#sec-5091">9.1 作为 MCP 服务器暴露</a><a class="nav-h3" href="#sec-5092">9.2 消费 MCP 服务器</a><a class="nav-h2" href="#sec-510">十、RAG 与向量检索</a><a class="nav-h3" href="#sec-5101">10.1 embabel-agent-rag 模块</a><a class="nav-h2" href="#sec-511">十一、多智能体与 A2A</a><a class="nav-h3" href="#sec-5111">11.1 Agent 联邦</a><a class="nav-h2" href="#sec-512">十二、运行、调试与测试</a><a class="nav-h3" href="#sec-5121">12.1 Spring Shell 命令</a><a class="nav-h3" href="#sec-5122">12.2 单元测试</a><a class="nav-h2" href="#sec-513">十三、成本与预算意识</a><a class="nav-h3" href="#sec-5131">13.1 预算感知 Agent</a><a class="nav-h2" href="#sec-514">十四、最佳实践与常见坑</a><a class="nav-h3" href="#sec-5141">14.1 实践清单</a><a class="nav-h3" href="#sec-5142">14.2 迁移 / 版本注意</a></div></div><div class="nav-list" data-lib="4"><div class="nav-group"><div class="nav-h1">Spring AI 知识库（Java 生态的 AI 工程框架）</div><a class="nav-h2" href="#sec-601">一、定位与版本</a><a class="nav-h3" href="#sec-6011">1.1 设计目标</a><a class="nav-h3" href="#sec-6012">1.2 版本与模块</a><a class="nav-h2" href="#sec-602">二、核心 API 全景</a><a class="nav-h3" href="#sec-6021">2.1 能力矩阵</a><a class="nav-h3" href="#sec-6022">2.2 支持的厂商</a><a class="nav-h2" href="#sec-603">三、快速开始</a><a class="nav-h3" href="#sec-6031">3.1 起步依赖</a><a class="nav-h3" href="#sec-6032">3.2 第一个调用</a><a class="nav-h2" href="#sec-604">四、ChatClient Fluent API</a><a class="nav-h3" href="#sec-6041">4.1 链式调用</a><a class="nav-h3" href="#sec-6042">4.2 流式与默认值</a><a class="nav-h2" href="#sec-605">五、结构化输出</a><a class="nav-h3" href="#sec-6051">5.1 entity 映射到 POJO</a><a class="nav-h3" href="#sec-6052">5.2 让模型理解字段</a><a class="nav-h2" href="#sec-606">六、PromptTemplate</a><a class="nav-h3" href="#sec-6061">6.1 变量与外部资源</a><a class="nav-h2" href="#sec-607">七、模型提供商与 ChatOptions</a><a class="nav-h3" href="#sec-6071">7.1 切换模型与参数</a><a class="nav-h2" href="#sec-608">八、Embedding 与 VectorStore</a><a class="nav-h3" href="#sec-6081">8.1 注入与检索</a><a class="nav-h3" href="#sec-6082">8.2 可移植的元数据过滤</a><a class="nav-h2" href="#sec-609">九、文档 ETL 流水线</a><a class="nav-h3" href="#sec-6091">9.1 读 → 切 → 嵌 → 写</a><a class="nav-h2" href="#sec-610">十、工具调用（Tool Calling）</a><a class="nav-h3" href="#sec-6101">10.1 用 @Tool 定义工具</a><a class="nav-h3" href="#sec-6102">10.2 注册为 ToolCallback 并接线</a><a class="nav-h3" href="#sec-6103">10.3 2.0 的工具循环</a><a class="nav-h2" href="#sec-611">十一、Advisors API</a><a class="nav-h3" href="#sec-6111">11.1 拦截器链模式</a><a class="nav-h2" href="#sec-612">十二、对话记忆（Chat Memory）</a><a class="nav-h3" href="#sec-6121">12.1 记忆仓库与窗口</a><a class="nav-h2" href="#sec-613">十三、RAG 实战</a><a class="nav-h3" href="#sec-6131">13.1 RAG 与工具天然可组合</a><a class="nav-h3" href="#sec-6132">13.2 给模型明确指引</a><a class="nav-h2" href="#sec-614">十四、MCP 集成</a><a class="nav-h3" href="#sec-6141">14.1 暴露为 MCP 工具服务器</a><a class="nav-h3" href="#sec-6142">14.2 消费远程 MCP 服务器</a><a class="nav-h2" href="#sec-615">十五、评估（Evaluation）</a><a class="nav-h3" href="#sec-6151">15.1 相关性评估器</a><a class="nav-h2" href="#sec-616">十六、可观测性</a><a class="nav-h3" href="#sec-6161">16.1 开启观测</a><a class="nav-h2" href="#sec-617">十七、Spring Boot 自动配置与 Starters</a><a class="nav-h3" href="#sec-6171">17.1 约定优于配置</a><a class="nav-h2" href="#sec-618">十八、最佳实践与常见坑</a><a class="nav-h3" href="#sec-6181">18.1 实践清单</a><a class="nav-h3" href="#sec-6182">18.2 版本注意</a></div></div><div class="nav-list" data-lib="5"><div class="nav-group"><div class="nav-h1">后端业务项目开发模板（以 Ragent 为蓝本）</div><a class="nav-h2" href="#sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</a><a class="nav-h2" href="#sec-7005">一、阶段一：需求梳理与范围界定</a><a class="nav-h3" href="#sec-7002">1.1 功能需求：用「用户故事」拆，而不是用「我要做个系统」</a><a class="nav-h3" href="#sec-7003">1.2 非功能需求（NFR）：决定技术难度的往往是它</a><a class="nav-h3" href="#sec-7004">1.3 以 Ragent 模拟：需求怎么拆</a><a class="nav-h2" href="#sec-7005">二、阶段二：技术选型的总原则</a><a class="nav-h3" href="#sec-7006">2.1 先定约束，再选技术</a><a class="nav-h3" href="#sec-7007">2.2 自研 vs 开源 vs 云服务的权衡</a><a class="nav-h3" href="#sec-7008">2.3 选型要留「演进后路」</a><a class="nav-h2" href="#sec-7009">三、阶段三：总体架构设计</a><a class="nav-h3" href="#sec-7010">3.1 经典四层（自顶向下）</a><a class="nav-h3" href="#sec-7011">3.2 模块边界：用「限界上下文」思路分</a><a class="nav-h3" href="#sec-7012">3.3 以 Ragent 模拟：一次问答的数据流</a><a class="nav-h2" href="#sec-7013">四、阶段四：逐功能技术拆解（核心，含优缺点）</a><a class="nav-h3" href="#sec-7014">4.1 对话问答核心链路：SSE 还是 WebSocket？</a><a class="nav-h3" href="#sec-7015">4.2 并发限流：队列式限流 vs 令牌桶</a><a class="nav-h3" href="#sec-7016">4.3 检索增强（RAG）：向量 / 关键词 / 混合，怎么选？</a><a class="nav-h3" href="#sec-7017">4.4 意图识别：LLM 分类 vs 传统 ML/NLP</a><a class="nav-h3" href="#sec-7018">4.5 会话记忆与上下文压缩</a><a class="nav-h3" href="#sec-7019">4.6 模型路由与容错：多模型 / 熔断 / 降级 / 首包探测</a><a class="nav-h3" href="#sec-7020">4.7 知识库管理与文档入库 Pipeline</a><a class="nav-h3" href="#sec-7021">4.8 认证授权与多租户</a><a class="nav-h3" href="#sec-7022">4.9 可观测性：Trace / 日志 / 指标 / 审计</a><a class="nav-h3" href="#sec-7023">4.10 异步与消息队列（RocketMQ / Kafka）</a><a class="nav-h3" href="#sec-7024">4.11 文件与对象存储（S3 兼容）</a><a class="nav-h3" href="#sec-7025">4.12 多级缓存（Redis）</a><a class="nav-h2" href="#sec-7026">五、阶段五：数据存储设计</a><a class="nav-h3" href="#sec-7027">5.1 关系型库：PostgreSQL vs MySQL</a><a class="nav-h3" href="#sec-7028">5.2 向量库选型</a><a class="nav-h3" href="#sec-7029">5.3 表设计要点（以 Ragent 23 张表为参考）</a><a class="nav-h2" href="#sec-7030">六、阶段六：工程化与并发治理</a><a class="nav-h3" href="#sec-7031">6.1 线程池隔离：别一个大池子打天下</a><a class="nav-h3" href="#sec-7032">6.2 配置中心与环境管理</a><a class="nav-h3" href="#sec-7033">6.3 幂等与防重</a><a class="nav-h2" href="#sec-7034">七、阶段七：部署与运维</a><a class="nav-h3" href="#sec-7035">7.1 容器化起步</a><a class="nav-h3" href="#sec-7036">7.2 编排与高可用（K8s）</a><a class="nav-h3" href="#sec-7037">7.3 灰度与回滚</a><a class="nav-h3" href="#sec-7038">7.4 监控告警</a><a class="nav-h2" href="#sec-7039">八、阶段八：上线 Checklist 与复盘</a><a class="nav-h3" href="#sec-7040">8.1 上线前清单（逐项打勾）</a><a class="nav-h3" href="#sec-7041">8.2 复盘模板（每次上线后必做）</a><a class="nav-h2" href="#sec-7042">九、速查表：功能 → 技术 → 优缺点（一页背完）</a></div></div>
   </div>
 </aside>
 <main class="main"><div class="content" id="contentBox">
@@ -1196,9 +1254,8 @@ orderTx.execute(() -&gt; {
 <li><strong>不会的问题应对公式</strong>：坦诚承认 + 讲出现有认知（相关经验）+ 给出学习思路，切忌不懂装懂。</li></ul>
 <blockquote>至此 Java 八股部分覆盖「基础概念 → 业务实战 → 分布式专项 → 2026 新版进阶」四层，建议按 T0 → T1 → T2 顺序滚动复习。</blockquote>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('1')">下一个知识库：Ragent 项目实战 →</button></div>
-  </section>
-  <section class="page" data-page="1"><h1 id="sec-136">Ragent 平台项目知识库（Agentic RAG 企业级实战）</h1>
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('1')">下一个知识库：Ragent 项目 →</button></div>
+  </section><section class="page" data-page="1"><h1 id="sec-136">Ragent 平台项目知识库（Agentic RAG 企业级实战）</h1>
 <blockquote>整理自 <code>ragent-main</code> 开源项目（nageoffer/ragent）：Java 17 + Spring Boot 3 + React 18 的企业级 <strong>Agentic RAG</strong> 平台。 定位：「后端程序员转型 AI 工程师的第一站」。覆盖从<strong>文档入库 → 智能问答 → 工具调用</strong>的完整链路。 学习理念：<strong>源码即文档</strong>——下面每个知识点都对应真实可调试的类与方法，建议配合断点跟一次请求走完整条链路。</blockquote>
 <hr class="sep">
 <h2 id="sec-137">一、项目定位与技术栈</h2>
@@ -1398,9 +1455,8 @@ orderTx.execute(() -&gt; {
 <li><strong>主动暴露边界</strong>：记忆摘要默认关闭、红锁没用（Redisson 看门狗够用）、ES 可选——知道「哪里做了简化」比假装完美更可信。</li></ul>
 <blockquote>建议打开 IDE 对照本章类名逐个断点跟一遍 <code>StreamChatPipeline.execute</code>，一小时就能建立全链路肌肉记忆。</blockquote>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('2')">下一个知识库：LangChain 1.0+ 指南 →</button></div>
-  </section>
-  <section class="page" data-page="2"><h1 id="sec-400">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</h1>
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('2')">下一个知识库：LangChain 1.0+ →</button></div>
+  </section><section class="page" data-page="2"><h1 id="sec-400">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</h1>
 <blockquote>LangChain 于 <strong>2025 年 10 月发布 1.0（GA）</strong>，是一次「做减法」的大版本：砍掉数百个历史遗留 Chain/Agent，把框架收敛到单一的高层智能体抽象 <code>create_agent</code>，底层跑在 LangGraph 运行时之上；2025 年 12 月 2 日又推出 <strong>1.1</strong>，新增模型能力画像（model profiles）。本知识库覆盖包结构、核心 API、中间件、标准内容块、RAG 与迁移，答法遵循「概念 → 用法 → 原理 → 坑点 → 实战」。</blockquote>
 <hr class="sep">
 <h2 id="sec-401">一、定位与设计哲学</h2>
@@ -1775,8 +1831,7 @@ agent = create_agent(
 <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">— LangChain 1.0+ 知识库结束 · 内容基于官方 1.0 / 1.1 公告与迁移指南整理 —</p>
 
     <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('3')">下一个知识库：Embabel Agent →</button></div>
-  </section>
-  <section class="page" data-page="3"><h1 id="sec-500">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</h1>
+  </section><section class="page" data-page="3"><h1 id="sec-500">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</h1>
 <blockquote>Embabel（发音 Em-BAY-bel）是由 <strong>Spring Framework 创始人 Rod Johnson</strong> 打造的 JVM 智能体框架，构建于 Spring AI 之上，用 <strong>Kotlin</strong> 编写但对 Java 极其友好。它的核心主张是：用<strong>非 LLM 的确定性规划算法（GOAP/A*）动态编排 Actions</strong>，把 LLM 调用与普通 JVM 代码、强类型领域模型无缝混合，从而得到「可解释、可调试、可重构」的智能体。本知识库基于官方文档 docs.embabel.com 与 GitHub 仓库整理，答法遵循「概念 → 注解 → 代码 → 原理 → 坑点」。</blockquote>
 <hr class="sep">
 <h2 id="sec-501">一、定位与背景</h2>
@@ -2039,8 +2094,7 @@ chat</code></pre>
 </ul>
 
     <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('4')">下一个知识库：Spring AI →</button></div>
-  </section>
-  <section class="page" data-page="4"><h1 id="sec-600">Spring AI 知识库（Java 生态的 AI 工程框架）</h1>
+  </section><section class="page" data-page="4"><h1 id="sec-600">Spring AI 知识库（Java 生态的 AI 工程框架）</h1>
 <blockquote>Spring AI 是 Spring 官方出品的 <strong>AI 工程应用框架</strong>，于 <strong>2025-05-20 发布 1.0 GA</strong>。它把 Spring 生态的设计原则（可移植、模块化、以 POJO 为积木）带到 AI 领域，核心挑战是<strong>把企业数据与 API 连接到大模型</strong>。核心 API 是 <code>ChatClient</code>（可移植、易用的模型交互入口）。本库基于 spring.io 官方文档与参考手册整理，答法遵循「概念 → API → 代码 → 实战 → 坑点」。</blockquote>
 <hr class="sep">
 <h2 id="sec-601">一、定位与版本</h2>
@@ -2303,8 +2357,7 @@ EvaluationResponse res = evaluator.evaluate(req);
 </ul>
 
     <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('5')">下一个知识库：业务开发模板 →</button></div>
-  </section>
-  <section class="page" data-page="5"><h1 id="sec-7000">后端业务项目开发模板（以 Ragent 为蓝本）</h1>
+  </section><section class="page" data-page="5"><h1 id="sec-7000">后端业务项目开发模板（以 Ragent 为蓝本）</h1>
 <h2 id="sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</h2>
 <p>很多人一上来就「先堆 CRUD、再补功能」，结果越写越乱、越改越怕。正确的顺序是<strong>先想清楚、再动手</strong>：<strong>需求 → 选型 → 架构 → 实现 → 运维</strong> 五个阶段闭环推进，而不是一条直线冲到底。本库以「Ragent（一个 AI 智能问答 / 知识库系统）」为蓝本，把<strong>一个真实业务项目从 0 到 1 该考虑的每件事</strong>拆给你看——既能当方法论，也能当检查清单。</p>
 <table><thead><tr><th>阶段</th><th>核心问题</th><th>产出物</th></tr></thead><tbody>
@@ -2317,7 +2370,7 @@ EvaluationResponse res = evaluator.evaluate(req);
 <blockquote>记住一句总纲：<strong>「先定约束，再选技术；先分边界，再写代码；先能跑通，再谈优雅。」</strong></blockquote>
 <hr class="sep">
 
-<h2 id="sec-7001">一、阶段一：需求梳理与范围界定</h2>
+<h2 id="sec-7005">一、阶段一：需求梳理与范围界定</h2>
 <h3 id="sec-7002">1.1 功能需求：用「用户故事」拆，而不是用「我要做个系统」</h3>
 <ul>
 <li>每个功能写成 <code>作为&lt;角色&gt;，我希望&lt;动作&gt;，以便&lt;价值&gt;</code>。例：作为<strong>访客</strong>，我希望<strong>输入问题得到流式回答</strong>，以便<strong>像聊天一样获取知识</strong>。</li>
@@ -2372,6 +2425,26 @@ EvaluationResponse res = evaluator.evaluate(req);
 <tr><td>能力层</td><td>模型、检索、存储等通用能力</td><td>infra-ai / Retrieval / Ingestion</td></tr>
 <tr><td>基础设施</td><td>DB / 缓存 / MQ / 对象存储</td><td>PostgreSQL+PGVector / Redis / RocketMQ / RustFS</td></tr>
 </tbody></table>
+<figure class="kb-fig">
+<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <text x="20" y="26" font-size="14" font-weight="700" fill="#c8a55e">四层架构（自顶向下，依赖单向流动）</text>
+  <g font-size="13">
+    <rect x="40" y="44" width="600" height="46" rx="10" fill="#16202b" stroke="#c8a55e"/><rect x="40" y="44" width="8" height="46" rx="4" fill="#c8a55e"/>
+    <text x="62" y="64" fill="#e6edf3" font-weight="700">① 接入层</text><text x="180" y="64" fill="#aebcc8">路由 · 鉴权 · 限流 · 协议转换（HTTP/SSE/WS）</text><text x="540" y="64" fill="#7fd1a6">Nginx·Controller·Sa-Token</text>
+    <path d="M340 92 L340 104" stroke="#c8a55e" stroke-width="2" marker-end="url(#arr)"/>
+    <rect x="40" y="110" width="600" height="46" rx="10" fill="#16202b" stroke="#c8a55e"/><rect x="40" y="110" width="8" height="46" rx="4" fill="#c8a55e"/>
+    <text x="62" y="130" fill="#e6edf3" font-weight="700">② 业务层</text><text x="180" y="130" fill="#aebcc8">编排用例 · 领域逻辑 · 事务边界</text><text x="540" y="130" fill="#7fd1a6">Service·Pipeline·Intent</text>
+    <path d="M340 158 L340 170" stroke="#c8a55e" stroke-width="2" marker-end="url(#arr)"/>
+    <rect x="40" y="176" width="600" height="46" rx="10" fill="#16202b" stroke="#c8a55e"/><rect x="40" y="176" width="8" height="46" rx="4" fill="#c8a55e"/>
+    <text x="62" y="196" fill="#e6edf3" font-weight="700">③ 能力层</text><text x="180" y="196" fill="#aebcc8">模型 · 检索 · 入库等通用能力</text><text x="540" y="196" fill="#7fd1a6">infra-ai·Retrieval·Ingestion</text>
+    <path d="M340 224 L340 236" stroke="#c8a55e" stroke-width="2" marker-end="url(#arr)"/>
+    <rect x="40" y="242" width="600" height="46" rx="10" fill="#16202b" stroke="#c8a55e"/><rect x="40" y="242" width="8" height="46" rx="4" fill="#c8a55e"/>
+    <text x="62" y="262" fill="#e6edf3" font-weight="700">④ 基础设施</text><text x="180" y="262" fill="#aebcc8">DB · 缓存 · MQ · 对象存储</text><text x="500" y="262" fill="#7fd1a6">PG+PGVector·Redis·RocketMQ·RustFS</text>
+  </g>
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#c8a55e"/></marker></defs>
+</svg>
+<figcaption class="fig-cap">图 3-1：四层架构。依赖方向固定为 ①→②→③→④，禁止反向调用（详见 <a href="#sec-7011" style="color:#c8a55e">3.2 模块边界</a>）。</figcaption>
+</figure>
 <h3 id="sec-7011">3.2 模块边界：用「限界上下文」思路分</h3>
 <ul>
 <li>每个上下文<strong>只对自己负责的数据有写权</strong>，对外只暴露接口。</li>
@@ -2380,6 +2453,29 @@ EvaluationResponse res = evaluator.evaluate(req);
 </ul>
 <h3 id="sec-7012">3.3 以 Ragent 模拟：一次问答的数据流</h3>
 <p><code>前端 → 网关鉴权 → 限流排队 → 服务编排(雪花ID) → 加载记忆 → 改写问题 → 意图识别 → 多路检索 → RRF融合 → Rerank → 模型首包探测流式输出 → SSE 推前端</code>。每一环都是一个可独立替换、可独立观测的节点。</p>
+<figure class="kb-fig">
+<svg viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#c8a55e"/></marker></defs>
+  <g font-size="11.5" text-anchor="middle">
+    <g fill="#16202b" stroke="#c8a55e">
+      <rect x="16" y="30" width="92" height="30" rx="8"/><rect x="124" y="30" width="92" height="30" rx="8"/><rect x="232" y="30" width="92" height="30" rx="8"/>
+      <rect x="340" y="30" width="92" height="30" rx="8"/><rect x="448" y="30" width="92" height="30" rx="8"/><rect x="556" y="30" width="92" height="30" rx="8"/>
+      <rect x="556" y="98" width="92" height="30" rx="8"/><rect x="448" y="98" width="92" height="30" rx="8"/><rect x="340" y="98" width="92" height="30" rx="8"/>
+      <rect x="232" y="98" width="92" height="30" rx="8"/><rect x="124" y="98" width="92" height="30" rx="8"/><rect x="16" y="98" width="92" height="30" rx="8"/>
+    </g>
+    <g fill="#e6edf3">
+      <text x="62" y="49">前端</text><text x="170" y="49">网关鉴权</text><text x="278" y="49">限流排队</text><text x="386" y="49">服务编排</text><text x="494" y="49">加载记忆</text><text x="602" y="49">问题改写</text>
+      <text x="602" y="117">意图识别</text><text x="494" y="117">多路检索</text><text x="386" y="117">RRF融合</text><text x="278" y="117">Rerank</text><text x="170" y="117">首包探测</text><text x="62" y="117">SSE推前端</text>
+    </g>
+  </g>
+  <g stroke="#c8a55e" stroke-width="1.8" fill="none" marker-end="url(#ar2)">
+    <path d="M108 45 L124 45"/><path d="M216 45 L232 45"/><path d="M324 45 L340 45"/><path d="M432 45 L448 45"/><path d="M540 45 L556 45"/>
+    <path d="M602 60 L602 98"/>
+    <path d="M556 113 L540 113"/><path d="M448 113 L432 113"/><path d="M340 113 L324 113"/><path d="M232 113 L216 113"/><path d="M124 113 L108 113"/>
+  </g>
+</svg>
+<figcaption class="fig-cap">图 3-2：一次问答的数据流。每组相邻节点都可独立替换 / 熔断降级（见 <a href="#sec-7019" style="color:#c8a55e">4.6 模型路由与容错</a>）。</figcaption>
+</figure>
 <hr class="sep">
 
 <h2 id="sec-7013">四、阶段四：逐功能技术拆解（核心，含优缺点）</h2>
@@ -2392,6 +2488,17 @@ EvaluationResponse res = evaluator.evaluate(req);
 <tr><td>普通轮询</td><td>实现最简单</td><td>延迟高、空转浪费</td><td>极简场景、临时方案</td></tr>
 </tbody></table>
 <ul><li><strong>取舍</strong>：AI 回答是「服务端一直推、客户端只发一次问题」，SSE 最契合；还要支持「中途停止」，用单独的 <code>POST /stop</code> 接口即可，不必为双向而 WebSocket。</li></ul>
+<div class="kb-snippet"><div class="sn-head"><span>Java · Spring Boot SSE（最小可运行）</span><span class="sn-tag">4.1</span></div><pre>@GetMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+public SseEmitter chat(@RequestParam String q) {
+    SseEmitter em = new SseEmitter(0L);          // 0 = 不限时
+    answerService.stream(q)                       // 业务层返回的 Flux&lt;String&gt;
+        .subscribe(
+            chunk -&gt; em.send(SseEmitter.event().data(chunk)),
+            err   -&gt; em.completeWithError(err),
+            em::complete);
+    return em;                                    // 前端用 EventSource 接收
+}</pre></div>
+<p>👉 相关：限流怎么配合见 <a href="#sec-7015">4.2</a>；整条推送链路见 <a href="#sec-7012">3.3</a> 数据流。</p>
 
 <h3 id="sec-7015">4.2 并发限流：队列式限流 vs 令牌桶</h3>
 <table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
@@ -2400,6 +2507,16 @@ EvaluationResponse res = evaluator.evaluate(req);
 </tbody></table>
 <ul><li><strong>参数示例</strong>：全局并发 50、排队上限 20s、许可租约 600s 兜底防泄漏；被拒回写记忆并推「系统繁忙」。</li>
 <li><strong>何时选队列</strong>：下游（LLM）是稀缺资源、且希望用户「等一下而非直接失败」；<strong>何时选令牌桶</strong>：纯接口防刷、不在乎个别请求失败。</li></ul>
+<div class="kb-snippet"><div class="sn-head"><span>Java · 令牌桶 vs 队列式（最小可运行）</span><span class="sn-tag">4.2</span></div><pre>// 令牌桶（Guava RateLimiter）：拿不到立即拒绝
+RateLimiter rl = RateLimiter.create(50.0);     // 50 许可/秒
+if (rl.tryAcquire()) handle(req);
+else reject429(req);
+
+// 队列式（Ragent）：满则进带 TTL 的队列等待，而非拒绝
+if (semaphore.tryAcquire(20, SECONDS)) {       // 20s 排队上限
+    try { handle(req); }
+    finally { semaphore.release(); }
+} else { reject429(req); }                       // 仍超限才拒绝</pre></div>
 
 <h3 id="sec-7016">4.3 检索增强（RAG）：向量 / 关键词 / 混合，怎么选？</h3>
 <table><thead><tr><th>检索方式</th><th>优点</th><th>缺点</th><th>典型用</th></tr></thead><tbody>
@@ -2410,6 +2527,17 @@ EvaluationResponse res = evaluator.evaluate(req);
 </tbody></table>
 <ul><li><strong>RRF 融合公式</strong>：<code>score = Σ weight / (k + rank + 1)</code>；各通道权重可配（vector/keyword/graph/web），融合后截断再送 Rerank。</li>
 <li><strong>取舍</strong>：MVP 先上向量检索跑通；召回不够再补关键词；质量不稳再加 Rerank——<strong>逐级加复杂度</strong>。</li></ul>
+<div class="kb-snippet"><div class="sn-head"><span>算法 · RRF 融合（最小可运行）</span><span class="sn-tag">4.3</span></div><pre>// 多通道召回按排名倒数求和，再截断送 Rerank
+double scoreOf(String docId) {
+    double s = 0;
+    for (Channel ch : channels) {               // vector / keyword / graph ...
+        int rank = ch.rankOf(docId);            // 1-based 排名
+        s += ch.weight / (60 + rank);           // k = 60 平滑
+    }
+    return s;
+}
+List&lt;Doc&gt; fused = docs.sortBy(this::scoreOf).take(topK);</pre></div>
+<p>👉 相关：向量库怎么落地见 <a href="#sec-7028">5.2 向量库选型</a>。</p>
 
 <h3 id="sec-7017">4.4 意图识别：LLM 分类 vs 传统 ML/NLP</h3>
 <table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
@@ -2426,6 +2554,14 @@ EvaluationResponse res = evaluator.evaluate(req);
 <li><strong>摘要压缩</strong>（Ragent）：保留 8 轮原文 + 超 9 轮开始摘要（≤200 字）；优点是不丢全局背景，缺点是异步摘要有延迟、要分布式锁防并发。</li>
 <li><strong>取舍</strong>：MVP 用滑动窗口；对话长、要连续性的业务再上摘要。Ragent 默认关摘要，按需开。</li>
 </ul>
+<div class="kb-snippet"><div class="sn-head"><span>算法 · 滑动窗口 + 摘要压缩（最小可运行）</span><span class="sn-tag">4.5</span></div><pre>List&lt;Turn&gt; recent = history.tail(8);          // 保留最近 8 轮原文
+if (history.size() &gt; 9) {
+    String summary = cache.getOrLock(userId, () -&gt;  // 分布式锁防并发
+        llm.summarize(history.except(recent), 200)); // 超 9 轮开始摘要，≤200 字
+    prompt = concat(summary, recent);
+} else {
+    prompt = concat(recent);                    // 否则直接用原文
+}</pre></div>
 
 <h3 id="sec-7019">4.6 模型路由与容错：多模型 / 熔断 / 降级 / 首包探测</h3>
 <table><thead><tr><th>机制</th><th>解决什么</th><th>要点</th></tr></thead><tbody>
@@ -2435,6 +2571,17 @@ EvaluationResponse res = evaluator.evaluate(req);
 <tr><td>首包探测</td><td>流式过程中某个模型不吐字就换</td><td>按各模型 timeoutMs 探测，ERROR/TIMEOUT 即切下一个</td></tr>
 </tbody></table>
 <ul><li><strong>取舍</strong>：单模型能跑通就别上全套容错；当依赖外部 LLM API（不稳定）时，熔断+降级是<strong>必选项</strong>而非可选项。</li></ul>
+<div class="kb-snippet"><div class="sn-head"><span>算法 · 多模型路由 + 熔断 + 首包探测（最小可运行）</span><span class="sn-tag">4.6</span></div><pre>for (Model m : candidates) {                  // 候选顺序即降级顺序
+    if (breaker.isOpen(m)) continue;           // 熔断中跳过
+    try (Probe p = m.stream(prompt, m.timeoutMs)) {
+        p.waitFirstToken();                    // 首包探测：超时即切下一个
+        return p.pipeToClient();               // 成功则直推前端
+    } catch (Timeout | Error e) {
+        breaker.fail(m);                        // 连续失败→OPEN 30s
+    }
+}
+return fallbackAnswer();                        // 全部失败→降级回复</pre></div>
+<p>👉 相关：降级回复可结合 <a href="#sec-7018">4.5 会话记忆</a> 给出更自然的兜底。</p>
 
 <h3 id="sec-7020">4.7 知识库管理与文档入库 Pipeline</h3>
 <ul>
@@ -2581,7 +2728,7 @@ EvaluationResponse res = evaluator.evaluate(req);
 </tbody></table>
 <blockquote>把这页存成「选型速查卡」，每次接到新功能先来这里对照——它就是把 Ragent 真实踩坑浓缩成的「后端业务开发模板」。</blockquote>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('0')">↻ 回到：Java 面试八股</button></div>
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('0')">↻ 回到：Java 八股</button></div>
   </section>
   <div class="empty-tip" id="emptyTip">暂无知识库，点击左侧「＋ 新建知识库」开始添加。</div>
 </div></main>
@@ -2663,6 +2810,28 @@ EvaluationResponse res = evaluator.evaluate(req);
     <button class="m-btn primary plan-gen" onclick="generatePlan()">✨ 生成学习计划</button>
     <div class="plan-out" id="planOut"></div>
     <div class="actions"><span></span><span class="right"><button class="m-btn ghost" onclick="closePlan()">关闭</button></span></div>
+  </div>
+</div>
+<div class="modal-mask" id="myNotesModal" onclick="if(event.target===this)closeMyNotes()">
+  <div class="modal">
+    <h3>📝 我的笔记与收藏 <span class="mn-sub" id="mnLibName"></span></h3>
+    <div class="mn-tabs">
+      <button class="mn-tab on" data-f="all" onclick="mnFilter('all')">全部</button>
+      <button class="mn-tab" data-f="fav" onclick="mnFilter('fav')">⭐ 收藏</button>
+      <button class="mn-tab" data-f="note" onclick="mnFilter('note')">📝 有笔记</button>
+    </div>
+    <div class="mn-tip" id="mnTip"></div>
+    <div class="mn-list" id="mnList"></div>
+    <div class="actions"><span></span><span class="right"><button class="m-btn ghost" onclick="closeMyNotes()">关闭</button></span></div>
+  </div>
+</div>
+<div class="modal-mask" id="noteModal" onclick="if(event.target===this)closeNoteEditor()">
+  <div class="modal">
+    <h3>📝 笔记 <span class="mn-sub" id="noteSecTitle"></span></h3>
+    <p class="tip">笔记仅保存在本浏览器，会随「⬇ 备份」一起导出。支持多行文字。</p>
+    <textarea id="noteArea" class="note-area" placeholder="写下你的思考、要点、疑问…"></textarea>
+    <label class="mn-favrow"><input type="checkbox" id="noteFav"> ⭐ 同时收藏此节</label>
+    <div class="actions"><span class="left"><button class="m-btn ghost danger" onclick="delNote()">🗑 删除笔记</button></span><span class="right"><button class="m-btn ghost" onclick="closeNoteEditor()">取消</button><button class="m-btn primary" onclick="saveNote()">保存</button></span></div>
   </div>
 </div>
 <script>
@@ -2770,7 +2939,35 @@ window.addEventListener("scroll", onScroll, { passive: true });
 
 /* ===== 搜索（过滤当前库目录，提示另一库匹配数） ===== */
 function onSearch(q){
-  q = q.trim().toLowerCase();
+  q = (q || "").trim().toLowerCase();
+  var hint = document.getElementById("searchHint");
+  var res = document.getElementById("searchResults");
+  var global = document.getElementById("searchGlobal") && document.getElementById("searchGlobal").checked;
+  if (global){
+    if (!q){ res.style.display = "none"; res.innerHTML = ""; hint.style.display = "none"; restoreNavDisplay(); return; }
+    var results = [];
+    document.querySelectorAll(".nav-list").forEach(function(list){
+      var lib = list.dataset.lib;
+      var nm = libName(lib);
+      list.querySelectorAll("a").forEach(function(a){
+        if (a.textContent.toLowerCase().indexOf(q) >= 0)
+          results.push({ lib: lib, name: nm, text: a.textContent, href: a.getAttribute("href") });
+      });
+    });
+    restoreNavDisplay();
+    if (!results.length){ res.style.display = "block"; res.innerHTML = '<div class="sr-empty">未找到匹配</div>'; hint.style.display = "none"; return; }
+    var html = '<div class="sr-head">跨全部知识库找到 ' + results.length + ' 个匹配：</div>';
+    results.slice(0, 60).forEach(function(r){
+      html += '<div class="sr-item" data-lib="' + r.lib + '" data-href="' + r.href + '"><span class="sr-lib">' + esc(r.name) + '</span><span class="sr-text">' + esc(r.text) + '</span></div>';
+    });
+    if (results.length > 60) html += '<div class="sr-more">仅显示前 60 个，请输入更精确的关键词</div>';
+    res.style.display = "block"; res.innerHTML = html; hint.style.display = "none";
+    Array.prototype.forEach.call(res.querySelectorAll(".sr-item"), function(el){
+      el.onclick = function(){ gotoResult(el.dataset.lib, el.dataset.href); };
+    });
+    return;
+  }
+  /* 非全局：仅过滤当前库，并提示其他库命中数 */
   var otherCount = 0;
   document.querySelectorAll(".nav-list").forEach(function(list){
     var isCur = list.dataset.lib === currentLib;
@@ -2785,13 +2982,24 @@ function onSearch(q){
       g.style.display = any ? "" : "none";
     });
   });
-  var hint = document.getElementById("searchHint");
+  res.style.display = "none"; res.innerHTML = "";
   if (q && otherCount > 0) {
     hint.style.display = "block";
     hint.textContent = "另一个知识库还有 " + otherCount + " 个匹配 →";
   } else {
     hint.style.display = "none";
   }
+}
+function restoreNavDisplay(){
+  document.querySelectorAll(".nav-list a").forEach(function(a){ a.style.display = ""; });
+  document.querySelectorAll(".nav-list .nav-group").forEach(function(g){ g.style.display = ""; });
+}
+function gotoResult(lib, href){
+  var id = href ? href.replace(/^#/, "") : null;
+  switchLib(lib, id);
+  var res = document.getElementById("searchResults");
+  if (res){ res.style.display = "none"; res.innerHTML = ""; }
+  document.getElementById("search").blur();
 }
 function jumpOtherLib(){
   var q = document.getElementById("search").value;
@@ -4057,8 +4265,10 @@ function lspConnectBtn(){
 function lspDisconnectBtn(){ if (LSP.ws){ try { LSP.ws.close(); } catch(e){} LSP.ws = null; } LSP.ready = false; lspSetStatus("已断开"); }
 var __monacoState = 0, __monacoCbs = [];
 var MONACO_CDNS = [
+  "./vendor/monaco/min",
   "https://registry.npmmirror.com/monaco-editor/0.52.2/files/min",
-  "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min"
+  "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min",
+  "https://unpkg.com/monaco-editor@0.52.2/min"
 ];
 function ensureMonaco(cb){
   if (__monacoState === 2){ cb(true); return; }
@@ -4580,8 +4790,190 @@ function renderPlan(plan, start, lib, titles){
   updateDueBadge();
   onScroll();
   checkOrigin();
+  decorateHeadings();
   try { lspInit(); } catch(e){}
 })();
+/* ---------- 备份 / 恢复：导出导入全部 kb_ 数据 ---------- */
+function kbToast(msg){
+  var t = document.getElementById("kbToast");
+  if (!t){
+    t = document.createElement("div"); t.id = "kbToast";
+    t.style.cssText = "position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(34,42,51,.94);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:99999;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:80vw;";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = "1";
+  clearTimeout(t._t); t._t = setTimeout(function(){ t.style.opacity = "0"; }, 1900);
+}
+function exportData(){
+  var data = { _app: "kb-backup", _ver: 1, _time: new Date().toISOString(), data: {} };
+  for (var i = 0; i < localStorage.length; i++){
+    var k = localStorage.key(i);
+    if (k && k.indexOf("kb_") === 0) data.data[k] = localStorage.getItem(k);
+  }
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "知识库备份_" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  kbToast("已导出备份（" + Object.keys(data.data).length + " 项）");
+}
+function importData(){
+  var inp = document.getElementById("backupFile");
+  if (!inp){
+    inp = document.createElement("input"); inp.type = "file"; inp.id = "backupFile";
+    inp.accept = "application/json"; inp.style.display = "none";
+    inp.onchange = function(){ if (inp.files && inp.files[0]) doImport(inp.files[0]); };
+    document.body.appendChild(inp);
+  }
+  inp.value = ""; inp.click();
+}
+function doImport(file){
+  var r = new FileReader();
+  r.onload = function(){
+    try {
+      var obj = JSON.parse(r.result);
+      if (!obj || !obj.data) throw new Error("文件格式不正确");
+      if (!confirm("恢复备份将覆盖当前所有自建库、学习进度、笔记与设置，确定继续？")) return;
+      for (var k in obj.data){ if (obj.data.hasOwnProperty(k)) localStorage.setItem(k, obj.data[k]); }
+      kbToast("恢复成功，即将刷新…");
+      setTimeout(function(){ location.reload(); }, 700);
+    } catch(e){ alert("导入失败：" + e.message); }
+  };
+  r.readAsText(file);
+}
+
+/* ---------- 笔记 / 收藏 ---------- */
+var KB_FAV_KEY = "kb_favs";   /* { lib: [secId,...] } */
+var KB_NOTE_KEY = "kb_notes"; /* { lib: { secId: "text" } } */
+var _mnFilter = "all";
+var _curNote = null;
+
+function favMap(){ try{ return JSON.parse(localStorage.getItem(KB_FAV_KEY)||"{}"); }catch(e){ return {}; } }
+function noteMap(){ try{ return JSON.parse(localStorage.getItem(KB_NOTE_KEY)||"{}"); }catch(e){ return {}; } }
+function saveFavMap(m){ try{ localStorage.setItem(KB_FAV_KEY, JSON.stringify(m)); }catch(e){} }
+function saveNoteMap(m){ try{ localStorage.setItem(KB_NOTE_KEY, JSON.stringify(m)); }catch(e){} }
+function isFav(lib, secId){ var m=favMap(); return !!(m[lib] && m[lib].indexOf(secId)>=0); }
+function isNoted(lib, secId){ var m=noteMap(); return !!(m[lib] && m[lib][secId]); }
+
+function toggleFav(lib, secId){
+  var m=favMap(); if(!m[lib]) m[lib]=[];
+  var i=m[lib].indexOf(secId);
+  if(i>=0){ m[lib].splice(i,1); if(!m[lib].length) delete m[lib]; kbToast("已取消收藏"); }
+  else { m[lib].push(secId); kbToast("★ 已收藏"); }
+  saveFavMap(m);
+  refreshFavButtons(lib, secId);
+  if (document.getElementById("myNotesModal").classList.contains("show")) openMyNotes();
+}
+function refreshFavButtons(lib, secId){
+  document.querySelectorAll('.page[data-page="'+lib+'"] .h-fav[data-sec="'+secId+'"]').forEach(function(b){
+    b.classList.toggle("on", isFav(lib, secId));
+  });
+}
+function refreshNoteButtons(lib, secId){
+  document.querySelectorAll('.page[data-page="'+lib+'"] .h-note[data-sec="'+secId+'"]').forEach(function(b){
+    b.classList.toggle("on", isNoted(lib, secId));
+  });
+}
+
+/* 给每个小节标题挂上 ⭐/📝 按钮（只在首次执行一次） */
+function decorateHeadings(){
+  document.querySelectorAll(".page").forEach(function(page){
+    var lib = page.dataset.page;
+    page.querySelectorAll('h2[id^="sec-"],h3[id^="sec-"]').forEach(function(h){
+      if (h.dataset.decorated) return;
+      h.dataset.decorated = "1";
+      var sid = h.id;
+      var act = document.createElement("span"); act.className = "h-actions";
+      var fav = document.createElement("button");
+      fav.className = "h-fav" + (isFav(lib, sid) ? " on" : "");
+      fav.title = "收藏此节"; fav.textContent = "⭐"; fav.setAttribute("data-sec", sid);
+      fav.onclick = function(e){ e.stopPropagation(); toggleFav(lib, sid); };
+      var note = document.createElement("button");
+      note.className = "h-note" + (isNoted(lib, sid) ? " on" : "");
+      note.title = "写笔记"; note.textContent = "📝"; note.setAttribute("data-sec", sid);
+      note.onclick = function(e){ e.stopPropagation(); openNoteEditor(lib, sid); };
+      act.appendChild(fav); act.appendChild(note); h.appendChild(act);
+    });
+  });
+}
+
+function openMyNotes(){
+  var lib = currentLib;
+  document.getElementById("mnLibName").textContent = "· " + libName(lib);
+  var page = document.querySelector('.page[data-page="'+lib+'"]');
+  var secs = page ? page.querySelectorAll('h2[id^="sec-"],h3[id^="sec-"]') : [];
+  var favs = favMap()[lib] || [];
+  var notes = noteMap()[lib] || {};
+  var list = document.getElementById("mnList"); list.innerHTML = "";
+  var arr = Array.prototype.slice.call(secs);
+  if (!arr.length){ list.innerHTML = '<div class="mn-empty">这个知识库还没有小节。</div>'; }
+  arr.forEach(function(h){
+    var sid = h.id;
+    var title = h.textContent.replace(/[⭐📝]/g,"").replace(/\s+/g," ").trim();
+    var f = favs.indexOf(sid) >= 0; var n = !!notes[sid];
+    if (_mnFilter === "fav" && !f) return;
+    if (_mnFilter === "note" && !n) return;
+    var row = document.createElement("div"); row.className = "mn-row";
+    var star = document.createElement("button"); star.className = "mn-star" + (f ? " on" : "");
+    star.textContent = "⭐"; star.title = "收藏"; star.onclick = function(){ toggleFav(lib, sid); };
+    var t = document.createElement("span"); t.className = "mn-title"; t.textContent = title;
+    t.onclick = function(){ switchLib(lib, sid); closeMyNotes(); };
+    var nb = document.createElement("span"); nb.className = "mn-note-badge" + (n ? " on" : "");
+    nb.textContent = n ? "📝" : ""; nb.title = n ? "有笔记" : "无笔记";
+    nb.onclick = function(){ openNoteEditor(lib, sid); closeMyNotes(); };
+    row.appendChild(star); row.appendChild(t); row.appendChild(nb);
+    list.appendChild(row);
+  });
+  document.getElementById("mnTip").textContent =
+    "共 " + arr.length + " 节 · 收藏 " + favs.length + " · 有笔记 " + Object.keys(notes).length;
+  document.getElementById("myNotesModal").classList.add("show");
+}
+function mnFilter(f){
+  _mnFilter = f;
+  document.querySelectorAll(".mn-tab").forEach(function(b){ b.classList.toggle("on", b.dataset.f === f); });
+  openMyNotes();
+}
+function closeMyNotes(){ document.getElementById("myNotesModal").classList.remove("show"); }
+
+function openNoteEditor(lib, secId){
+  _curNote = { lib: lib, secId: secId };
+  var page = document.querySelector('.page[data-page="'+lib+'"]');
+  var h = page ? page.querySelector('[id="'+secId+'"]') : null;
+  var title = h ? h.textContent.replace(/[⭐📝]/g,"").replace(/\s+/g," ").trim() : secId;
+  document.getElementById("noteSecTitle").textContent = "· " + title;
+  var nm = noteMap();
+  document.getElementById("noteArea").value = (nm[lib] && nm[lib][secId]) ? nm[lib][secId] : "";
+  document.getElementById("noteFav").checked = isFav(lib, secId);
+  document.getElementById("noteModal").classList.add("show");
+  try { document.getElementById("noteArea").focus(); } catch(e){}
+}
+function saveNote(){
+  if (!_curNote) return;
+  var lib = _curNote.lib, secId = _curNote.secId;
+  var txt = document.getElementById("noteArea").value;
+  var nm = noteMap(); if (!nm[lib]) nm[lib] = {};
+  if (txt && txt.trim()) nm[lib][secId] = txt; else delete nm[lib][secId];
+  saveNoteMap(nm);
+  var wantFav = document.getElementById("noteFav").checked;
+  if (wantFav && !isFav(lib, secId)) toggleFav(lib, secId);
+  else if (!wantFav && isFav(lib, secId)) toggleFav(lib, secId);
+  refreshNoteButtons(lib, secId);
+  kbToast("笔记已保存");
+  closeNoteEditor();
+}
+function delNote(){
+  if (!_curNote) return;
+  var lib = _curNote.lib, secId = _curNote.secId;
+  var nm = noteMap(); if (nm[lib]) delete nm[lib][secId];
+  saveNoteMap(nm);
+  document.getElementById("noteArea").value = "";
+  refreshNoteButtons(lib, secId);
+  kbToast("笔记已删除");
+  closeNoteEditor();
+}
+function closeNoteEditor(){ document.getElementById("noteModal").classList.remove("show"); _curNote = null; }
+
 function realAppUrl(){
   var APP_URL = "https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net";
   return (window.location.href && /^https?:/.test(window.location.href)) ? window.location.href : APP_URL;
@@ -4609,4 +5001,5 @@ function checkOrigin(){
   var w = document.getElementById("originWarn");
   if (bad && w){ w.style.display = "flex"; var inp = document.getElementById("owUrl"); if (inp) inp.value = realAppUrl(); }
 }
-</script></body></html>
+</script>
+</body></html>

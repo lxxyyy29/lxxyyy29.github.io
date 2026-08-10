@@ -1,0 +1,261 @@
+<h1 id="sec-500">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</h1>
+<blockquote>Embabel（发音 Em-BAY-bel）是由 <strong>Spring Framework 创始人 Rod Johnson</strong> 打造的 JVM 智能体框架，构建于 Spring AI 之上，用 <strong>Kotlin</strong> 编写但对 Java 极其友好。它的核心主张是：用<strong>非 LLM 的确定性规划算法（GOAP/A*）动态编排 Actions</strong>，把 LLM 调用与普通 JVM 代码、强类型领域模型无缝混合，从而得到「可解释、可调试、可重构」的智能体。本知识库基于官方文档 docs.embabel.com 与 GitHub 仓库整理，答法遵循「概念 → 注解 → 代码 → 原理 → 坑点」。</blockquote>
+<hr class="sep">
+<h2 id="sec-501">一、定位与背景</h2>
+<h3 id="sec-5011">1.1 它解决什么问题</h3>
+<ul>
+<li>绝大多数 Agent 框架活在 Python 生态；JVM 开发者要么调用 Python 服务，要么在裸 LLM 客户端上手写编排逻辑。</li>
+<li>LangChain 等依赖 LLM 做路由决策，非确定性、难调试；Embabel 用<strong>经典 AI 规划（非 LLM）</strong>决定「下一步执行哪个 Action」。</li>
+<li>目标：成为在 JVM（尤其是 Spring 应用）上做 GenAI 的「自然方式」，证明模型能力，并逐步演化为「自然语言 PaaS」。</li>
+</ul>
+<h3 id="sec-5012">1.2 与 Spring AI / LangChain 的关系</h3>
+<table><thead><tr><th>维度</th><th>Spring AI</th><th>Embabel</th><th>LangChain(1.0)</th></tr></thead><tbody>
+<tr><td>定位</td><td>AI 集成基础库（ChatClient/VectorStore/Tool）</td><td>构建于 Spring AI 之上的智能体<strong>编排框架</strong></td><td>智能体抽象（create_agent）</td></tr>
+<tr><td>规划方式</td><td>无（由你写流程）</td><td><strong>GOAP/A* 确定性规划 + 每步 Replan</strong></td><td>LangGraph 图执行</td></tr>
+<tr><td>强类型</td><td>POJO 映射输出</td><td><strong>全程强类型领域模型驱动</strong></td><td>TypedDict / pydantic</td></tr>
+<tr><td>语言</td><td>Java/Kotlin</td><td>Kotlin 为主，Java 友好</td><td>Python / JS</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-502">二、核心概念</h2>
+<h3 id="sec-5021">2.1 五大支柱</h3>
+<ul>
+<li><strong>Actions</strong>：智能体执行的离散步骤（一个方法），可调用 LLM、工具或普通代码。</li>
+<li><strong>Goals</strong>：智能体要达成的目标，由系统<strong>动态推导</strong>，而非硬编码。</li>
+<li><strong>Conditions</strong>：执行 Action 前需满足的前置条件、以及判定 Goal 是否已达成的后置条件；每个 Action 后都会重新评估。</li>
+<li><strong>Domain Model</strong>：支撑流程的强类型领域对象，为 Actions/Goals/Conditions 提供类型信息。</li>
+<li><strong>Plan</strong>：由系统用非 LLM 算法<strong>动态编排</strong>出的一组 Action 序列；每完成一个 Action 就重新规划（OODA 循环）。</li>
+</ul>
+<h3 id="sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</h3>
+<ul>
+<li>确定性：规划是经典 AI 算法（A*/GOAP），<strong>可解释、可调试、成本极低</strong>，不消耗 token。</li>
+<li>可扩展：新增 Action/Goal/Condition 即可扩展系统能力，<strong>无需改现有的状态机或代码</strong>。</li>
+<li>强类型：提示词与手写代码通过领域模型干净交互，<strong>没有「魔法 Map」，享受完整重构支持</strong>。</li>
+<li>平台抽象：编程模型与运行时解耦，本地可跑，生产可上更高 QoS 而不改应用代码。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-503">三、快速开始</h2>
+<h3 id="sec-5031">3.1 项目脚手架</h3>
+<p>Embabel 暂不兼容 Spring AI 2.0 / Spring Boot 4，请使用 <strong>Spring Boot 3.5.x</strong>。推荐用 <code>project-creator</code> 或 start.spring.io 建一个空 Spring Boot 项目，再手动加依赖。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">xml</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">&lt;!-- pom.xml：管理 Spring AI BOM 与 Embabel 依赖 --&gt;</span>
+<span class="tok-kw">&lt;properties&gt;</span>
+  <span class="tok-kw">&lt;embabel.version&gt;</span>0.4.0-SNAPSHOT<span class="tok-kw">&lt;/embabel.version&gt;</span>
+  <span class="tok-kw">&lt;spring-ai.version&gt;</span>1.1.4<span class="tok-kw">&lt;/spring-ai.version&gt;</span>
+<span class="tok-kw">&lt;/properties&gt;</span>
+<span class="tok-kw">&lt;dependencyManagement&gt;</span>
+  <span class="tok-kw">&lt;dependencies&gt;</span>
+    <span class="tok-kw">&lt;dependency&gt;</span>
+      <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+      <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-bom<span class="tok-kw">&lt;/artifactId&gt;</span>
+      <span class="tok-kw">&lt;version&gt;</span>${spring-ai.version}<span class="tok-kw">&lt;/version&gt;</span>
+      <span class="tok-kw">&lt;type&gt;</span>pom<span class="tok-kw">&lt;/type&gt;</span><span class="tok-kw">&lt;scope&gt;</span>import<span class="tok-kw">&lt;/scope&gt;</span>
+    <span class="tok-kw">&lt;/dependency&gt;</span>
+  <span class="tok-kw">&lt;/dependencies&gt;</span>
+<span class="tok-kw">&lt;/dependencyManagement&gt;</span>
+<span class="tok-kw">&lt;dependencies&gt;</span>
+  <span class="tok-cmt">&lt;!-- shell starter 自带 Spring Shell，便于调试；也可用普通 Web starter --&gt;</span>
+  <span class="tok-kw">&lt;dependency&gt;</span>
+    <span class="tok-kw">&lt;groupId&gt;</span>com.embabel<span class="tok-kw">&lt;/groupId&gt;</span>
+    <span class="tok-kw">&lt;artifactId&gt;</span>embabel-agent-starter-shell<span class="tok-kw">&lt;/artifactId&gt;</span>
+    <span class="tok-kw">&lt;version&gt;</span>${embabel.version}<span class="tok-kw">&lt;/version&gt;</span>
+  <span class="tok-kw">&lt;/dependency&gt;</span>
+  <span class="tok-kw">&lt;dependency&gt;</span>
+    <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+    <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-openai-spring-boot-starter<span class="tok-kw">&lt;/artifactId&gt;</span>
+  <span class="tok-kw">&lt;/dependency&gt;</span>
+<span class="tok-kw">&lt;/dependencies&gt;</span></code></pre>
+<h3 id="sec-5032">3.2 配置与运行</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">properties</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.properties</span>
+spring.main.web-application-type=none
+spring.shell.interactive.enabled=true
+embabel.models.default-llm=gpt-4o-mini
+spring.ai.openai.api-key=${OPENAI_API_KEY}</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">bash</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># 进入交互式 shell（开发调试神器）</span>
+./shell.sh
+<span class="tok-cmt"># 执行一个 agent，框架会自动选择最匹配的那个</span>
+execute "Lynda is a Scorpio, find news for her" -p -r
+<span class="tok-cmt"># x 是 execute 的快捷方式；-p 打印 prompt，-r 打印 LLM 响应</span>
+x "fact check the following: holden cars are still made in australia"
+<span class="tok-cmt"># 进入对话模式，框架为每个命令挑选最合适的 agent</span>
+chat</code></pre>
+<hr class="sep">
+<h2 id="sec-504">四、领域模型（强类型基石）</h2>
+<h3 id="sec-5041">4.1 用 record / data class 表达类型</h3>
+<p>领域对象既可由 LLM 生成，也可由用户代码构造/操作。用 Jackson 注解帮助 LLM 理解字段含义，并标记要忽略的字段。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@JsonClassDescription</span>(<span class="tok-str">"Person with astrology details"</span>)
+<span class="tok-kw">public record</span> StarPerson(
+    String name,
+    <span class="tok-kw">@JsonPropertyDescription</span>(<span class="tok-str">"Star sign"</span>) String sign
+) {}</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Kotlin</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">data class</span> RelevantNewsStories(<span class="tok-kw">val</span> items: List&lt;NewsStory&gt;)
+<span class="tok-kw">data class</span> NewsStory(<span class="tok-kw">val</span> url: String, <span class="tok-kw">val</span> summary: String)</code></pre>
+<h3 id="sec-5042">4.2 把行为暴露给 LLM</h3>
+<p>领域对象上的方法若标注 Spring AI 的 <code>@Tool</code>，当其处于作用域时会<strong>自动暴露给 LLM</strong> 作为可调用工具。注意：工具方法要安全，避免误触发导致删库/改数据。</p>
+<hr class="sep">
+<h2 id="sec-505">五、@Agent / @Action / @AchievesGoal</h2>
+<h3 id="sec-5051">5.1 Kotlin 示例：StarNewsFinder</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Kotlin</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Agent</span>(description = <span class="tok-str">"Find news based on a person's star sign"</span>)
+<span class="tok-kw">class</span> StarNewsFinder(
+    <span class="tok-kw">private val</span> horoscopeService: HoroscopeService,
+    <span class="tok-kw">@param:Value</span>(<span class="tok-str">"\${star-news-finder.story.count:5}"</span>)
+    <span class="tok-kw">private val</span> storyCount: Int = 5,
+) {
+    <span class="tok-cmt">// 全部 prompt 类型安全；此 Action 用 LLM 抽取结构化对象</span>
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> extractPerson(userInput: UserInput, ai: Ai): StarPerson =
+        ai.withDefaultLlm().createObject(
+            <span class="tok-str">"Create a person from this user input, extracting name and star sign: $userInput"</span>)
+
+    <span class="tok-cmt">// 这个 Action 完全不调 LLM，演示 LLM 与普通代码混合</span>
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> retrieveHoroscope(starPerson: StarPerson) =
+        Horoscope(horoscopeService.dailyHoroscope(starPerson.sign))
+
+    <span class="tok-cmt">// toolGroups 声明本 Action 需要 WEB 工具组</span>
+    <span class="tok-kw">@Action</span>(toolGroups = [ToolGroup.WEB])
+    <span class="tok-kw">fun</span> findNewsStories(person: StarPerson, horoscope: Horoscope, ai: Ai): RelevantNewsStories =
+        ai.withDefaultLlm().createObject(<span class="tok-str">"..."</span>)
+
+    <span class="tok-cmt">// @AchievesGoal 标记「完成此 Action 即达成目标」，agent 运行结束</span>
+    <span class="tok-kw">@AchievesGoal</span>(description = <span class="tok-str">"Write an amusing writeup based on horoscope and news"</span>)
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> writeup(person: StarPerson, relevantNewsStories: RelevantNewsStories,
+              horoscope: Horoscope, ai: Ai): Writeup =
+        ai.withLlm(LlmOptions.withModel(model).withTemperature(0.9))
+            .createObject(<span class="tok-str">"..."</span>)
+}</code></pre>
+<h3 id="sec-5052">5.2 Java 示例：BlogWriterAgent</h3>
+<p><code>@Agent</code> 把类同时标记为 Spring Bean 与 Embabel Agent；每个 <code>@Action</code> 方法的<strong>参数即它需要的对象，返回值即它产出的对象</strong>，框架据此推断流程路径。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Agent</span>(description = <span class="tok-str">"Write and review a blog post about a given topic"</span>)
+<span class="tok-kw">public class</span> BlogWriterAgent {
+
+    <span class="tok-cmt">// 用 OperationContext 访问 AI 能力与运行时</span>
+    <span class="tok-kw">@AchievesGoal</span>(description = <span class="tok-str">"Produce a reviewed blog post"</span>)
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">public</span> ReviewedPost writePost(Topic topic, OperationContext context) {
+        BlogDraft draft = context.ai().withDefaultLlm()
+            .createObject(<span class="tok-str">"Write a blog post about "</span> + topic, BlogDraft.<span class="tok-kw">class</span>);
+        <span class="tok-cmt">// 领域服务做确定性校验/改写</span>
+        <span class="tok-kw">return</span> reviewService.review(draft);
+    }
+}</code></pre>
+<h3 id="sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</h3>
+<table><thead><tr><th>属性</th><th>含义</th><th>用途</th></tr></thead><tbody>
+<tr><td><code>description</code></td><td>动作说明</td><td>规划与选择时参考</td></tr>
+<tr><td><code>cost</code></td><td>相对成本（如 0.1）</td><td>规划时权衡花费</td></tr>
+<tr><td><code>value</code></td><td>相对价值（如 0.8）</td><td>规划时评估收益</td></tr>
+<tr><td><code>toolGroups</code></td><td>所需工具组如 <code>[ToolGroup.WEB]</code></td><td>声明前置依赖，不满足则跳过</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-506">六、AI 与 LLM 抽象</h2>
+<h3 id="sec-5061">6.1 Ai 与 OperationContext</h3>
+<ul>
+<li><code>OperationContext</code>：运行时上下文，通过 <code>context.ai()</code> 拿到 <code>Ai</code> 入口。</li>
+<li><code>ai.withDefaultLlm()</code>：用应用配置的默认模型。</li>
+<li><code>ai.withLlm(LlmOptions.withModel("gpt-4").withTemperature(0.9))</code>：自定义模型与超参。</li>
+<li><code>createObject(prompt, Class)</code>：让 LLM 输出可反序列化为指定类型的对象——<strong>把 LLM 当类型安全的解析器</strong>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>IncidentSignal signal = context.ai().withDefaultLlm().createObject(<span class="tok-str">"""
+    Extract an IncidentSignal from the user's message.
+    - lon is a number in [-180, 180]; lat in [-90, 90]
+    - metric is one of: neuralLatencyMs, cpuUsagePct, powerUsageUw
+    User message: %s"""</span>.formatted(input.getContent()), IncidentSignal.<span class="tok-kw">class</span>);</code></pre>
+<h3 id="sec-5062">6.2 模型提供商与自定义 LLM</h3>
+<ul>
+<li>内置支持：OpenAI、Anthropic、Ollama（设 <code>ollama</code> profile 自动接入本地模型）、Docker（<code>docker</code> profile）。</li>
+<li>自定义：对任意提供了 Spring AI <code>ChatModel</code> 的厂商，定义类型为 <code>Llm</code> 的 Spring Bean 即可（参考 <code>OpenAiConfiguration</code>）。配置类应 <code>@ConditionalOnProperty</code> 依赖对应 API Key。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-507">七、规划引擎（GOAP / A*）</h2>
+<h3 id="sec-5071">7.1 工作原理</h3>
+<ol>
+<li><strong>Goal Resolver</strong>：把用户意图映射到最匹配的目标。</li>
+<li><strong>Planning Engine</strong>：用<strong>非 LLM 的 A* 算法</strong>在「当前世界状态」与「目标」之间搜索最优 Action 序列——这是经典 AI 规划，不是让 LLM 决定下一步。</li>
+<li><strong>OODA 循环</strong>：Observe → Orient → Decide → Act。每执行一个 Action 后<strong>重新评估 Conditions 并重新规划</strong>，从而对新信息做出反应。</li>
+<li><strong>Blackboard</strong>：各 Action 的输入/输出对象挂在 Blackboard 上，规划器据此串接（类型 A 产出 → 类型 B 消费）。</li>
+</ol>
+<h3 id="sec-5072">7.2 为什么不是状态机</h3>
+<ul>
+<li>有限状态机 / 线性链是「写死的流程」；Embabel 是「已知步骤的新组合」，能完成从未显式编程的任务。</li>
+<li>新增领域对象、Action、Goal、Condition 即可扩展能力，<strong>无需改 FSM 定义或既有代码</strong>。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-508">八、工具与 ToolGroup</h2>
+<h3 id="sec-5081">8.1 声明工具组</h3>
+<p>Action 用 <code>toolGroups</code> 声明运行所需工具；<code>ToolGroup.WEB</code> 等标准组由框架/扩展提供。工具也可通过领域对象上的 <code>@Tool</code> 方法暴露（见 4.2）。</p>
+<h3 id="sec-5082">8.2 安全提示</h3>
+<ul>
+<li>即使最好的 LLM 也可能「手痒」乱触发工具，对会<strong>改数据/删数据</strong>的方法要特别谨慎。</li>
+<li>更稳妥的做法：把危险操作建模为同一领域类上的<strong>非工具方法</strong>，在代码 Action 里显式调用。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-509">九、MCP 集成</h2>
+<h3 id="sec-5091">9.1 作为 MCP 服务器暴露</h3>
+<p>Embabel 平台本身可作为 MCP Server（通过 SSE）被 Claude Desktop 等 UI 消费：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">json</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// claude_desktop_config.yml</span>
+{
+  <span class="tok-str">"mcpServers"</span>: {
+    <span class="tok-str">"embabel"</span>: { <span class="tok-str">"command"</span>: <span class="tok-str">"npx"</span>, <span class="tok-str">"args"</span>: [<span class="tok-str">"-y"</span>, <span class="tok-str">"mcp-remote"</span>, <span class="tok-str">"http://localhost:8080/sse"</span>] }
+  }
+}</code></pre>
+<h3 id="sec-5092">9.2 消费 MCP 服务器</h3>
+<p>框架内建支持消费 Model Context Protocol 服务器，通过标准接口扩展应用能力；可用 MCP Inspector（<code>npx @modelcontextprotocol/inspector</code>）手动调试。</p>
+<hr class="sep">
+<h2 id="sec-510">十、RAG 与向量检索</h2>
+<h3 id="sec-5101">10.1 embabel-agent-rag 模块</h3>
+<ul>
+<li>独立模块提供检索增强能力，包含分块增强器（如 <code>ChunkMergingEnhancer</code>）与<strong>类型化 Chunk</strong> 处理。</li>
+<li>与 Spring AI 的 <code>VectorStore</code> 打通，可在 Action 中以工具/服务形式检索知识库。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-511">十一、多智能体与 A2A</h2>
+<h3 id="sec-5111">11.1 Agent 联邦</h3>
+<ul>
+<li>路线图中的关键目标：在 GOAP 模型下演示<strong>Agent 联邦（agent federation）</strong>，多个 Agent 协同完成更大任务。</li>
+<li><code>embabel-agent-a2a</code> 模块提供对 Google <strong>A2A（Agent-to-Agent）</strong>协议的支持，实现跨进程/跨平台的智能体协作。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-512">十二、运行、调试与测试</h2>
+<h3 id="sec-5121">12.1 Spring Shell 命令</h3>
+<table><thead><tr><th>命令</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>execute "..."</code> / <code>x "..."</code></td><td>运行匹配目标的 agent</td></tr>
+<tr><td><code>chat</code></td><td>进入交互式会话，保留历史</td></tr>
+<tr><td><code>-p</code></td><td>打印发给 LLM 的 prompt</td></tr>
+<tr><td><code>-r</code></td><td>打印 LLM 原始响应</td></tr>
+<tr><td><code>!!</code></td><td>重复上一条命令（重启后仍保留）</td></tr>
+</tbody></table>
+<h3 id="sec-5122">12.2 单元测试</h3>
+<p>可轻松单测逻辑与 prompt 是否正确，无需真实 LLM：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">public class</span> StarNewsFinderTest {
+    <span class="tok-kw">@Test</span>
+    <span class="tok-kw">void</span> writeupPromptMustContainKeyData() {
+        StarNewsFinder agent = <span class="tok-kw">new</span> StarNewsFinder(mock(HoroscopeService.<span class="tok-kw">class</span>), 5);
+        <span class="tok-kw">var</span> ctx = <span class="tok-kw">new</span> FakeOperationContext();
+        ctx.expectResponse(<span class="tok-kw">new</span> Writeup(<span class="tok-str">"Gonna be a good day"</span>));
+        <span class="tok-cmt">// 验证 agent 把正确数据与 prompt 传给了 LLM</span>
+        String result = agent.writeup(...);
+        assertTrue(result.contains(<span class="tok-str">"good day"</span>));
+    }
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-513">十三、成本与预算意识</h2>
+<h3 id="sec-5131">13.1 预算感知 Agent</h3>
+<ul>
+<li>Action 的 <code>cost</code>/<code>value</code> 元数据让规划器权衡花费，例如：「研究该主题，若仍在摸索阶段花费上限 20 美分」。</li>
+<li>设计上鼓励<strong>混用多个 LLM</strong>（贵的做判断、便宜的做解析），兼顾成本与能力。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-514">十四、最佳实践与常见坑</h2>
+<h3 id="sec-5141">14.1 实践清单</h3>
+<ul>
+<li><strong>类型优先</strong>：所有 LLM 输出尽量映射为 record/data class，享受重构与强类型。</li>
+<li><strong>LLM 只做它擅长的</strong>：抽取、生成、判断用 LLM；查库、计算、校验用确定性代码。</li>
+<li><strong>明确工具边界</strong>：会改/删数据的操作不要用 <code>@Tool</code> 暴露给 LLM，改在代码里显式调用。</li>
+<li><strong>描述即契约</strong>：<code>@Agent</code>/<code>@Action</code>/<code>@JsonClassDescription</code> 的 description 是规划与选择依据，要写清楚。</li>
+<li><strong>用 shell 调试</strong>：<code>-p -r</code> 看 prompt 与响应，快速定位规划/提示词问题。</li>
+</ul>
+<h3 id="sec-5142">14.2 迁移 / 版本注意</h3>
+<ul>
+<li>Embabel <strong>尚不兼容 Spring AI 2.0 / Spring Boot 4</strong>，当前用 Spring Boot 3.5.x + Spring AI 1.1.x。</li>
+<li>版本演进快（如 1.5.0-SNAPSHOT 主线），引入新特性前先核对对应版本的文档与依赖坐标。</li>
+<li>License：Apache 2.0，仓库 <code>github.com/embabel/embabel-agent</code>，文档 <code>docs.embabel.com</code>。</li>
+</ul>

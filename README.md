@@ -2,7 +2,7 @@
 
 一个**纯静态、单文件、可离线打开**的知识库网站。支持多知识库切换、侧边导航、全文搜索、学习计划、闪卡速记、艾宾浩斯复习、暗色模式，并内置 Monaco 代码编辑器与「AI 学习助手」。数据全部保存在浏览器 `localStorage`，无需后端。
 
-> 本仓库（`lxxyyy29.github.io`）仅存放构建产物（`index.html` / `知识库.html`）。源码生成器 `build_kb.py` 与各个内容片段 `frag_*.html`、以及可选 IDEA 级补全后端 `lsp-bridge/` 在本地 WorkBuddy 工程中。
+> 本仓库（`lxxyyy29.github.io`）既存放构建产物（`index.html` / `知识库.html`），也**自带可构建源码**：`build_kb.py`、`kb_template.html`、`kb_app.js`、`frag_*.html`、`src_long.html`。因此可直接由 GitHub Actions 自动构建并部署，无需本地先行构建（见下文「自动部署」）。IDEA 级补全后端 `lsp-bridge/` 在本地 WorkBuddy 工程中，为可选组件。
 
 ---
 
@@ -48,21 +48,29 @@
 
 ---
 
-## 项目结构（源码侧）
+## 项目结构（本仓库即源码）
 
 ```
-知识库.html            构建产物（单文件，可直接打开）
+index.html            构建产物 / Pages 入口（单文件，可直接打开）
+知识库.html           构建产物副本（同 index.html）
 build_kb.py           生成器：拆分正文 + 拼接各 frag + 注入 TPL
+kb_template.html      HTML 模板（含 %%APPJS%%/%%LIBTABS%%/%%NAVLISTS%%/%%PAGES%% 占位）
+kb_app.js             全部应用逻辑（内联到产物中）
 frag_java.html        库 0 扩充片段
 frag_ragent.html      库 1 片段（Ragent 源码深挖）
 frag_langchain.html   库 2 片段
 frag_embabel.html     库 3 片段
 frag_springai.html    库 4 片段
 frag_biztpl.html      库 5 片段（业务开发模板）
+src_long.html         原始长页正文（库 0/1 的来源；CI 构建用，本地缺失时回退绝对路径）
+.github/workflows/    GitHub Actions 自动部署
+sync_gitee.sh         一键同步到 Gitee（大陆访问）
 lsp-bridge/           可选：IDEA 级 Java 补全后端（Node WS 桥接 jdtls）
 ```
 
-新增一个知识库的标准做法：写 `frag_xxx.html`（以 `<h1>` 作为导航分组标题，章节用 `<h2>/<h3>` 并带 `id="sec-xxxx"`），在 `build_kb.py` 里加 `FRAG_XXX` / `pageN` / `navN`、TPL 补 `lib-tab` / `nav-list` / `page` 占位与 `replace` 注入，再 `python build_kb.py` 重建。库切换逻辑全读 DOM，无需改 JS。
+新增一个知识库的标准做法（**数据驱动，只加一行**）：写 `frag_xxx.html`（以 `<h1>` 作为导航分组标题，章节用 `<h2>/<h3>` 并带 `id="sec-xxxx"`），在 `build_kb.py` 的 `EXTRA_LIBS` 列表加一行 `("6","🚀","新库名","frag_xxx.html")`，再 `python build_kb.py` 重建。库切换逻辑全读 DOM，无需改 JS。
+
+> ⚠️ 导航分组必须以 `<h1>` 作为锚点：如果某个库片段首行不是 `<h1>`，`build_nav` 会得不到分组，导致该库侧边导航为空（库 5 曾踩过这个坑）。
 
 ---
 
@@ -80,16 +88,72 @@ lsp-bridge/           可选：IDEA 级 Java 补全后端（Node WS 桥接 jdtls
 
 ## 构建与部署
 
-```bash
-# 本地重建（需 Python 3.13+）
-python build_kb.py          # 生成 知识库.html
+### 本地构建
 
-# 发布到 GitHub Pages
-cp 知识库.html deploy_kb/index.html
-cd deploy_kb && git add -A && git commit -m "update" && git push origin main
+```bash
+python build_kb.py          # 生成 知识库.html（同时可 cp 知识库.html index.html）
+```
+
+### 自动部署（GitHub Actions）✅
+
+本仓库已配置 `.github/workflows/deploy.yml`：**push 到 `main` 即自动构建并发布到 GitHub Pages**。
+
+1. 在本仓库「Settings → Pages → Build and deployment → Source」选择 **GitHub Actions**。
+2. 之后任何 `git push` 都会触发：检出 → `python build_kb.py && cp 知识库.html index.html` → 发布 Pages 产物。
+3. 无需本地先构建；源码（含 `src_long.html`）已随仓库提交，CI 可直接还原整站。
+
+> 注意：CI 默认读取仓库内的 `src_long.html`。若你只改了 `frag_*.html` / `kb_app.js` 等，直接 push 即可；若改了底层长页源，记得一并更新 `src_long.html`。
+
+### 大陆稳定访问（Gitee Pages / 自定义域名 / CDN）
+
+GitHub Pages 在大陆经常不稳定，下面是几条可用的「加速」路径：
+
+**A. Gitee Pages 镜像（已附脚本）**
+
+```bash
+# 1) 在 Gitee 建同名空仓库，配置好 SSH 公钥或私人令牌
+# 2) 运行同步脚本（默认仓库 lxxyyy29/lxxyyy29，可用环境变量覆盖）
+bash sync_gitee.sh
+# 或：GITEE_OWNER=你的用户名 GITEE_REPO=仓库名 bash sync_gitee.sh
+```
+
+脚本会把 `main` 强制推到 Gitee 的 `master` 分支（Gitee Pages 只认 `master`/`gh-pages`）。随后在 Gitee 仓库「服务 → Gitee Pages」选 `master`、目录 `/`，点「启动」。
+
+**B. 自定义域名 + CDN（最稳）**
+
+1. 给 Pages 绑一个你自己的域名（GitHub Pages / Gitee Pages 均支持自定义域名），并在 DNS 处开启 **CNAME 扁平化 / 关闭 DNSSEC 冲突**。
+2. 在域名前挂一层 CDN（Cloudflare / 国内云厂商 CDN），开启：
+   - 静态缓存（`index.html` 及 Monaco 等静态资源缓存 1 小时~1 天）；
+   - **HTTP/2、Brotli 压缩**；
+   - 必要时「海外回源 + 大陆边缘节点」以绕开直连不稳定。
+3. 开启 HTTPS（证书可由 CDN 自动签发）。这样大陆访问走 CDN 边缘，稳定性显著提升。
+
+**C. 把 Monaco 放到本地 / 自有 CDN（离线也能用编辑器）**
+
+编辑器默认从 `npmmirror → jsdelivr → unpkg` 依次加载，全失败时回退纯文本框。若希望**完全离线或自有域名加速**，把 Monaco 放到站点同目录 `vendor/monaco/min`（加载器会**优先**用本地路径）：
+
+```bash
+# 任选其一拉取 monaco-editor 0.52.2 的 min 产物到 vendor/monaco
+npm pack monaco-editor@0.52.2 && tar -xzf monaco-editor-0.52.2.tgz && mv package/dist/min vendor/monaco/min
+# 或：直接下载 https://registry.npmmirror.com/monaco-editor/0.52.2/files/min 整目录到 vendor/monaco/min
 ```
 
 CloudStudio 镜像通过部署工具覆盖重部署（同沙箱 ID），与 GitHub Pages 保持同步。
+
+---
+
+## Roadmap（已落地 / 规划）
+
+- [x] 第 6 个知识库「业务开发模板」（Ragent 为蓝本，五段闭环 + 逐功能优缺点）
+- [x] 工程化：拆分 `TPL`/`JS` 为 `kb_template.html` + `kb_app.js`，新增库改为数据驱动（一行）
+- [x] 备份/恢复：⬇ 导出 / ⬆ 导入 `localStorage` 全部 `kb_` 数据
+- [x] 全局搜索：跨全部知识库检索，结果下拉直达
+- [x] 我的笔记与收藏：标题 ⭐/📝 一键标注，📝 我的 总览（全部/收藏/有笔记筛选）
+- [x] 业务模板库加深：四层架构图 + 问答数据流图（SVG）、5 处最小可运行片段、章节交叉链接
+- [x] 移动端打磨：窄屏工具行可横滑、编辑器与标题按钮缩小
+- [x] Monaco 加载：本地 `vendor` 优先 + npmmirror/jsdelivr/unpkg 多 CDN 兜底
+- [x] 大陆稳定访问：Gitee 同步脚本 + 自定义域名/CDN 指南
+- [x] GitHub Actions 自动部署：push 即构建发布到 Pages
 
 ---
 
