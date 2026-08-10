@@ -534,6 +534,7 @@ body.review h3.open::before{content:"\25BE  ";}
     <button type="button" class="lib-tab" data-lib="2" onclick="switchLib('2')"><span class="ic">🔗</span><span class="nm">LangChain 1.0+</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'2')">×</span></button>
     <button type="button" class="lib-tab" data-lib="3" onclick="switchLib('3')"><span class="ic">🤖</span><span class="nm">Embabel Agent</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'3')">×</span></button>
     <button type="button" class="lib-tab" data-lib="4" onclick="switchLib('4')"><span class="ic">🌱</span><span class="nm">Spring AI</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'4')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="5" onclick="switchLib('5')"><span class="ic">🧭</span><span class="nm">业务开发模板</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'5')">×</span></button>
     <button type="button" class="lib-add" onclick="openLibModal()">＋ 新建知识库</button>
   </div>
   <div class="search"><input id="search" type="text" placeholder="🔍 搜索当前知识库…" oninput="onSearch(this.value)"><div class="search-hint" id="searchHint" onclick="jumpOtherLib()"></div></div>
@@ -544,6 +545,7 @@ body.review h3.open::before{content:"\25BE  ";}
     <div class="nav-list" data-lib="2"><div class="nav-group"><div class="nav-h1">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</div><a class="nav-h2" href="#sec-401">一、定位与设计哲学</a><a class="nav-h3" href="#sec-4011">1.1 发布背景与时间线</a><a class="nav-h3" href="#sec-4012">1.2 设计哲学：一个 Agent 抽象</a><a class="nav-h2" href="#sec-402">二、包结构精简</a><a class="nav-h3" href="#sec-4021">2.1 主包 langchain 的命名空间</a><a class="nav-h3" href="#sec-4022">2.2 langchain-classic（旧代码救生艇）</a><a class="nav-h3" href="#sec-4023">2.3 安装与环境要求</a><a class="nav-h2" href="#sec-403">三、模型初始化 init_chat_model</a><a class="nav-h3" href="#sec-4031">3.1 统一初始化与多模型切换</a><a class="nav-h3" href="#sec-4032">3.2 厂商包与对接国产 / OpenAI 兼容模型</a><a class="nav-h2" href="#sec-404">四、工具定义 @tool</a><a class="nav-h3" href="#sec-4041">4.1 基础用法</a><a class="nav-h3" href="#sec-4042">4.2 结构化入参与状态注入</a><a class="nav-h2" href="#sec-405">五、消息与标准内容块 content_blocks</a><a class="nav-h3" href="#sec-4051">5.1 content_blocks：跨供应商统一</a><a class="nav-h3" href="#sec-4052">5.2 多模态消息</a><a class="nav-h3" href="#sec-4053">5.3 序列化与 LC_OUTPUT_VERSION</a><a class="nav-h2" href="#sec-406">六、构建智能体 create_agent</a><a class="nav-h3" href="#sec-4061">6.1 最小可运行的 Agent</a><a class="nav-h3" href="#sec-4062">6.2 system_prompt 与运行时 context</a><a class="nav-h3" href="#sec-4063">6.3 流式调用</a><a class="nav-h2" href="#sec-407">七、智能体中间件 Middleware</a><a class="nav-h3" href="#sec-4071">7.1 内置中间件</a><a class="nav-h3" href="#sec-4072">7.2 自定义中间件</a><a class="nav-h2" href="#sec-408">八、结构化输出 Structured Output</a><a class="nav-h3" href="#sec-4081">8.1 response_format + ToolStrategy</a><a class="nav-h3" href="#sec-4082">8.2 厂商原生结构化输出</a><a class="nav-h2" href="#sec-409">九、持久化与 LangGraph 运行时</a><a class="nav-h3" href="#sec-4091">9.1 Durable State 与断点恢复</a><a class="nav-h3" href="#sec-4092">9.2 人在回路 HITL</a><a class="nav-h2" href="#sec-410">十、RAG 与检索（1.0 的变化）</a><a class="nav-h3" href="#sec-4101">10.1 检索器迁移到 classic</a><a class="nav-h3" href="#sec-4102">10.2 用 create_agent + 检索工具做 RAG</a><a class="nav-h2" href="#sec-411">十一、迁移指南（0.x → 1.0）</a><a class="nav-h3" href="#sec-4111">11.1 常见 import 对照</a><a class="nav-h3" href="#sec-4112">11.2 升级步骤建议</a><a class="nav-h2" href="#sec-412">十二、实战：工具调用 Agent 完整示例</a><a class="nav-h2" href="#sec-413">十三、1.1 与版本演进（model profiles）</a><a class="nav-h2" href="#sec-414">十四、最佳实践与常见坑</a></div></div>
     <div class="nav-list" data-lib="3"><div class="nav-group"><div class="nav-h1">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</div><a class="nav-h2" href="#sec-501">一、定位与背景</a><a class="nav-h3" href="#sec-5011">1.1 它解决什么问题</a><a class="nav-h3" href="#sec-5012">1.2 与 Spring AI / LangChain 的关系</a><a class="nav-h2" href="#sec-502">二、核心概念</a><a class="nav-h3" href="#sec-5021">2.1 五大支柱</a><a class="nav-h3" href="#sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</a><a class="nav-h2" href="#sec-503">三、快速开始</a><a class="nav-h3" href="#sec-5031">3.1 项目脚手架</a><a class="nav-h3" href="#sec-5032">3.2 配置与运行</a><a class="nav-h2" href="#sec-504">四、领域模型（强类型基石）</a><a class="nav-h3" href="#sec-5041">4.1 用 record / data class 表达类型</a><a class="nav-h3" href="#sec-5042">4.2 把行为暴露给 LLM</a><a class="nav-h2" href="#sec-505">五、@Agent / @Action / @AchievesGoal</a><a class="nav-h3" href="#sec-5051">5.1 Kotlin 示例：StarNewsFinder</a><a class="nav-h3" href="#sec-5052">5.2 Java 示例：BlogWriterAgent</a><a class="nav-h3" href="#sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</a><a class="nav-h2" href="#sec-506">六、AI 与 LLM 抽象</a><a class="nav-h3" href="#sec-5061">6.1 Ai 与 OperationContext</a><a class="nav-h3" href="#sec-5062">6.2 模型提供商与自定义 LLM</a><a class="nav-h2" href="#sec-507">七、规划引擎（GOAP / A*）</a><a class="nav-h3" href="#sec-5071">7.1 工作原理</a><a class="nav-h3" href="#sec-5072">7.2 为什么不是状态机</a><a class="nav-h2" href="#sec-508">八、工具与 ToolGroup</a><a class="nav-h3" href="#sec-5081">8.1 声明工具组</a><a class="nav-h3" href="#sec-5082">8.2 安全提示</a><a class="nav-h2" href="#sec-509">九、MCP 集成</a><a class="nav-h3" href="#sec-5091">9.1 作为 MCP 服务器暴露</a><a class="nav-h3" href="#sec-5092">9.2 消费 MCP 服务器</a><a class="nav-h2" href="#sec-510">十、RAG 与向量检索</a><a class="nav-h3" href="#sec-5101">10.1 embabel-agent-rag 模块</a><a class="nav-h2" href="#sec-511">十一、多智能体与 A2A</a><a class="nav-h3" href="#sec-5111">11.1 Agent 联邦</a><a class="nav-h2" href="#sec-512">十二、运行、调试与测试</a><a class="nav-h3" href="#sec-5121">12.1 Spring Shell 命令</a><a class="nav-h3" href="#sec-5122">12.2 单元测试</a><a class="nav-h2" href="#sec-513">十三、成本与预算意识</a><a class="nav-h3" href="#sec-5131">13.1 预算感知 Agent</a><a class="nav-h2" href="#sec-514">十四、最佳实践与常见坑</a><a class="nav-h3" href="#sec-5141">14.1 实践清单</a><a class="nav-h3" href="#sec-5142">14.2 迁移 / 版本注意</a></div></div>
     <div class="nav-list" data-lib="4"><div class="nav-group"><div class="nav-h1">Spring AI 知识库（Java 生态的 AI 工程框架）</div><a class="nav-h2" href="#sec-601">一、定位与版本</a><a class="nav-h3" href="#sec-6011">1.1 设计目标</a><a class="nav-h3" href="#sec-6012">1.2 版本与模块</a><a class="nav-h2" href="#sec-602">二、核心 API 全景</a><a class="nav-h3" href="#sec-6021">2.1 能力矩阵</a><a class="nav-h3" href="#sec-6022">2.2 支持的厂商</a><a class="nav-h2" href="#sec-603">三、快速开始</a><a class="nav-h3" href="#sec-6031">3.1 起步依赖</a><a class="nav-h3" href="#sec-6032">3.2 第一个调用</a><a class="nav-h2" href="#sec-604">四、ChatClient Fluent API</a><a class="nav-h3" href="#sec-6041">4.1 链式调用</a><a class="nav-h3" href="#sec-6042">4.2 流式与默认值</a><a class="nav-h2" href="#sec-605">五、结构化输出</a><a class="nav-h3" href="#sec-6051">5.1 entity 映射到 POJO</a><a class="nav-h3" href="#sec-6052">5.2 让模型理解字段</a><a class="nav-h2" href="#sec-606">六、PromptTemplate</a><a class="nav-h3" href="#sec-6061">6.1 变量与外部资源</a><a class="nav-h2" href="#sec-607">七、模型提供商与 ChatOptions</a><a class="nav-h3" href="#sec-6071">7.1 切换模型与参数</a><a class="nav-h2" href="#sec-608">八、Embedding 与 VectorStore</a><a class="nav-h3" href="#sec-6081">8.1 注入与检索</a><a class="nav-h3" href="#sec-6082">8.2 可移植的元数据过滤</a><a class="nav-h2" href="#sec-609">九、文档 ETL 流水线</a><a class="nav-h3" href="#sec-6091">9.1 读 → 切 → 嵌 → 写</a><a class="nav-h2" href="#sec-610">十、工具调用（Tool Calling）</a><a class="nav-h3" href="#sec-6101">10.1 用 @Tool 定义工具</a><a class="nav-h3" href="#sec-6102">10.2 注册为 ToolCallback 并接线</a><a class="nav-h3" href="#sec-6103">10.3 2.0 的工具循环</a><a class="nav-h2" href="#sec-611">十一、Advisors API</a><a class="nav-h3" href="#sec-6111">11.1 拦截器链模式</a><a class="nav-h2" href="#sec-612">十二、对话记忆（Chat Memory）</a><a class="nav-h3" href="#sec-6121">12.1 记忆仓库与窗口</a><a class="nav-h2" href="#sec-613">十三、RAG 实战</a><a class="nav-h3" href="#sec-6131">13.1 RAG 与工具天然可组合</a><a class="nav-h3" href="#sec-6132">13.2 给模型明确指引</a><a class="nav-h2" href="#sec-614">十四、MCP 集成</a><a class="nav-h3" href="#sec-6141">14.1 暴露为 MCP 工具服务器</a><a class="nav-h3" href="#sec-6142">14.2 消费远程 MCP 服务器</a><a class="nav-h2" href="#sec-615">十五、评估（Evaluation）</a><a class="nav-h3" href="#sec-6151">15.1 相关性评估器</a><a class="nav-h2" href="#sec-616">十六、可观测性</a><a class="nav-h3" href="#sec-6161">16.1 开启观测</a><a class="nav-h2" href="#sec-617">十七、Spring Boot 自动配置与 Starters</a><a class="nav-h3" href="#sec-6171">17.1 约定优于配置</a><a class="nav-h2" href="#sec-618">十八、最佳实践与常见坑</a><a class="nav-h3" href="#sec-6181">18.1 实践清单</a><a class="nav-h3" href="#sec-6182">18.2 版本注意</a></div></div>
+    <div class="nav-list" data-lib="5"><div class="nav-group"><div class="nav-h1">后端业务项目开发模板（以 Ragent 为蓝本）</div><a class="nav-h2" href="#sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</a><a class="nav-h2" href="#sec-7001">一、阶段一：需求梳理与范围界定</a><a class="nav-h3" href="#sec-7002">1.1 功能需求：用「用户故事」拆，而不是用「我要做个系统」</a><a class="nav-h3" href="#sec-7003">1.2 非功能需求（NFR）：决定技术难度的往往是它</a><a class="nav-h3" href="#sec-7004">1.3 以 Ragent 模拟：需求怎么拆</a><a class="nav-h2" href="#sec-7005">二、阶段二：技术选型的总原则</a><a class="nav-h3" href="#sec-7006">2.1 先定约束，再选技术</a><a class="nav-h3" href="#sec-7007">2.2 自研 vs 开源 vs 云服务的权衡</a><a class="nav-h3" href="#sec-7008">2.3 选型要留「演进后路」</a><a class="nav-h2" href="#sec-7009">三、阶段三：总体架构设计</a><a class="nav-h3" href="#sec-7010">3.1 经典四层（自顶向下）</a><a class="nav-h3" href="#sec-7011">3.2 模块边界：用「限界上下文」思路分</a><a class="nav-h3" href="#sec-7012">3.3 以 Ragent 模拟：一次问答的数据流</a><a class="nav-h2" href="#sec-7013">四、阶段四：逐功能技术拆解（核心，含优缺点）</a><a class="nav-h3" href="#sec-7014">4.1 对话问答核心链路：SSE 还是 WebSocket？</a><a class="nav-h3" href="#sec-7015">4.2 并发限流：队列式限流 vs 令牌桶</a><a class="nav-h3" href="#sec-7016">4.3 检索增强（RAG）：向量 / 关键词 / 混合，怎么选？</a><a class="nav-h3" href="#sec-7017">4.4 意图识别：LLM 分类 vs 传统 ML/NLP</a><a class="nav-h3" href="#sec-7018">4.5 会话记忆与上下文压缩</a><a class="nav-h3" href="#sec-7019">4.6 模型路由与容错：多模型 / 熔断 / 降级 / 首包探测</a><a class="nav-h3" href="#sec-7020">4.7 知识库管理与文档入库 Pipeline</a><a class="nav-h3" href="#sec-7021">4.8 认证授权与多租户</a><a class="nav-h3" href="#sec-7022">4.9 可观测性：Trace / 日志 / 指标 / 审计</a><a class="nav-h3" href="#sec-7023">4.10 异步与消息队列（RocketMQ / Kafka）</a><a class="nav-h3" href="#sec-7024">4.11 文件与对象存储（S3 兼容）</a><a class="nav-h3" href="#sec-7025">4.12 多级缓存（Redis）</a><a class="nav-h2" href="#sec-7026">五、阶段五：数据存储设计</a><a class="nav-h3" href="#sec-7027">5.1 关系型库：PostgreSQL vs MySQL</a><a class="nav-h3" href="#sec-7028">5.2 向量库选型</a><a class="nav-h3" href="#sec-7029">5.3 表设计要点（以 Ragent 23 张表为参考）</a><a class="nav-h2" href="#sec-7030">六、阶段六：工程化与并发治理</a><a class="nav-h3" href="#sec-7031">6.1 线程池隔离：别一个大池子打天下</a><a class="nav-h3" href="#sec-7032">6.2 配置中心与环境管理</a><a class="nav-h3" href="#sec-7033">6.3 幂等与防重</a><a class="nav-h2" href="#sec-7034">七、阶段七：部署与运维</a><a class="nav-h3" href="#sec-7035">7.1 容器化起步</a><a class="nav-h3" href="#sec-7036">7.2 编排与高可用（K8s）</a><a class="nav-h3" href="#sec-7037">7.3 灰度与回滚</a><a class="nav-h3" href="#sec-7038">7.4 监控告警</a><a class="nav-h2" href="#sec-7039">八、阶段八：上线 Checklist 与复盘</a><a class="nav-h3" href="#sec-7040">8.1 上线前清单（逐项打勾）</a><a class="nav-h3" href="#sec-7041">8.2 复盘模板（每次上线后必做）</a><a class="nav-h2" href="#sec-7042">九、速查表：功能 → 技术 → 优缺点（一页背完）</a></div></div>
   </div>
 </aside>
 <main class="main"><div class="content" id="contentBox">
@@ -2299,6 +2301,285 @@ EvaluationResponse res = evaluator.evaluate(req);
 <li>1.0 GA 是当前主流稳定版；2.0 引入 <code>ToolCallingAdvisor</code> 统一工具循环，迁移时留意 advisor 注册方式变化。</li>
 <li>多模态（图文/音视频）取决于底层模型是否支持，使用前核对厂商能力。</li>
 </ul>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('5')">下一个知识库：业务开发模板 →</button></div>
+  </section>
+  <section class="page" data-page="5"><h1 id="sec-7000">后端业务项目开发模板（以 Ragent 为蓝本）</h1>
+<h2 id="sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</h2>
+<p>很多人一上来就「先堆 CRUD、再补功能」，结果越写越乱、越改越怕。正确的顺序是<strong>先想清楚、再动手</strong>：<strong>需求 → 选型 → 架构 → 实现 → 运维</strong> 五个阶段闭环推进，而不是一条直线冲到底。本库以「Ragent（一个 AI 智能问答 / 知识库系统）」为蓝本，把<strong>一个真实业务项目从 0 到 1 该考虑的每件事</strong>拆给你看——既能当方法论，也能当检查清单。</p>
+<table><thead><tr><th>阶段</th><th>核心问题</th><th>产出物</th></tr></thead><tbody>
+<tr><td>① 需求</td><td>到底要解决谁的什么问题？做到什么程度算成功？</td><td>功能清单 + 非功能指标 + MVP 边界</td></tr>
+<tr><td>② 选型</td><td>在团队 / 成本 / 性能 / 可维护的约束下，用什么？</td><td>技术选型表（含备选与理由）</td></tr>
+<tr><td>③ 架构</td><td>模块怎么分、依赖怎么走、数据怎么流？</td><td>分层图 + 模块边界 + 时序</td></tr>
+<tr><td>④ 实现</td><td>每个功能点落地时，技术的优缺点怎么权衡？</td><td>逐功能技术拆解 + 取舍记录</td></tr>
+<tr><td>⑤ 运维</td><td>怎么上线、怎么扛量、出事怎么查？</td><td>部署拓扑 + 监控 + 上线 Checklist</td></tr>
+</tbody></table>
+<blockquote>记住一句总纲：<strong>「先定约束，再选技术；先分边界，再写代码；先能跑通，再谈优雅。」</strong></blockquote>
+<hr class="sep">
+
+<h2 id="sec-7001">一、阶段一：需求梳理与范围界定</h2>
+<h3 id="sec-7002">1.1 功能需求：用「用户故事」拆，而不是用「我要做个系统」</h3>
+<ul>
+<li>每个功能写成 <code>作为&lt;角色&gt;，我希望&lt;动作&gt;，以便&lt;价值&gt;</code>。例：作为<strong>访客</strong>，我希望<strong>输入问题得到流式回答</strong>，以便<strong>像聊天一样获取知识</strong>。</li>
+<li>功能要能<strong>验收</strong>：能写出「满足 X 条件即算通过」的测试标准，否则等于没需求。</li>
+<li>功能要<strong>可排优先级</strong>：用 MoSCoW（Must / Should / Could / Won't）区分，避免一上来全做。</li>
+</ul>
+<h3 id="sec-7003">1.2 非功能需求（NFR）：决定技术难度的往往是它</h3>
+<table><thead><tr><th>维度</th><th>要问的问题</th><th>典型指标</th></tr></thead><tbody>
+<tr><td>性能</td><td>单次请求多久要回？</td><td>P95 &lt; 800ms（首包 &lt; 1.5s）</td></tr>
+<tr><td>并发</td><td>同时多少人用？</td><td>峰值 200 QPS / 全局 50 并发</td></tr>
+<tr><td>可用性</td><td>挂了多久能恢复？</td><td>99.9%（月停 &lt; 43 分钟）</td></tr>
+<tr><td>安全</td><td>谁能用、数据归谁？</td><td>登录鉴权 + 多租户隔离</td></tr>
+<tr><td>合规</td><td>数据要存境内吗？</td><td>等保 / 数据不出境</td></tr>
+<tr><td>可演进</td><td>半年后要不要加能力？</td><td>插件化 / 配置化预留</td></tr>
+</tbody></table>
+<h3 id="sec-7004">1.3 以 Ragent 模拟：需求怎么拆</h3>
+<ul>
+<li><strong>Must</strong>：问答接口（流式）、知识库上传与检索、用户登录。</li>
+<li><strong>Should</strong>：意图识别、多路混合检索、限流防刷、会话记忆。</li>
+<li><strong>Could</strong>：文档定时刷新、MCP 外部工具、Rerank 精排。</li>
+<li><strong>Won't（本期不做）</strong>：多模态图文问答、私有化小模型微调。</li>
+</ul>
+<blockquote>「Won't」和「Must」一样重要——它帮你挡住无底洞需求，保护 MVP 能按时上线。</blockquote>
+<hr class="sep">
+
+<h2 id="sec-7005">二、阶段二：技术选型的总原则</h2>
+<h3 id="sec-7006">2.1 先定约束，再选技术</h3>
+<ul>
+<li><strong>团队约束</strong>：团队只会 Java？就别硬上 Go/Rust；只会单体？先别强上微服务。</li>
+<li><strong>成本约束</strong>：云上 GPU 推理很贵，能走 API 就别自建集群。</li>
+<li><strong>性能约束</strong>：要毫秒级检索？就得上向量索引，不能靠 LIKE 全表扫。</li>
+<li><strong>可维护约束</strong>：招不到人维护的技术栈，再先进也不能碰。</li>
+</ul>
+<h3 id="sec-7007">2.2 自研 vs 开源 vs 云服务的权衡</h3>
+<table><thead><tr><th>路径</th><th>优点</th><th>缺点</th><th>何时选</th></tr></thead><tbody>
+<tr><td>直接用云服务（如大模型 API）</td><td>零运维、弹性、上线快</td><td>长期成本高、锁定、数据出境风险</td><td>MVP / 不确定规模时</td></tr>
+<tr><td>用成熟开源（如 Spring AI / LangChain）</td><td>可控、社区活跃、可改</td><td>要自己集成、踩坑</td><td>有定制需求、团队能 hold 住</td></tr>
+<tr><td>完全自研（如 Ragent 的 infra-ai）</td><td>完全贴合业务、无依赖绑架</td><td>成本高、需长期养</td><td>核心差异化能力、已有沉淀</td></tr>
+</tbody></table>
+<h3 id="sec-7008">2.3 选型要留「演进后路」</h3>
+<ul>
+<li>抽象一层接口，底层可替换：今天用 DeepSeek，明天换通义，业务代码不动。</li>
+<li>配置驱动：开关、阈值、权重都放配置，不写死在代码里。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7009">三、阶段三：总体架构设计</h2>
+<h3 id="sec-7010">3.1 经典四层（自顶向下）</h3>
+<table><thead><tr><th>层</th><th>职责</th><th>Ragent 对应</th></tr></thead><tbody>
+<tr><td>接入层</td><td>路由、鉴权、限流、协议转换（HTTP/SSE/WS）</td><td>Nginx + Controller + Sa-Token + RateLimiter</td></tr>
+<tr><td>业务层</td><td>编排用例、领域逻辑</td><td>Service + Pipeline + Intent</td></tr>
+<tr><td>能力层</td><td>模型、检索、存储等通用能力</td><td>infra-ai / Retrieval / Ingestion</td></tr>
+<tr><td>基础设施</td><td>DB / 缓存 / MQ / 对象存储</td><td>PostgreSQL+PGVector / Redis / RocketMQ / RustFS</td></tr>
+</tbody></table>
+<h3 id="sec-7011">3.2 模块边界：用「限界上下文」思路分</h3>
+<ul>
+<li>每个上下文<strong>只对自己负责的数据有写权</strong>，对外只暴露接口。</li>
+<li>依赖方向单向：接入 → 业务 → 能力 → 基础设施；<strong>禁止反向调用</strong>。</li>
+<li>Ragent 把「对话」「检索」「入库」「意图」「模型路由」拆成独立包，互不污染。</li>
+</ul>
+<h3 id="sec-7012">3.3 以 Ragent 模拟：一次问答的数据流</h3>
+<p><code>前端 → 网关鉴权 → 限流排队 → 服务编排(雪花ID) → 加载记忆 → 改写问题 → 意图识别 → 多路检索 → RRF融合 → Rerank → 模型首包探测流式输出 → SSE 推前端</code>。每一环都是一个可独立替换、可独立观测的节点。</p>
+<hr class="sep">
+
+<h2 id="sec-7013">四、阶段四：逐功能技术拆解（核心，含优缺点）</h2>
+<p>下面把 Ragent 的每个功能拆开，讲「用什么技术、为什么、优缺点、备选」。这是本库最值钱的部分。</p>
+
+<h3 id="sec-7014">4.1 对话问答核心链路：SSE 还是 WebSocket？</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th><th>适用</th></tr></thead><tbody>
+<tr><td>SSE（Server-Sent Events）</td><td>基于 HTTP、天然断线重连、单向推送简单、好过代理</td><td>只能服务端→客户端单向；二进制弱</td><td>AI 流式回答（Ragent 选它）</td></tr>
+<tr><td>WebSocket</td><td>全双工、双向实时、可传二进制</td><td>需自己管心跳/重连、代理/CDN 支持参差</td><td>协同编辑、聊天室、游戏</td></tr>
+<tr><td>普通轮询</td><td>实现最简单</td><td>延迟高、空转浪费</td><td>极简场景、临时方案</td></tr>
+</tbody></table>
+<ul><li><strong>取舍</strong>：AI 回答是「服务端一直推、客户端只发一次问题」，SSE 最契合；还要支持「中途停止」，用单独的 <code>POST /stop</code> 接口即可，不必为双向而 WebSocket。</li></ul>
+
+<h3 id="sec-7015">4.2 并发限流：队列式限流 vs 令牌桶</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
+<tr><td>令牌桶 / 漏桶（Guava / Redis）</td><td>实现简单、平滑限平均速率</td><td>突发时直接拒绝，用户体验差；不保证「先到先服务」</td></tr>
+<tr><td>信号量 + 排队（Ragent 队列式）</td><td>满负载时<strong>排队等待</strong>而非拒绝，公平且体验好</td><td>实现复杂（需 Lua 原子出队、僵尸清理、超时状态机）</td></tr>
+</tbody></table>
+<ul><li><strong>参数示例</strong>：全局并发 50、排队上限 20s、许可租约 600s 兜底防泄漏；被拒回写记忆并推「系统繁忙」。</li>
+<li><strong>何时选队列</strong>：下游（LLM）是稀缺资源、且希望用户「等一下而非直接失败」；<strong>何时选令牌桶</strong>：纯接口防刷、不在乎个别请求失败。</li></ul>
+
+<h3 id="sec-7016">4.3 检索增强（RAG）：向量 / 关键词 / 混合，怎么选？</h3>
+<table><thead><tr><th>检索方式</th><th>优点</th><th>缺点</th><th>典型用</th></tr></thead><tbody>
+<tr><td>向量检索（Embedding + 近似近邻）</td><td>语义匹配强，问法不同也能命中</td><td>精确值/专名弱；依赖 Embedding 质量</td><td>口语化、语义相似问题</td></tr>
+<tr><td>关键词检索（ES / 倒排）</td><td>精确匹配、专名/编号准、可解释</td><td>同义/泛化能力差</td><td>订单号、术语、法规条文</td></tr>
+<tr><td>混合检索（多路并行 + RRF 融合）</td><td>兼顾语义与精确，召回更全</td><td>链路更长、要调权重与融合参数</td><td>生产级知识库（Ragent 选它）</td></tr>
+<tr><td>Rerank 精排</td><td>在召回基础上重排，相关性更高</td><td>额外一次模型调用、有成本</td><td>候选多、要保 Top 质量时开启</td></tr>
+</tbody></table>
+<ul><li><strong>RRF 融合公式</strong>：<code>score = Σ weight / (k + rank + 1)</code>；各通道权重可配（vector/keyword/graph/web），融合后截断再送 Rerank。</li>
+<li><strong>取舍</strong>：MVP 先上向量检索跑通；召回不够再补关键词；质量不稳再加 Rerank——<strong>逐级加复杂度</strong>。</li></ul>
+
+<h3 id="sec-7017">4.4 意图识别：LLM 分类 vs 传统 ML/NLP</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
+<tr><td>LLM 一次性打分（Ragent）</td><td>零训练、可改 Prompt、多意图一次出</td><td>有延迟与成本、需设阈值防误判</td></tr>
+<tr><td>传统文本分类（BERT 微调）</td><td>快、便宜、可本地化</td><td>要标注数据、要训练维护、改意图要重训</td></tr>
+<tr><td>关键词/规则路由</td><td>极快、可控</td><td>死板、覆盖低、维护地狱</td></tr>
+</tbody></table>
+<ul><li><strong>参数</strong>：意图阈值 0.35、最多 3 个意图、temperature=0.1/topP=0.3 求稳；结果缓存 7 天减少重复调用。</li></ul>
+
+<h3 id="sec-7018">4.5 会话记忆与上下文压缩</h3>
+<ul>
+<li><strong>不压缩</strong>：实现简单，但长对话爆 token、贵且慢。</li>
+<li><strong>滑动窗口</strong>（保留最近 N 轮）：简单有效，但会丢早期上下文。</li>
+<li><strong>摘要压缩</strong>（Ragent）：保留 8 轮原文 + 超 9 轮开始摘要（≤200 字）；优点是不丢全局背景，缺点是异步摘要有延迟、要分布式锁防并发。</li>
+<li><strong>取舍</strong>：MVP 用滑动窗口；对话长、要连续性的业务再上摘要。Ragent 默认关摘要，按需开。</li>
+</ul>
+
+<h3 id="sec-7019">4.6 模型路由与容错：多模型 / 熔断 / 降级 / 首包探测</h3>
+<table><thead><tr><th>机制</th><th>解决什么</th><th>要点</th></tr></thead><tbody>
+<tr><td>多模型路由</td><td>不同任务用不同模型（快/贵）</td><td>分 defaultTier / deepThinkingTier 档位</td></tr>
+<tr><td>熔断（三态）</td><td>某模型连续失败不再傻等</td><td>连续失败 2 次→OPEN 30s→半开放探针</td></tr>
+<tr><td>降级</td><td>主模型挂了切备胎</td><td>候选有序列表即降级顺序</td></tr>
+<tr><td>首包探测</td><td>流式过程中某个模型不吐字就换</td><td>按各模型 timeoutMs 探测，ERROR/TIMEOUT 即切下一个</td></tr>
+</tbody></table>
+<ul><li><strong>取舍</strong>：单模型能跑通就别上全套容错；当依赖外部 LLM API（不稳定）时，熔断+降级是<strong>必选项</strong>而非可选项。</li></ul>
+
+<h3 id="sec-7020">4.7 知识库管理与文档入库 Pipeline</h3>
+<ul>
+<li><strong>四步</strong>：解析（PDF/Word/网页）→ 分块（按语义/固定长度）→ Embedding → 写库（文档-分块-向量三级）。</li>
+<li><strong>分块策略</strong>：固定长度简单但易切断语义；按标题/段落切更连贯但实现复杂。Ragent 用 <code>NodeConfig</code> 连线执行，<code>validatePipeline</code> 校验环防死循环。</li>
+<li><strong>入库异步化</strong>：大文件走后台任务 + 状态表（pipeline/node/task 三级状态），前端轮询进度。</li>
+</ul>
+
+<h3 id="sec-7021">4.8 认证授权与多租户</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th><th>适用</th></tr></thead><tbody>
+<tr><td>JWT（无状态）</td><td>不用查库、易横向扩展</td><td>注销难（需黑名单）、过期固定</td><td>纯 API、无强制即时注销</td></tr>
+<tr><td>Session + Redis</td><td>可即时注销、可控</td><td>要存服务端状态</td><td>要强管控的后台</td></tr>
+<tr><td>Sa-Token（Ragent 选）</td><td>API 简洁、登录/踢人/权限一体</td><td>引入框架依赖</td><td>中后台快速落地</td></tr>
+</tbody></table>
+<ul><li><strong>多租户</strong>：数据隔离三档——独立库（最安全最贵）/ 共享库+tenant_id 行级（最省最易漏）/ 独立 schema（折中）。Ragent 用 <code>UserContextInterceptor</code> 把用户上下文透传，查询统一带租户条件。</li></ul>
+
+<h3 id="sec-7022">4.9 可观测性：Trace / 日志 / 指标 / 审计</h3>
+<ul>
+<li><strong>Trace</strong>：一次问答用 TraceId 串起所有节点（run/节点两级），出问题时一眼定位慢在哪。</li>
+<li><strong>日志</strong>：结构化（JSON）+ 级别分级；敏感信息脱敏。</li>
+<li><strong>指标</strong>：QPS / 延迟 / 限流拒绝数 / 模型失败率，接 Prometheus + Grafana。</li>
+<li><strong>审计</strong>：关键写操作留 <code>t_biz_change_log</code>，合规与排错都要。</li>
+</ul>
+
+<h3 id="sec-7023">4.10 异步与消息队列（RocketMQ / Kafka）</h3>
+<table><thead><tr><th>中间件</th><th>优点</th><th>缺点</th><th>适用</th></tr></thead><tbody>
+<tr><td>RocketMQ</td><td>事务消息、低延迟、Java 生态友好</td><td>运维略重</td><td>金融/订单/国内业务（Ragent 选）</td></tr>
+<tr><td>Kafka</td><td>超高吞吐、生态广</td><td>事务弱、延迟略高</td><td>日志流、大数据管道</td></tr>
+<tr><td>RabbitMQ</td><td>路由灵活、易上手</td><td>吞吐中等</td><td>中小业务、复杂路由</td></tr>
+</tbody></table>
+<ul><li><strong>用在哪</strong>：文档入库完成通知、记忆摘要触发、异步审计——把「可延迟」的事从主链路摘出去。</li></ul>
+
+<h3 id="sec-7024">4.11 文件与对象存储（S3 兼容）</h3>
+<ul>
+<li>自建 MinIO / RustFS 还是云 OSS？<strong>有合规/成本考量选自建，求省心选云</strong>。</li>
+<li>抽象 <code>storage.type=oss/s3</code>，业务只调统一接口，换厂商不动代码。</li>
+</ul>
+
+<h3 id="sec-7025">4.12 多级缓存（Redis）</h3>
+<ul>
+<li><strong>本地缓存（Caffeine）</strong>：极快、扛读多场景；缺点是多实例不一致。</li>
+<li><strong>分布式缓存（Redis）</strong>：实例间共享；缺点是多一跳网络。</li>
+<li><strong>典型用法</strong>：意图树缓存（TTL 7 天，节点变更主动失效）、限流计数、会话存活标记。</li>
+<li><strong>坑</strong>：缓存穿透（空值也缓存 / 布隆）、击穿（热点 key 互斥重建）、雪崩（TTL 加随机）。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7026">五、阶段五：数据存储设计</h2>
+<h3 id="sec-7027">5.1 关系型库：PostgreSQL vs MySQL</h3>
+<table><thead><tr><th>维度</th><th>PostgreSQL</th><th>MySQL</th></tr></thead><tbody>
+<tr><td>向量能力</td><td>原生 PGVector 扩展，一套库搞定关系+向量</td><td>需外接向量库</td></tr>
+<tr><td>复杂查询</td><td>CTE/窗口函数/JSON 强</td><td>够用但偏弱</td></tr>
+<tr><td>生态/人力</td><td>略少</td><td>人多、资料多</td></tr>
+</tbody></table>
+<ul><li><strong>Ragent 选 PostgreSQL 17 + PGVector</strong>：少养一个向量库、事务一致、运维简单。若团队只熟 MySQL 且向量量小，可 MySQL + 外挂 Milvus。</li></ul>
+<h3 id="sec-7028">5.2 向量库选型</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
+<tr><td>PGVector（Ragent 默认）</td><td>与关系库同实例、事务一致、运维省</td><td>超大数据量性能不如专用库</td></tr>
+<tr><td>Milvus</td><td>十亿级向量、高性能、云原生</td><td>重、独立集群、运维成本高</td></tr>
+<tr><td>Elasticsearch</td><td>关键词+向量一体、检索生态强</td><td>资源吃、版本坑多</td></tr>
+</tbody></table>
+<ul><li><strong>量级决策</strong>：百万级向量以内 PGVector 足够；上亿再考虑 Milvus。</li></ul>
+<h3 id="sec-7029">5.3 表设计要点（以 Ragent 23 张表为参考）</h3>
+<ul>
+<li><strong>按域分表</strong>：会话域 / 知识库域 / 意图域 / 入库域 / 观测域，互不交叉。</li>
+<li><strong>四级知识模型</strong>：库 → 文档 → 分块 → 向量，分块与向量可独立扩。</li>
+<li><strong>状态表</strong>：长任务（入库/调度）必有状态表，前端才能查进度。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7030">六、阶段六：工程化与并发治理</h2>
+<h3 id="sec-7031">6.1 线程池隔离：别一个大池子打天下</h3>
+<ul>
+<li>按<strong>工作负载特征</strong>拆池：IO 密集池大（如检索 4×CPU）、保 LLM 的池小（摘要 1~2 线程防打爆模型）、入口池与限流许可严格对齐。</li>
+<li>用 <code>TtlExecutors</code> 包装保证用户上下文 / TraceId 跨线程透传（否则异步后日志全乱）。</li>
+<li>拒绝策略：CallerRuns（降速自保）vs AbortPolicy（快速失败），按场景选。</li>
+</ul>
+<h3 id="sec-7032">6.2 配置中心与环境管理</h3>
+<ul>
+<li>本地 / 测试 / 生产三套 <code>application.yaml</code>，敏感信息走环境变量或配置中心（Nacos/Apollo），<strong>别提交密码进代码库</strong>。</li>
+<li>所有阈值（限流/熔断/记忆轮数）配置化，运维可热更不重启。</li>
+</ul>
+<h3 id="sec-7033">6.3 幂等与防重</h3>
+<ul>
+<li>入口按 <code>userId + 请求指纹</code> 幂等（Ragent 的 <code>@IdempotentSubmit</code>），防止用户连点产生重复回答/扣费。</li>
+<li>写操作带唯一键 / 乐观锁，防并发重复插入。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7034">七、阶段七：部署与运维</h2>
+<h3 id="sec-7035">7.1 容器化起步</h3>
+<ul>
+<li>一键 <code>docker-compose</code> 起中间件（PG+Redis+MQ+对象存储），开发者本地一条命令跑全流程。</li>
+<li>应用本身也打镜像，保证「本地能跑=线上能跑」。</li>
+</ul>
+<h3 id="sec-7036">7.2 编排与高可用（K8s）</h3>
+<ul>
+<li>无状态服务（接入/业务）多副本 + HPA 自动扩；有状态（DB）用托管服务。</li>
+<li>探针（liveness/readiness）保证流量只进健康实例。</li>
+</ul>
+<h3 id="sec-7037">7.3 灰度与回滚</h3>
+<ul>
+<li>蓝绿 / 金丝雀：新版本先放 5% 流量，指标正常再全量。</li>
+<li>每次发布保留上一个镜像，出问题一键回滚。</li>
+</ul>
+<h3 id="sec-7038">7.4 监控告警</h3>
+<ul>
+<li>四件套：日志（ELK/Loki）+ 指标（Prometheus/Grafana）+ Trace（Jaeger/自建）+ 告警（Webhook/钉钉）。</li>
+<li>告警要有「阈值 + 静默 + 升级」，否则告警风暴等于没告警。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7039">八、阶段八：上线 Checklist 与复盘</h2>
+<h3 id="sec-7040">8.1 上线前清单（逐项打勾）</h3>
+<table><thead><tr><th>类别</th><th>检查项</th></tr></thead><tbody>
+<tr><td>功能</td><td>核心链路跑通、边界用例覆盖、幂等验证</td></tr>
+<tr><td>性能</td><td>压测达预期 QPS、限流/熔断生效、慢 SQL 清零</td></tr>
+<tr><td>安全</td><td>鉴权全覆盖、敏感信息脱敏、依赖无已知漏洞</td></tr>
+<tr><td>数据</td><td>表结构评审、备份策略、迁移脚本可回滚</td></tr>
+<tr><td>运维</td><td>监控/告警就绪、日志可查、回滚预案演练</td></tr>
+</tbody></table>
+<h3 id="sec-7041">8.2 复盘模板（每次上线后必做）</h3>
+<ul>
+<li>做得好的 / 踩的坑 / 下次改进，三条必写；把「坑」沉淀进本模板，形成团队资产。</li>
+<li>把这次新发现的技术取舍补回「阶段四」对应小节，模板越用越厚。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7042">九、速查表：功能 → 技术 → 优缺点（一页背完）</h2>
+<table><thead><tr><th>功能</th><th>首选技术</th><th>最大优点</th><th>最大缺点 / 风险</th><th>备选</th></tr></thead><tbody>
+<tr><td>流式问答</td><td>SSE</td><td>简单、好过代理、可重连</td><td>单向，需另做停止接口</td><td>WebSocket</td></tr>
+<tr><td>并发限流</td><td>队列式（信号量+排队）</td><td>满负载排队不拒用户</td><td>实现复杂、要 Lua 原子</td><td>令牌桶</td></tr>
+<tr><td>知识检索</td><td>混合检索+RRF</td><td>语义+精确兼顾</td><td>链路长、要调参</td><td>纯向量</td></tr>
+<tr><td>意图识别</td><td>LLM 一次性打分</td><td>零训练、可改 Prompt</td><td>有延迟成本、需阈值</td><td>微调分类器</td></tr>
+<tr><td>会话记忆</td><td>滑动窗口→摘要</td><td>不丢背景</td><td>摘要异步有延迟</td><td>纯窗口</td></tr>
+<tr><td>模型容错</td><td>熔断+降级+首包探测</td><td>外部 API 不稳也不挂</td><td>链路复杂</td><td>单模型</td></tr>
+<tr><td>文档入库</td><td>Pipeline 异步</td><td>大文件不阻塞主链路</td><td>要状态表与进度查询</td><td>同步入库</td></tr>
+<tr><td>认证多租户</td><td>Sa-Token + tenant_id</td><td>登录/权限一体</td><td>框架依赖</td><td>JWT / Session</td></tr>
+<tr><td>可观测</td><td>Trace+指标+审计</td><td>出事一眼定位</td><td>接入有工作量</td><td>仅日志</td></tr>
+<tr><td>异步解耦</td><td>RocketMQ</td><td>事务消息、低延迟</td><td>运维略重</td><td>Kafka / RabbitMQ</td></tr>
+<tr><td>对象存储</td><td>S3 兼容抽象</td><td>换厂商不动代码</td><td>多一层抽象</td><td>云 OSS 直连</td></tr>
+<tr><td>缓存</td><td>本地+Redis 多级</td><td>读多场景极快</td><td>穿透/击穿/雪崩</td><td>单 Redis</td></tr>
+<tr><td>关系库</td><td>PostgreSQL+PGVector</td><td>关系+向量一套</td><td>超大向量量性能弱</td><td>MySQL+Milvus</td></tr>
+</tbody></table>
+<blockquote>把这页存成「选型速查卡」，每次接到新功能先来这里对照——它就是把 Ragent 真实踩坑浓缩成的「后端业务开发模板」。</blockquote>
 
     <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('0')">↻ 回到：Java 面试八股</button></div>
   </section>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>知识库 · Java 八股 / Ragent 项目</title><style>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>知识库 · Java 八股 / Ragent / LangChain 1.0+ / Embabel / Spring AI</title><style>
 :root{
   --bg:#f2efe7; --card:#fffdf8; --ink:#222a33; --ink2:#3d4650; --muted:#7a828c;
   --line:#e5dfcf; --gold:#a87c2a; --gold-2:#cfa553; --gold-soft:rgba(168,124,42,.10);
@@ -49,25 +49,29 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
   font-weight:800;font-size:20px;letter-spacing:3px;color:#f3e9d0;line-height:1.2;}
 .brand .s{font-size:11.5px;color:#93a3b0;margin-top:4px;letter-spacing:.6px;transition:color .2s;}
 
-.lib-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 16px 8px;position:relative;}
-.lib-tab{position:relative;padding:12px 12px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.10);
+.lib-tabs{display:flex;flex-wrap:nowrap;gap:8px;padding:12px 14px 10px;position:relative;overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(207,165,83,.5) transparent;}
+.lib-tabs::-webkit-scrollbar{height:7px;}
+.lib-tabs::-webkit-scrollbar-track{background:transparent;}
+.lib-tabs::-webkit-scrollbar-thumb{background:rgba(207,165,83,.45);border-radius:4px;}
+.lib-tabs::-webkit-scrollbar-thumb:hover{background:rgba(207,165,83,.7);}
+.lib-tab{position:relative;flex:0 0 auto;width:118px;padding:8px 10px 7px;border-radius:11px;border:1px solid rgba(255,255,255,.10);
   background:rgba(255,255,255,.04);color:#c3ccd4;cursor:pointer;text-align:left;
   transition:transform .18s,background .18s,border-color .18s,box-shadow .18s;font-family:inherit;}
-.lib-tab .ic{font-size:18px;line-height:1;}
-.lib-tab .nm{display:block;font-size:13px;font-weight:700;margin-top:7px;letter-spacing:.3px;}
-.lib-tab .ct{display:block;font-size:11px;color:#8494a1;margin-top:2px;}
+.lib-tab .ic{font-size:15px;line-height:1;}
+.lib-tab .nm{display:block;font-size:11.5px;font-weight:700;margin-top:5px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lib-tab .ct{display:block;font-size:10px;color:#8494a1;margin-top:1px;}
 .lib-tab:hover{background:rgba(255,255,255,.09);color:#fff;transform:translateY(-2px);}
 .lib-tab.active{background:linear-gradient(160deg,rgba(207,165,83,.26),rgba(207,165,83,.07));
   border-color:rgba(222,184,110,.6);color:#f6e8c6;
-  box-shadow:0 8px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.10);}
+  box-shadow:0 6px 16px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.10);}
 .lib-tab.active .ct{color:#cdb27c;}
-.lib-tab .del{position:absolute;top:5px;right:6px;width:17px;height:17px;border:none;border-radius:50%;
-  background:rgba(255,255,255,.14);color:#b6c2cd;font-size:11px;line-height:17px;text-align:center;
+.lib-tab .del{position:absolute;top:3px;right:4px;width:15px;height:15px;border:none;border-radius:50%;
+  background:rgba(255,255,255,.14);color:#b6c2cd;font-size:10px;line-height:15px;text-align:center;
   cursor:pointer;opacity:0;transition:.15s;padding:0;}
 .lib-tab:hover .del{opacity:1;}
 .lib-tab .del:hover{background:#c0453a;color:#fff;}
-.lib-add{grid-column:1 / -1;padding:9px;border:1px dashed rgba(255,255,255,.28);border-radius:12px;
-  background:transparent;color:#9fb0bc;font-size:12.5px;cursor:pointer;transition:.16s;font-family:inherit;}
+.lib-add{flex:0 0 auto;align-self:center;padding:9px 13px;border:1px dashed rgba(255,255,255,.28);border-radius:11px;
+  background:transparent;color:#9fb0bc;font-size:12px;cursor:pointer;transition:.16s;font-family:inherit;white-space:nowrap;}
 .lib-add:hover{border-color:var(--gold-2);color:#e8d5a4;background:rgba(207,165,83,.08);}
 
 /* ===== 新建知识库弹窗 ===== */
@@ -145,7 +149,10 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
   color:#f6e8c6;font-weight:600;box-shadow:inset 3px 0 0 var(--gold-2);}
 
 /* ===== 主区域 ===== */
-.main{margin-left:308px;padding:48px 32px 80px;}
+/* KB-FIX(monaco-suggest-v2): 必须限定为 main 标签。裸 .main 会命中 Monaco 补全项内部的
+   <div class="main">，把候选文字挤出可视区（margin-left:308px + padding-top:48px），
+   表现为"下拉框有、选中行蓝、但文字看不见"。 */
+main.main{margin-left:308px;padding:48px 32px 80px;}
 .content{max-width:880px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;
   box-shadow:var(--shadow);padding:56px 64px;transition:background .3s,border-color .3s;
   position:relative;overflow:hidden;}
@@ -260,6 +267,12 @@ body.review h3.open::before{content:"\25BE  ";}
 .ai-cfg .row{display:flex;gap:8px;align-items:center;}
 .ai-cfg .hint{font-size:11px;color:var(--muted);margin-top:2px;}
 .ai-cfg .m-btn{padding:6px 14px;font-size:12px;}
+.lsp-cfg{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+.lsp-cfg .lsp-title{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;}
+.lsp-cfg input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:12px;margin-bottom:7px;outline:none;font-family:inherit;}
+.lsp-cfg input:focus{border-color:var(--gold-2);}
+.lsp-cfg .lsp-status{font-size:11.5px;color:var(--muted);margin-left:4px;}
+.lsp-cfg .lsp-status:empty{display:none;}
 .ai-msgs{flex:1;overflow-y:auto;padding:16px 16px 8px;}
 .ai-msg{margin-bottom:14px;display:flex;gap:9px;animation:pageIn .25s ease;}
 .ai-msg .av{width:28px;height:28px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;}
@@ -283,12 +296,69 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .pd .lab{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.5px;margin:8px 0 3px;text-transform:uppercase;}
 .prac .pd ul{margin:3px 0;padding-left:18px;font-size:12.5px;}
 .prac .ed .lh{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#161b22;border-bottom:1px solid #202d39;font-size:11px;color:#c8a55e;font-family:"SFMono-Regular",Consolas,monospace;}
-.prac .ed textarea{width:100%;min-height:170px;padding:11px 13px;border:none;background:#0d141b;color:#cfd8e0;
+/* KB-FIX(monaco-suggest-v2): 限定 > textarea.code，否则会命中 Monaco 的隐藏输入框
+   .inputarea（min-height:170px/padding/background），导致光标错位与布局跳动。 */
+.prac .ed > textarea.code{width:100%;min-height:170px;padding:11px 13px;border:none;background:#0d141b;color:#cfd8e0;
   font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:12.5px;line-height:1.6;
   resize:vertical;outline:none;white-space:pre;tab-size:4;}
-.prac .ed textarea:focus{box-shadow:inset 0 0 0 2px var(--gold-2);}
-.prac .acts{display:flex;gap:8px;padding:9px 12px;background:var(--card);border-top:1px solid var(--line);}
-.prac .acts button{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--ink2);border-radius:9px;
+.prac .ed > textarea.code:focus{box-shadow:inset 0 0 0 2px var(--gold-2);}
+.prac .ed .monaco-mount{height:210px;min-height:120px;background:#1e1e1e;border-bottom:1px solid #202d39;overflow:hidden;}
+.prac .ed .monaco-mount .monaco-editor,.prac .ed .monaco-mount .monaco-editor .overflow-guard{border-radius:0;}
+.prac .ed .ed-grip{height:20px;cursor:ns-resize;display:flex;align-items:center;justify-content:center;gap:7px;background:#222d3a;border-top:1px solid #33414f;color:#8fa0ad;font-size:11px;letter-spacing:.5px;user-select:none;-webkit-user-select:none;}
+.prac .ed .ed-grip::before{content:"⠿";font-size:14px;line-height:1;color:#aebcc8;letter-spacing:1px;}
+.prac .ed .ed-grip::after{content:"拖动调整高度";}
+.prac .ed .ed-grip:hover,.prac .ed .ed-grip:active{background:#2b3848;color:var(--gold-2);}
+.prac .ed .ed-grip:hover::before,.prac .ed .ed-grip:active::before{color:var(--gold-2);}
+/* ===== KB-FIX(monaco-suggest-v2) Monaco 隔离层 =====
+   根因：页面的通用选择器（.main / a / ul,ol,li / .prac .ed textarea）会命中 Monaco 内部
+   同名 DOM（补全项的 <div class="main">、<a class="label-name"> 等）。其中 .main 的
+   margin-left:308px + padding:48px 32px 80px 把候选文字推出被 .contents{overflow:hidden}
+   裁剪的 18px 行高之外 —— 所以行背景/选中高亮都在，唯独文字看不见。
+   这里做几何复位（margin/padding/缩进/浮动），文字颜色由下方规则单独锁定。 */
+.monaco-editor .main,
+.monaco-editor .suggest-widget .monaco-list-row .contents,
+.monaco-editor .suggest-widget .monaco-list-row .main,
+.monaco-editor .suggest-widget .monaco-list-row .left,
+.monaco-editor .suggest-widget .monaco-list-row .right,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-icon-label,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-icon-label-container,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-icon-name-container,
+.monaco-editor .suggest-widget .monaco-list-row .label,
+.monaco-editor .suggest-widget .monaco-list-row .label-name,
+.monaco-editor .suggest-widget .monaco-list-row .monaco-highlighted-label{
+  margin:0!important;padding:0!important;text-indent:0!important;float:none!important;
+  letter-spacing:normal!important;text-transform:none!important;max-width:none!important;}
+/* 页面 a{} / ul,ol{} / li{} 对 Monaco 内部元素的污染（补全标签就是 <a>，菜单用 ul/li） */
+.monaco-editor a{color:inherit;text-decoration:none;}
+.monaco-editor ul,.monaco-editor ol,.monaco-editor li{margin:0;padding:0;list-style:none;}
+/* 编辑器整体兜底前景色，避免继承页面 var(--ink) 造成深底深字 */
+.monaco-editor{color:#d4d4d4;}
+/* Monaco 补全下拉框（suggest widget）文字强制可见，避免与页面主题/缓存继承导致空白 */
+.monaco-editor .suggest-widget{background:#252526!important;border:1px solid #454545!important;color:#e6e6e6!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-name,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-description,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .type-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label span,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .highlight,
+.monaco-editor .suggest-widget .details,
+.monaco-editor .suggest-widget .details *{color:#e6e6e6!important;fill:#e6e6e6!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label .highlight{color:#4ec9b0!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected{background:#094771!important;color:#fff!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused *,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected *{color:#fff!important;fill:#fff!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .highlight,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected .match,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected .highlight{color:#7fffd4!important;}
+.prac .acts{display:flex;flex-wrap:wrap;gap:8px;padding:9px 12px;background:var(--card);border-top:1px solid var(--line);}
+.prac .acts button{flex:1 1 auto;min-width:84px;border:1px solid var(--line);background:var(--bg);color:var(--ink2);border-radius:9px;
   padding:8px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
 .prac .acts .sub{background:var(--grad);color:#2a1f08;border-color:transparent;}
 .prac .acts button:hover{transform:translateY(-1px);}
@@ -302,12 +372,21 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .term-h span{color:#3ecf8e;font-size:9px;}
 .prac .term pre{margin:0;padding:11px 12px;color:#d7e0ec;font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;}
 .prac .term .ai-typing{display:inline-flex;gap:4px;padding:11px 12px;}
-.prac .hint{display:none;margin:0 12px 12px;padding:11px 13px;border:1px dashed #c8a55e;border-radius:10px;background:rgba(200,165,94,.06);color:#6f5b2e;font-size:13px;line-height:1.75;}
-.prac .hint h5{margin:0 0 7px;font-size:12.5px;color:var(--ink);letter-spacing:.5px;}
+.prac .hint{display:none;position:relative;margin:0 12px 12px;padding:13px 15px 13px 17px;border:1px solid rgba(200,165,94,.55);border-left:4px solid #d3a94f;border-radius:10px;background:linear-gradient(180deg,rgba(255,238,186,.34),rgba(255,224,150,.18));color:#5a4a22!important;font-size:13px;line-height:1.85;box-shadow:0 0 0 3px rgba(211,169,79,.12),0 4px 14px rgba(180,140,60,.12);animation:hintPop .32s ease;}
+.prac .hint:before{content:"💡 提示";position:absolute;top:-10px;left:13px;padding:1px 9px;font-size:11px;font-weight:700;letter-spacing:.5px;color:#fff;background:linear-gradient(180deg,#e6b860,#cf9f3d);border-radius:20px;box-shadow:0 2px 6px rgba(180,140,60,.3);}
+.prac .hint h5{margin:4px 0 7px;font-size:12.5px;color:#5a4a22!important;letter-spacing:.5px;}
 .prac .hint ol{margin:4px 0 0;padding-left:20px;}
-.prac .hint li{margin:3px 0;}
-.prac .hint b{color:#9a7b35;}
+.prac .hint li{margin:4px 0;}
+.prac .hint b{background:linear-gradient(transparent 58%,rgba(255,214,102,.6) 0);color:#7a5e1f!important;padding:0 3px;border-radius:3px;font-weight:700;}
+.prac .hint code{background:rgba(180,140,60,.14);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:12px;color:#6b4f1d!important;}
 .prac .hint-btn{background:linear-gradient(180deg,#fbf3e2,#f3e6cb);color:#8a6d2f;border:1px solid #e1cfa3;}
+.prac .ans-btn{background:linear-gradient(180deg,#e2f6ec,#c7ecd6);color:#1f7a4d;border:1px solid #a9dcbf;}
+@keyframes hintPop{from{opacity:0;transform:translateY(-6px) scale(.98);}to{opacity:1;transform:none;}}
+.prac .answer{display:none;position:relative;margin:0 12px 12px;padding:13px 15px 13px 17px;border:1px solid rgba(46,160,96,.5);border-left:4px solid #2ea060;border-radius:10px;background:linear-gradient(180deg,rgba(220,245,232,.4),rgba(200,236,217,.2));color:#1f5a3c!important;font-size:13px;line-height:1.8;box-shadow:0 0 0 3px rgba(46,160,96,.1),0 4px 14px rgba(40,140,90,.1);animation:hintPop .32s ease;}
+.prac .answer:before{content:"🔑 参考答案";position:absolute;top:-10px;left:13px;padding:1px 9px;font-size:11px;font-weight:700;letter-spacing:.5px;color:#fff;background:linear-gradient(180deg,#43c585,#2ea060);border-radius:20px;box-shadow:0 2px 6px rgba(40,140,90,.3);}
+.prac .answer h5{margin:4px 0 7px;font-size:12.5px;color:#1f5a3c!important;letter-spacing:.5px;}
+.prac .answer pre{margin:8px 0 0;padding:11px 12px;background:#0d141b;color:#cfd8e0;border-radius:8px;font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:320px;overflow:auto;}
+.prac .answer .note{margin-top:8px;font-size:12.5px;color:#234d38;}
 .prac .run-ok{color:#3ecf8e;}
 .ai-input{flex:none;display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:var(--card);}
 .ai-input textarea{flex:1;resize:none;height:42px;max-height:110px;padding:10px 12px;border:1px solid var(--line);
@@ -424,7 +503,7 @@ body.review h3.open::before{content:"\25BE  ";}
 @media (max-width:920px){
   .sidebar{transform:translateX(-100%);width:84%;max-width:340px;transition:transform .25s ease;}
   .sidebar.open{transform:translateX(0);}
-  .main{margin-left:0;padding:66px 14px 44px;}
+  main.main{margin-left:0;padding:66px 14px 44px;} /* KB-FIX(monaco-suggest-v2) 同上，禁止裸 .main */
   .content{padding:28px 20px;border-radius:16px;}
   .topbar{display:flex;align-items:center;position:fixed;top:0;left:0;right:0;z-index:900;
     background:rgba(255,253,248,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:11px 15px;}
@@ -452,6 +531,10 @@ body.review h3.open::before{content:"\25BE  ";}
   <div class="lib-tabs" id="libTabs">
     <button type="button" class="lib-tab active" data-lib="0" onclick="switchLib('0')"><span class="ic">☕</span><span class="nm">Java 八股</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'0')">×</span></button>
     <button type="button" class="lib-tab" data-lib="1" onclick="switchLib('1')"><span class="ic">🤖</span><span class="nm">Ragent 项目</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'1')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="2" onclick="switchLib('2')"><span class="ic">🔗</span><span class="nm">LangChain 1.0+</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'2')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="3" onclick="switchLib('3')"><span class="ic">🤖</span><span class="nm">Embabel Agent</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'3')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="4" onclick="switchLib('4')"><span class="ic">🌱</span><span class="nm">Spring AI</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'4')">×</span></button>
+    <button type="button" class="lib-tab" data-lib="5" onclick="switchLib('5')"><span class="ic">🧭</span><span class="nm">业务开发模板</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'5')">×</span></button>
     <button type="button" class="lib-add" onclick="openLibModal()">＋ 新建知识库</button>
   </div>
   <div class="search"><input id="search" type="text" placeholder="🔍 搜索当前知识库…" oninput="onSearch(this.value)"><div class="search-hint" id="searchHint" onclick="jumpOtherLib()"></div></div>
@@ -459,6 +542,10 @@ body.review h3.open::before{content:"\25BE  ";}
   <div class="nav-scroll">
     <div class="nav-list show" data-lib="0"><div class="nav-group"><div class="nav-h1">Java 面试八股完整知识库（概念 + 业务实战）</div><a class="nav-h2" href="#sec-2">总目录</a></div><div class="nav-group"><div class="nav-h1">第一部分：核心知识点（八股速查）</div><a class="nav-h2" href="#sec-4">1. Java 基础</a><a class="nav-h3" href="#sec-5">1.1 谈谈 Java 的跨平台原理</a><a class="nav-h3" href="#sec-6">1.2 JDK、JRE、JVM 的关系</a><a class="nav-h3" href="#sec-7">1.3 基本数据类型 vs 包装类</a><a class="nav-h3" href="#sec-8">1.4 == 与 equals 的区别</a><a class="nav-h3" href="#sec-9">1.5 String、StringBuffer、StringBuilder</a><a class="nav-h3" href="#sec-10">1.6 String 为什么不可变？好处是什么？</a><a class="nav-h3" href="#sec-11">1.7 重写（Override）与重载（Overload）</a><a class="nav-h3" href="#sec-12">1.8 异常体系</a><a class="nav-h3" href="#sec-13">1.9 final、finally、finalize</a><a class="nav-h3" href="#sec-14">1.10 什么是反射？优缺点？</a><a class="nav-h2" href="#sec-15">2. 面向对象</a><a class="nav-h3" href="#sec-16">2.1 三大特性</a><a class="nav-h3" href="#sec-17">2.2 面向对象 vs 面向过程</a><a class="nav-h3" href="#sec-18">2.3 接口与抽象类的区别</a><a class="nav-h3" href="#sec-19">2.4 深拷贝 vs 浅拷贝</a><a class="nav-h2" href="#sec-20">3. 集合框架</a><a class="nav-h3" href="#sec-21">3.1 整体结构</a><a class="nav-h3" href="#sec-22">3.2 ArrayList vs LinkedList</a><a class="nav-h3" href="#sec-23">3.3 HashMap 原理（重点）</a><a class="nav-h3" href="#sec-24">3.4 ConcurrentHashMap</a><a class="nav-h3" href="#sec-25">3.5 HashSet 如何保证不重复</a><a class="nav-h3" href="#sec-26">3.6 fail-fast 与 fail-safe</a><a class="nav-h2" href="#sec-27">4. 并发与多线程（JUC）</a><a class="nav-h3" href="#sec-28">4.1 进程与线程</a><a class="nav-h3" href="#sec-29">4.2 创建线程的方式</a><a class="nav-h3" href="#sec-30">4.3 线程的生命周期</a><a class="nav-h3" href="#sec-31">4.4 synchronized 关键字</a><a class="nav-h3" href="#sec-32">4.5 volatile</a><a class="nav-h3" href="#sec-33">4.6 synchronized vs volatile</a><a class="nav-h3" href="#sec-34">4.7 锁分类</a><a class="nav-h3" href="#sec-35">4.8 CAS 是什么？有什么问题？</a><a class="nav-h3" href="#sec-36">4.9 线程池</a><a class="nav-h3" href="#sec-37">4.10 ThreadLocal</a><a class="nav-h2" href="#sec-38">5. JVM</a><a class="nav-h3" href="#sec-39">5.1 运行时数据区</a><a class="nav-h3" href="#sec-40">5.2 堆内存划分</a><a class="nav-h3" href="#sec-41">5.3 垃圾回收算法</a><a class="nav-h3" href="#sec-42">5.4 垃圾收集器</a><a class="nav-h3" href="#sec-43">5.5 如何判断对象可回收？</a><a class="nav-h3" href="#sec-44">5.6 双亲委派模型</a><a class="nav-h3" href="#sec-45">5.7 常见 OOM / 调优参数</a><a class="nav-h2" href="#sec-46">6. Java 8+ 新特性</a><a class="nav-h3" href="#sec-47">6.1 Lambda 表达式</a><a class="nav-h3" href="#sec-48">6.2 函数式接口</a><a class="nav-h3" href="#sec-49">6.3 Stream API</a><a class="nav-h3" href="#sec-50">6.4 新日期时间 API</a><a class="nav-h3" href="#sec-51">6.5 接口的 default / static 方法</a><a class="nav-h3" href="#sec-52">6.6 var（Java 10）/ Switch 表达式（Java 14）/ Record（Java 16）/ 文本块（Java 15）</a><a class="nav-h2" href="#sec-53">7. I/O 与 NIO</a><a class="nav-h3" href="#sec-54">7.1 BIO / NIO / AIO</a><a class="nav-h3" href="#sec-55">7.2 NIO 核心组件</a><a class="nav-h2" href="#sec-56">8. 常见设计模式</a><a class="nav-h3" href="#sec-57">8.1 单例模式（双重检查锁）</a><a class="nav-h3" href="#sec-58">8.2 工厂 / 抽象工厂</a><a class="nav-h3" href="#sec-59">8.3 策略模式</a><a class="nav-h3" href="#sec-60">8.4 观察者模式</a><a class="nav-h3" href="#sec-61">8.5 代理模式</a><a class="nav-h3" href="#sec-62">8.6 装饰器模式</a><a class="nav-h2" href="#sec-63">9. MySQL 基础</a><a class="nav-h3" href="#sec-64">9.1 索引</a><a class="nav-h3" href="#sec-65">9.2 事务四大特性（ACID）</a><a class="nav-h3" href="#sec-66">9.3 事务隔离级别</a><a class="nav-h3" href="#sec-67">9.4 慢查询优化思路</a><a class="nav-h3" href="#sec-68">9.5 分库分表</a><a class="nav-h2" href="#sec-69">10. Redis 基础</a><a class="nav-h3" href="#sec-70">10.1 数据类型</a><a class="nav-h3" href="#sec-71">10.2 持久化</a><a class="nav-h3" href="#sec-72">10.3 缓存问题</a><a class="nav-h3" href="#sec-73">10.4 内存淘汰策略</a><a class="nav-h3" href="#sec-74">10.5 常见用途</a><a class="nav-h2" href="#sec-75">11. Spring / Spring Boot</a><a class="nav-h3" href="#sec-76">11.1 控制反转（IoC）与依赖注入（DI）</a><a class="nav-h3" href="#sec-77">11.2 Bean 作用域</a><a class="nav-h3" href="#sec-78">11.3 Bean 生命周期</a><a class="nav-h3" href="#sec-79">11.4 AOP</a><a class="nav-h3" href="#sec-80">11.5 Spring 事务</a><a class="nav-h3" href="#sec-81">11.6 Spring Boot 自动配置原理</a><a class="nav-h2" href="#sec-82">12. 计算机网络</a><a class="nav-h3" href="#sec-83">12.1 TCP 三次握手 / 四次挥手</a><a class="nav-h3" href="#sec-84">12.2 TCP 与 UDP 区别</a><a class="nav-h3" href="#sec-85">12.3 HTTP 与 HTTPS</a><a class="nav-h3" href="#sec-86">12.4 常见状态码</a><a class="nav-h3" href="#sec-87">12.5 浏览器输入 URL 到页面显示的过程</a><a class="nav-h2" href="#sec-88">13. 常见算法与数据结构</a><a class="nav-h3" href="#sec-89">13.1 数据结构</a><a class="nav-h3" href="#sec-90">13.2 排序算法速记</a><a class="nav-h3" href="#sec-91">13.3 刷题套路</a></div><div class="nav-group"><div class="nav-h1">第二部分：业务场景实战</div><a class="nav-h2" href="#sec-93">1. 集合：购物车与商品去重</a><a class="nav-h2" href="#sec-94">2. HashMap / ConcurrentHashMap：本地缓存与热点计数</a><a class="nav-h2" href="#sec-95">3. synchronized / 锁：秒杀库存扣减</a><a class="nav-h2" href="#sec-96">4. volatile：系统开关与单例配置中心</a><a class="nav-h2" href="#sec-97">5. 线程池：异步通知与批量任务</a><a class="nav-h2" href="#sec-98">6. ThreadLocal：用户上下文与链路追踪</a><a class="nav-h2" href="#sec-99">7. JVM / GC：大促接口超时排查</a><a class="nav-h2" href="#sec-100">8. String：订单号与金额拼接</a><a class="nav-h2" href="#sec-101">9. 设计模式：支付与促销策略</a><a class="nav-h2" href="#sec-102">10. MySQL 索引：订单查询慢 SQL</a><a class="nav-h2" href="#sec-103">11. 事务：下单扣库存与转账</a><a class="nav-h2" href="#sec-104">12. Redis：缓存与分布式锁</a><a class="nav-h2" href="#sec-105">13. Spring：循环依赖 / AOP / 事务失效</a><a class="nav-h2" href="#sec-106">14. 网络：接口超时与 HTTPS</a><a class="nav-h2" href="#sec-107">15. 消息队列：下单异步解耦</a></div><div class="nav-group"><div class="nav-h1">第三部分：分布式与微服务专项</div><a class="nav-h2" href="#sec-109">1. 微服务与 Spring Cloud 生态</a><a class="nav-h3" href="#sec-110">1.1 微服务核心组件</a><a class="nav-h3" href="#sec-111">1.2 服务注册与发现原理</a><a class="nav-h3" href="#sec-112">1.3 网关（Gateway）作用</a><a class="nav-h3" href="#sec-113">1.4 负载均衡：Ribbon vs Nginx</a><a class="nav-h3" href="#sec-114">1.5 熔断、降级、限流</a><a class="nav-h2" href="#sec-115">2. 消息队列（MQ）</a><a class="nav-h3" href="#sec-116">2.1 为什么用 MQ</a><a class="nav-h3" href="#sec-117">2.2 Kafka / RabbitMQ / RocketMQ 对比</a><a class="nav-h3" href="#sec-118">2.3 消息可靠性（不丢）</a><a class="nav-h3" href="#sec-119">2.4 重复消费与幂等</a><a class="nav-h3" href="#sec-120">2.5 消息积压处理</a><a class="nav-h3" href="#sec-121">2.6 顺序消息</a><a class="nav-h2" href="#sec-122">3. 分布式事务</a><a class="nav-h3" href="#sec-123">3.1 2PC / 3PC</a><a class="nav-h3" href="#sec-124">3.2 TCC（Try-Confirm-Cancel）</a><a class="nav-h3" href="#sec-125">3.3 消息最终一致性（常用）</a><a class="nav-h3" href="#sec-126">3.4 Seata</a><a class="nav-h3" href="#sec-127">3.5 最大努力通知</a><a class="nav-h2" href="#sec-128">4. 分布式锁与缓存一致性</a><a class="nav-h3" href="#sec-129">4.1 分布式锁方案</a><a class="nav-h3" href="#sec-130">4.2 缓存与 DB 一致性</a><a class="nav-h2" href="#sec-131">5. 分布式 ID 与分库分表</a><a class="nav-h3" href="#sec-132">5.1 分布式 ID 方案</a><a class="nav-h3" href="#sec-133">5.2 分库分表</a></div><div class="nav-group"><div class="nav-h1">附录 A：高频追问清单（自查）</div></div><div class="nav-group"><div class="nav-h1">附录 B：八股 → 业务的回答套路</div></div><div class="nav-group"><div class="nav-h1">第四部分：进阶高频补充（2026 新版考点）</div><a class="nav-h2" href="#sec-201">1. JDK 17 / 21 新特性（T0 必考）</a><a class="nav-h3" href="#sec-202">1.1 虚拟线程（Virtual Threads，Project Loom）★</a><a class="nav-h3" href="#sec-203">1.2 Sealed Classes / Records / Pattern Matching</a><a class="nav-h3" href="#sec-204">1.3 Structured Concurrency 与 Scoped Values</a><a class="nav-h2" href="#sec-205">2. 并发进阶（手写 AQS 是高频要求）</a><a class="nav-h3" href="#sec-206">2.1 AQS 原理 ★</a><a class="nav-h3" href="#sec-207">2.2 ReentrantLock vs synchronized</a><a class="nav-h3" href="#sec-208">2.3 CountDownLatch / CyclicBarrier / Semaphore</a><a class="nav-h3" href="#sec-209">2.4 原子类、LongAdder 与 StampedLock</a><a class="nav-h3" href="#sec-210">2.5 CompletableFuture 编排</a><a class="nav-h2" href="#sec-211">3. JVM 深入</a><a class="nav-h3" href="#sec-212">3.1 类加载过程与对象创建细节</a><a class="nav-h3" href="#sec-213">3.2 CMS / G1 / ZGC 对比与选型</a><a class="nav-h3" href="#sec-214">3.3 线上问题排查四板斧 ★</a><a class="nav-h2" href="#sec-215">4. MySQL 深入</a><a class="nav-h3" href="#sec-216">4.1 MVCC 原理 ★</a><a class="nav-h3" href="#sec-217">4.2 redo log / undo log / binlog 与两阶段提交</a><a class="nav-h3" href="#sec-218">4.3 行锁、间隙锁与死锁</a><a class="nav-h2" href="#sec-219">5. Redis 深入</a><a class="nav-h3" href="#sec-220">5.1 底层数据结构</a><a class="nav-h3" href="#sec-221">5.2 主从 / 哨兵 / Cluster</a><a class="nav-h3" href="#sec-222">5.3 bigkey 与 hotkey 治理</a><a class="nav-h3" href="#sec-223">5.4 分布式锁的正确姿势 ★</a><a class="nav-h2" href="#sec-224">6. Spring 深入</a><a class="nav-h3" href="#sec-225">6.1 循环依赖与三级缓存 ★</a><a class="nav-h3" href="#sec-226">6.2 Spring MVC 请求处理流程</a><a class="nav-h3" href="#sec-227">6.3 Spring Boot 3.x 变化（新版必问）</a><a class="nav-h3" href="#sec-228">6.4 AI 工程化趋势：Spring AI 与 RAG</a><a class="nav-h2" href="#sec-229">7. 高频场景题（设计思路模板）</a><a class="nav-h3" href="#sec-230">7.1 秒杀系统完整链路 ★</a><a class="nav-h3" href="#sec-231">7.2 短链系统</a><a class="nav-h3" href="#sec-232">7.3 排行榜与高并发计数</a><a class="nav-h3" href="#sec-233">7.4 百万数据导出</a><a class="nav-h3" href="#sec-234">7.5 接口幂等设计</a><a class="nav-h2" href="#sec-235">8. 2026 面试趋势与答题策略</a></div></div>
     <div class="nav-list" data-lib="1"><div class="nav-group"><div class="nav-h1">Ragent 平台项目知识库（Agentic RAG 企业级实战）</div><a class="nav-h2" href="#sec-137">一、项目定位与技术栈</a><a class="nav-h3" href="#sec-138">1.1 它是什么</a><a class="nav-h3" href="#sec-139">1.2 技术栈全景</a><a class="nav-h3" href="#sec-140">1.3 四大 Maven 模块职责</a><a class="nav-h2" href="#sec-141">二、架构分层思想</a><a class="nav-h3" href="#sec-142">2.1 三层职责链路</a><a class="nav-h3" href="#sec-143">2.2 为什么这么分</a><a class="nav-h2" href="#sec-144">三、核心业务流程链路：一次问答的全过程 ★重点</a><a class="nav-h3" href="#sec-145">3.1 总览（流水线阶段编排）</a><a class="nav-h3" href="#sec-146">3.2 阶段 1：会话记忆加载</a><a class="nav-h3" href="#sec-147">3.3 阶段 2：问题改写与子问题拆分</a><a class="nav-h3" href="#sec-148">3.4 阶段 3：意图识别（树形多级）</a><a class="nav-h3" href="#sec-149">3.5 阶段 4：歧义引导</a><a class="nav-h3" href="#sec-150">3.6 阶段 5：多路检索 ★</a><a class="nav-h3" href="#sec-151">3.7 阶段 6：Prompt 组装与流式输出</a><a class="nav-h3" href="#sec-152">3.8 一张图看懂调用链（文字时序）</a><a class="nav-h2" href="#sec-153">四、知识库入库链路（Ingestion Pipeline）</a><a class="nav-h3" href="#sec-154">4.1 五种节点类型（接口 IngestionNode）</a><a class="nav-h3" href="#sec-155">4.2 链式执行引擎</a><a class="nav-h3" href="#sec-156">4.3 切片策略与写入</a><a class="nav-h2" href="#sec-157">五、模型路由与故障转移</a><a class="nav-h2" href="#sec-158">六、多路检索深挖</a><a class="nav-h3" href="#sec-159">6.1 检索通道</a><a class="nav-h3" href="#sec-160">6.2 后处理责任链</a><a class="nav-h3" href="#sec-161">6.3 向量库双支持</a><a class="nav-h2" href="#sec-162">七、意图识别体系</a><a class="nav-h2" href="#sec-163">八、MCP 工具调用</a><a class="nav-h2" href="#sec-164">九、多租户与管理后台</a><a class="nav-h2" href="#sec-165">十、设计模式实战（对照表）</a><a class="nav-h2" href="#sec-166">十一、生产级工程特性</a><a class="nav-h3" href="#sec-167">11.1 队列式分布式限流</a><a class="nav-h3" href="#sec-168">11.2 8 线程池 + TTL 透传</a><a class="nav-h3" href="#sec-169">11.3 全链路 Trace（AOP）</a><a class="nav-h3" href="#sec-170">11.4 会话记忆压缩</a><a class="nav-h3" href="#sec-171">11.5 认证鉴权</a><a class="nav-h3" href="#sec-172">11.6 其他生产特性</a><a class="nav-h2" href="#sec-173">十二、可扩展性：新增 X 只需实现接口</a><a class="nav-h2" href="#sec-174">十三、学习路线与面试考点（自查）</a><a class="nav-h2" href="#sec-300">十四、源码导览：核心类速查表</a><a class="nav-h2" href="#sec-301">十五、关键机制深挖（源码级参数）</a><a class="nav-h3" href="#sec-302">15.1 队列式限流的完整实现 ★</a><a class="nav-h3" href="#sec-303">15.2 RRF 融合与后处理责任链（精确参数）</a><a class="nav-h3" href="#sec-304">15.3 模型熔断与首包探测（精确参数）</a><a class="nav-h3" href="#sec-305">15.4 意图识别阈值与缓存</a><a class="nav-h3" href="#sec-306">15.5 会话记忆压缩参数</a><a class="nav-h2" href="#sec-307">十六、数据模型：核心表速查（PostgreSQL，23 张）</a><a class="nav-h2" href="#sec-308">十七、线程池配置清单（面试可直接背）</a><a class="nav-h2" href="#sec-309">十八、本地跑起来：中间件与启动顺序</a><a class="nav-h2" href="#sec-310">十九、面试怎么讲这个项目（加分话术）</a></div></div>
+    <div class="nav-list" data-lib="2"><div class="nav-group"><div class="nav-h1">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</div><a class="nav-h2" href="#sec-401">一、定位与设计哲学</a><a class="nav-h3" href="#sec-4011">1.1 发布背景与时间线</a><a class="nav-h3" href="#sec-4012">1.2 设计哲学：一个 Agent 抽象</a><a class="nav-h2" href="#sec-402">二、包结构精简</a><a class="nav-h3" href="#sec-4021">2.1 主包 langchain 的命名空间</a><a class="nav-h3" href="#sec-4022">2.2 langchain-classic（旧代码救生艇）</a><a class="nav-h3" href="#sec-4023">2.3 安装与环境要求</a><a class="nav-h2" href="#sec-403">三、模型初始化 init_chat_model</a><a class="nav-h3" href="#sec-4031">3.1 统一初始化与多模型切换</a><a class="nav-h3" href="#sec-4032">3.2 厂商包与对接国产 / OpenAI 兼容模型</a><a class="nav-h2" href="#sec-404">四、工具定义 @tool</a><a class="nav-h3" href="#sec-4041">4.1 基础用法</a><a class="nav-h3" href="#sec-4042">4.2 结构化入参与状态注入</a><a class="nav-h2" href="#sec-405">五、消息与标准内容块 content_blocks</a><a class="nav-h3" href="#sec-4051">5.1 content_blocks：跨供应商统一</a><a class="nav-h3" href="#sec-4052">5.2 多模态消息</a><a class="nav-h3" href="#sec-4053">5.3 序列化与 LC_OUTPUT_VERSION</a><a class="nav-h2" href="#sec-406">六、构建智能体 create_agent</a><a class="nav-h3" href="#sec-4061">6.1 最小可运行的 Agent</a><a class="nav-h3" href="#sec-4062">6.2 system_prompt 与运行时 context</a><a class="nav-h3" href="#sec-4063">6.3 流式调用</a><a class="nav-h2" href="#sec-407">七、智能体中间件 Middleware</a><a class="nav-h3" href="#sec-4071">7.1 内置中间件</a><a class="nav-h3" href="#sec-4072">7.2 自定义中间件</a><a class="nav-h2" href="#sec-408">八、结构化输出 Structured Output</a><a class="nav-h3" href="#sec-4081">8.1 response_format + ToolStrategy</a><a class="nav-h3" href="#sec-4082">8.2 厂商原生结构化输出</a><a class="nav-h2" href="#sec-409">九、持久化与 LangGraph 运行时</a><a class="nav-h3" href="#sec-4091">9.1 Durable State 与断点恢复</a><a class="nav-h3" href="#sec-4092">9.2 人在回路 HITL</a><a class="nav-h2" href="#sec-410">十、RAG 与检索（1.0 的变化）</a><a class="nav-h3" href="#sec-4101">10.1 检索器迁移到 classic</a><a class="nav-h3" href="#sec-4102">10.2 用 create_agent + 检索工具做 RAG</a><a class="nav-h2" href="#sec-411">十一、迁移指南（0.x → 1.0）</a><a class="nav-h3" href="#sec-4111">11.1 常见 import 对照</a><a class="nav-h3" href="#sec-4112">11.2 升级步骤建议</a><a class="nav-h2" href="#sec-412">十二、实战：工具调用 Agent 完整示例</a><a class="nav-h2" href="#sec-413">十三、1.1 与版本演进（model profiles）</a><a class="nav-h2" href="#sec-414">十四、最佳实践与常见坑</a></div></div>
+    <div class="nav-list" data-lib="3"><div class="nav-group"><div class="nav-h1">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</div><a class="nav-h2" href="#sec-501">一、定位与背景</a><a class="nav-h3" href="#sec-5011">1.1 它解决什么问题</a><a class="nav-h3" href="#sec-5012">1.2 与 Spring AI / LangChain 的关系</a><a class="nav-h2" href="#sec-502">二、核心概念</a><a class="nav-h3" href="#sec-5021">2.1 五大支柱</a><a class="nav-h3" href="#sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</a><a class="nav-h2" href="#sec-503">三、快速开始</a><a class="nav-h3" href="#sec-5031">3.1 项目脚手架</a><a class="nav-h3" href="#sec-5032">3.2 配置与运行</a><a class="nav-h2" href="#sec-504">四、领域模型（强类型基石）</a><a class="nav-h3" href="#sec-5041">4.1 用 record / data class 表达类型</a><a class="nav-h3" href="#sec-5042">4.2 把行为暴露给 LLM</a><a class="nav-h2" href="#sec-505">五、@Agent / @Action / @AchievesGoal</a><a class="nav-h3" href="#sec-5051">5.1 Kotlin 示例：StarNewsFinder</a><a class="nav-h3" href="#sec-5052">5.2 Java 示例：BlogWriterAgent</a><a class="nav-h3" href="#sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</a><a class="nav-h2" href="#sec-506">六、AI 与 LLM 抽象</a><a class="nav-h3" href="#sec-5061">6.1 Ai 与 OperationContext</a><a class="nav-h3" href="#sec-5062">6.2 模型提供商与自定义 LLM</a><a class="nav-h2" href="#sec-507">七、规划引擎（GOAP / A*）</a><a class="nav-h3" href="#sec-5071">7.1 工作原理</a><a class="nav-h3" href="#sec-5072">7.2 为什么不是状态机</a><a class="nav-h2" href="#sec-508">八、工具与 ToolGroup</a><a class="nav-h3" href="#sec-5081">8.1 声明工具组</a><a class="nav-h3" href="#sec-5082">8.2 安全提示</a><a class="nav-h2" href="#sec-509">九、MCP 集成</a><a class="nav-h3" href="#sec-5091">9.1 作为 MCP 服务器暴露</a><a class="nav-h3" href="#sec-5092">9.2 消费 MCP 服务器</a><a class="nav-h2" href="#sec-510">十、RAG 与向量检索</a><a class="nav-h3" href="#sec-5101">10.1 embabel-agent-rag 模块</a><a class="nav-h2" href="#sec-511">十一、多智能体与 A2A</a><a class="nav-h3" href="#sec-5111">11.1 Agent 联邦</a><a class="nav-h2" href="#sec-512">十二、运行、调试与测试</a><a class="nav-h3" href="#sec-5121">12.1 Spring Shell 命令</a><a class="nav-h3" href="#sec-5122">12.2 单元测试</a><a class="nav-h2" href="#sec-513">十三、成本与预算意识</a><a class="nav-h3" href="#sec-5131">13.1 预算感知 Agent</a><a class="nav-h2" href="#sec-514">十四、最佳实践与常见坑</a><a class="nav-h3" href="#sec-5141">14.1 实践清单</a><a class="nav-h3" href="#sec-5142">14.2 迁移 / 版本注意</a></div></div>
+    <div class="nav-list" data-lib="4"><div class="nav-group"><div class="nav-h1">Spring AI 知识库（Java 生态的 AI 工程框架）</div><a class="nav-h2" href="#sec-601">一、定位与版本</a><a class="nav-h3" href="#sec-6011">1.1 设计目标</a><a class="nav-h3" href="#sec-6012">1.2 版本与模块</a><a class="nav-h2" href="#sec-602">二、核心 API 全景</a><a class="nav-h3" href="#sec-6021">2.1 能力矩阵</a><a class="nav-h3" href="#sec-6022">2.2 支持的厂商</a><a class="nav-h2" href="#sec-603">三、快速开始</a><a class="nav-h3" href="#sec-6031">3.1 起步依赖</a><a class="nav-h3" href="#sec-6032">3.2 第一个调用</a><a class="nav-h2" href="#sec-604">四、ChatClient Fluent API</a><a class="nav-h3" href="#sec-6041">4.1 链式调用</a><a class="nav-h3" href="#sec-6042">4.2 流式与默认值</a><a class="nav-h2" href="#sec-605">五、结构化输出</a><a class="nav-h3" href="#sec-6051">5.1 entity 映射到 POJO</a><a class="nav-h3" href="#sec-6052">5.2 让模型理解字段</a><a class="nav-h2" href="#sec-606">六、PromptTemplate</a><a class="nav-h3" href="#sec-6061">6.1 变量与外部资源</a><a class="nav-h2" href="#sec-607">七、模型提供商与 ChatOptions</a><a class="nav-h3" href="#sec-6071">7.1 切换模型与参数</a><a class="nav-h2" href="#sec-608">八、Embedding 与 VectorStore</a><a class="nav-h3" href="#sec-6081">8.1 注入与检索</a><a class="nav-h3" href="#sec-6082">8.2 可移植的元数据过滤</a><a class="nav-h2" href="#sec-609">九、文档 ETL 流水线</a><a class="nav-h3" href="#sec-6091">9.1 读 → 切 → 嵌 → 写</a><a class="nav-h2" href="#sec-610">十、工具调用（Tool Calling）</a><a class="nav-h3" href="#sec-6101">10.1 用 @Tool 定义工具</a><a class="nav-h3" href="#sec-6102">10.2 注册为 ToolCallback 并接线</a><a class="nav-h3" href="#sec-6103">10.3 2.0 的工具循环</a><a class="nav-h2" href="#sec-611">十一、Advisors API</a><a class="nav-h3" href="#sec-6111">11.1 拦截器链模式</a><a class="nav-h2" href="#sec-612">十二、对话记忆（Chat Memory）</a><a class="nav-h3" href="#sec-6121">12.1 记忆仓库与窗口</a><a class="nav-h2" href="#sec-613">十三、RAG 实战</a><a class="nav-h3" href="#sec-6131">13.1 RAG 与工具天然可组合</a><a class="nav-h3" href="#sec-6132">13.2 给模型明确指引</a><a class="nav-h2" href="#sec-614">十四、MCP 集成</a><a class="nav-h3" href="#sec-6141">14.1 暴露为 MCP 工具服务器</a><a class="nav-h3" href="#sec-6142">14.2 消费远程 MCP 服务器</a><a class="nav-h2" href="#sec-615">十五、评估（Evaluation）</a><a class="nav-h3" href="#sec-6151">15.1 相关性评估器</a><a class="nav-h2" href="#sec-616">十六、可观测性</a><a class="nav-h3" href="#sec-6161">16.1 开启观测</a><a class="nav-h2" href="#sec-617">十七、Spring Boot 自动配置与 Starters</a><a class="nav-h3" href="#sec-6171">17.1 约定优于配置</a><a class="nav-h2" href="#sec-618">十八、最佳实践与常见坑</a><a class="nav-h3" href="#sec-6181">18.1 实践清单</a><a class="nav-h3" href="#sec-6182">18.2 版本注意</a></div></div>
+    <div class="nav-list" data-lib="5"><div class="nav-group"><div class="nav-h1">后端业务项目开发模板（以 Ragent 为蓝本）</div><a class="nav-h2" href="#sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</a><a class="nav-h2" href="#sec-7001">一、阶段一：需求梳理与范围界定</a><a class="nav-h3" href="#sec-7002">1.1 功能需求：用「用户故事」拆，而不是用「我要做个系统」</a><a class="nav-h3" href="#sec-7003">1.2 非功能需求（NFR）：决定技术难度的往往是它</a><a class="nav-h3" href="#sec-7004">1.3 以 Ragent 模拟：需求怎么拆</a><a class="nav-h2" href="#sec-7005">二、阶段二：技术选型的总原则</a><a class="nav-h3" href="#sec-7006">2.1 先定约束，再选技术</a><a class="nav-h3" href="#sec-7007">2.2 自研 vs 开源 vs 云服务的权衡</a><a class="nav-h3" href="#sec-7008">2.3 选型要留「演进后路」</a><a class="nav-h2" href="#sec-7009">三、阶段三：总体架构设计</a><a class="nav-h3" href="#sec-7010">3.1 经典四层（自顶向下）</a><a class="nav-h3" href="#sec-7011">3.2 模块边界：用「限界上下文」思路分</a><a class="nav-h3" href="#sec-7012">3.3 以 Ragent 模拟：一次问答的数据流</a><a class="nav-h2" href="#sec-7013">四、阶段四：逐功能技术拆解（核心，含优缺点）</a><a class="nav-h3" href="#sec-7014">4.1 对话问答核心链路：SSE 还是 WebSocket？</a><a class="nav-h3" href="#sec-7015">4.2 并发限流：队列式限流 vs 令牌桶</a><a class="nav-h3" href="#sec-7016">4.3 检索增强（RAG）：向量 / 关键词 / 混合，怎么选？</a><a class="nav-h3" href="#sec-7017">4.4 意图识别：LLM 分类 vs 传统 ML/NLP</a><a class="nav-h3" href="#sec-7018">4.5 会话记忆与上下文压缩</a><a class="nav-h3" href="#sec-7019">4.6 模型路由与容错：多模型 / 熔断 / 降级 / 首包探测</a><a class="nav-h3" href="#sec-7020">4.7 知识库管理与文档入库 Pipeline</a><a class="nav-h3" href="#sec-7021">4.8 认证授权与多租户</a><a class="nav-h3" href="#sec-7022">4.9 可观测性：Trace / 日志 / 指标 / 审计</a><a class="nav-h3" href="#sec-7023">4.10 异步与消息队列（RocketMQ / Kafka）</a><a class="nav-h3" href="#sec-7024">4.11 文件与对象存储（S3 兼容）</a><a class="nav-h3" href="#sec-7025">4.12 多级缓存（Redis）</a><a class="nav-h2" href="#sec-7026">五、阶段五：数据存储设计</a><a class="nav-h3" href="#sec-7027">5.1 关系型库：PostgreSQL vs MySQL</a><a class="nav-h3" href="#sec-7028">5.2 向量库选型</a><a class="nav-h3" href="#sec-7029">5.3 表设计要点（以 Ragent 23 张表为参考）</a><a class="nav-h2" href="#sec-7030">六、阶段六：工程化与并发治理</a><a class="nav-h3" href="#sec-7031">6.1 线程池隔离：别一个大池子打天下</a><a class="nav-h3" href="#sec-7032">6.2 配置中心与环境管理</a><a class="nav-h3" href="#sec-7033">6.3 幂等与防重</a><a class="nav-h2" href="#sec-7034">七、阶段七：部署与运维</a><a class="nav-h3" href="#sec-7035">7.1 容器化起步</a><a class="nav-h3" href="#sec-7036">7.2 编排与高可用（K8s）</a><a class="nav-h3" href="#sec-7037">7.3 灰度与回滚</a><a class="nav-h3" href="#sec-7038">7.4 监控告警</a><a class="nav-h2" href="#sec-7039">八、阶段八：上线 Checklist 与复盘</a><a class="nav-h3" href="#sec-7040">8.1 上线前清单（逐项打勾）</a><a class="nav-h3" href="#sec-7041">8.2 复盘模板（每次上线后必做）</a><a class="nav-h2" href="#sec-7042">九、速查表：功能 → 技术 → 优缺点（一页背完）</a></div></div>
   </div>
 </aside>
 <main class="main"><div class="content" id="contentBox">
@@ -1311,7 +1398,1190 @@ orderTx.execute(() -&gt; {
 <li><strong>主动暴露边界</strong>：记忆摘要默认关闭、红锁没用（Redisson 看门狗够用）、ES 可选——知道「哪里做了简化」比假装完美更可信。</li></ul>
 <blockquote>建议打开 IDE 对照本章类名逐个断点跟一遍 <code>StreamChatPipeline.execute</code>，一小时就能建立全链路肌肉记忆。</blockquote>
 
-    <div class="page-foot"><button class="pf-btn" onclick="switchLib('0')">← 返回：Java 面试八股</button><span></span></div>
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('2')">下一个知识库：LangChain 1.0+ 指南 →</button></div>
+  </section>
+  <section class="page" data-page="2"><h1 id="sec-400">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</h1>
+<blockquote>LangChain 于 <strong>2025 年 10 月发布 1.0（GA）</strong>，是一次「做减法」的大版本：砍掉数百个历史遗留 Chain/Agent，把框架收敛到单一的高层智能体抽象 <code>create_agent</code>，底层跑在 LangGraph 运行时之上；2025 年 12 月 2 日又推出 <strong>1.1</strong>，新增模型能力画像（model profiles）。本知识库覆盖包结构、核心 API、中间件、标准内容块、RAG 与迁移，答法遵循「概念 → 用法 → 原理 → 坑点 → 实战」。</blockquote>
+<hr class="sep">
+<h2 id="sec-401">一、定位与设计哲学</h2>
+<h3 id="sec-4011">1.1 发布背景与时间线</h3>
+<ul>
+<li><strong>2024-06</strong>：集成从核心包拆分，部分迁入独立包或 <code>langchain-community</code>。</li>
+<li><strong>2024-10</strong>：LangGraph 被确立为「不只是单次 LLM 调用」应用的首选编排方式，旧 Chain/Agent 大量被标记弃用。</li>
+<li><strong>2025-04</strong>：模型走向多模态，<code>langchain-core</code> 的消息格式升级以支持图文/音视频输入。</li>
+<li><strong>2025-10</strong>：<strong>v1.0.0 GA</strong>——重构所有 chains/agents，统一为基于 LangGraph 的单一 Agent 抽象；旧版迁移到 <code>langchain-classic</code>。</li>
+<li><strong>2025-12-02</strong>：<strong>v1.1</strong>——Chat 模型新增 <code>.profile</code> 能力画像（来自 models.dev 开放目录）。</li>
+</ul>
+<h3 id="sec-4012">1.2 设计哲学：一个 Agent 抽象</h3>
+<ul>
+<li>LangChain 团队发现绝大多数使用场景可归结为同一个模式：<strong>给 LLM 一些工具 → 调用模型 → 若调用工具则执行并把结果喂回 → 不再调用工具则结束</strong>。</li>
+<li>v1.0 把这个「Agent 抽象」从 LangGraph 的 <code>create_react_agent</code> 提升为 LangChain 主包的 <code>create_agent</code>，并用 LangGraph 作为底层运行时不重新造轮子。</li>
+<li>核心收益：<strong>只有一种被官方推荐的方式构建 Agent</strong>，不再有 AgentExecutor / create_react_agent / 手写 LangGraph 三选一的纠结。</li>
+</ul>
+<table><thead><tr><th>需求</th><th>推荐</th><th>说明</th></tr></thead><tbody>
+<tr><td>快速构建标准智能体</td><td>LangChain 1.0（<code>create_agent</code> + 中间件）</td><td>高层抽象，开箱即用</td></tr>
+<tr><td>复杂业务流程 / 自定义编排</td><td>LangGraph 1.0</td><td>图执行模型 + 持久状态</td></tr>
+<tr><td>长周期任务 / 人工审核</td><td>LangGraph</td><td>原生人在回路（HITL）</td></tr>
+<tr><td>混合工作流</td><td>两者结合</td><td>LangChain 构建于 LangGraph 之上，可平滑切换</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-402">二、包结构精简</h2>
+<h3 id="sec-4021">2.1 主包 <code>langchain</code> 的命名空间</h3>
+<p>v1.0 把主包显著瘦身，只保留构建 Agent 的核心 API（大多从 <code>langchain-core</code> 重新导出），更易发现与使用：</p>
+<table><thead><tr><th>模块</th><th>核心内容</th><th>来源</th></tr></thead><tbody>
+<tr><td><code>langchain.agents</code></td><td><code>create_agent</code>、<code>AgentState</code></td><td>智能体创建核心</td></tr>
+<tr><td><code>langchain.messages</code></td><td>消息类型、<code>content_blocks</code>、<code>trim_messages</code></td><td>从 langchain-core 重导出</td></tr>
+<tr><td><code>langchain.tools</code></td><td><code>@tool</code>、<code>BaseTool</code>、注入辅助</td><td>从 langchain-core 重导出</td></tr>
+<tr><td><code>langchain.chat_models</code></td><td><code>init_chat_model</code>、<code>BaseChatModel</code></td><td>统一模型初始化</td></tr>
+<tr><td><code>langchain.embeddings</code></td><td><code>init_embeddings</code>、<code>Embeddings</code></td><td>嵌入模型管理</td></tr>
+</tbody></table>
+<h3 id="sec-4022">2.2 <code>langchain-classic</code>（旧代码救生艇）</h3>
+<p>v0.x 中已被弃用的功能全部搬到独立包 <code>langchain-classic</code>，让主包保持干净。包含：</p>
+<ul>
+<li>旧版 Chain：<code>LLMChain</code>、<code>ConversationChain</code>、<code>SequentialChain</code>、<code>RetrievalQA</code> 等。</li>
+<li>旧版 Retriever：<code>MultiQueryRetriever</code>、<code>ParentDocumentRetriever</code> 等（含整个 <code>langchain.retrievers</code> 模块）。</li>
+<li>Indexing API、<code>hub</code> 模块（程序化管理 Prompt）、<code>CacheBackedEmbeddings</code> 及社区嵌入。</li>
+<li><code>langchain-community</code> 的再导出与部分旧 Agent（<code>AgentExecutor</code>、零样本 ReAct）。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># 旧代码迁移：改 import 即可，逻辑不变</span>
+<span class="tok-kw">from</span> langchain_classic.chains <span class="tok-kw">import</span> LLMChain
+<span class="tok-kw">from</span> langchain_classic.retrievers <span class="tok-kw">import</span> MultiQueryRetriever
+<span class="tok-kw">from</span> langchain_classic.indexes <span class="tok-kw">import</span> clean</code></pre>
+<h3 id="sec-4023">2.3 安装与环境要求</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">bash</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># Python（需要 3.10+，已放弃 3.9）</span>
+pip install --upgrade langchain
+pip install langchain-classic     <span class="tok-cmt"># 仅老项目兼容需要</span>
+pip install langchain-openai      <span class="tok-cmt"># 厂商包按需安装</span>
+
+<span class="tok-cmt"># Node.js</span>
+npm install @langchain/langchain@latest
+npm install @langchain/langchain-classic</code></pre>
+<hr class="sep">
+<h2 id="sec-403">三、模型初始化 <code>init_chat_model</code></h2>
+<h3 id="sec-4031">3.1 统一初始化与多模型切换</h3>
+<ul>
+<li><code>init_chat_model</code> 用「<strong>provider:model</strong>」字符串一次性初始化任意厂商模型，<strong>切换模型代码零改动</strong>。</li>
+<li>支持的厂商前缀：<code>openai</code>、<code>anthropic</code>、<code>google</code>、<code>ollama</code>、<code>aws</code>、<code>azure</code> 等，后缀即模型名。</li>
+<li>原理：内部按前缀分发到对应厂商包（如 <code>langchain-openai</code>），但调用方只依赖统一的 <code>BaseChatModel</code> 接口。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-4o-mini"</span>)          <span class="tok-cmt"># 字符串前缀路由</span>
+model = init_chat_model(<span class="tok-str">"anthropic:claude-3-5-sonnet"</span>)
+model = init_chat_model(<span class="tok-str">"gpt-4o"</span>, model_provider=<span class="tok-str">"openai"</span>)  <span class="tok-cmt"># 也可显式指定 provider</span>
+
+resp = model.invoke(<span class="tok-str">"用一句话解释 LangChain 1.0"</span>)
+<span class="tok-kw">print</span>(resp.content)</code></pre>
+<h3 id="sec-4032">3.2 厂商包与对接国产 / OpenAI 兼容模型</h3>
+<ul>
+<li>生产环境官方建议直接用厂商包（如 <code>from langchain_openai import ChatOpenAI</code>），主包只做统一接口层。</li>
+<li>兼容 OpenAI 协议的第三方（<strong>DeepSeek、通义千问、火山方舟、Ollama</strong> 等）可复用 <code>langchain-openai</code>，只需改 <code>base_url</code> 与 key。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain_openai <span class="tok-kw">import</span> ChatOpenAI
+
+<span class="tok-cmt"># 以 DeepSeek 为例（OpenAI 兼容协议）</span>
+deepseek = ChatOpenAI(
+    model=<span class="tok-str">"deepseek-chat"</span>,
+    api_key=<span class="tok-str">"sk-..."</span>,
+    base_url=<span class="tok-str">"https://api.deepseek.com"</span>,
+)</code></pre>
+<hr class="sep">
+<h2 id="sec-404">四、工具定义 <code>@tool</code></h2>
+<h3 id="sec-4041">4.1 基础用法</h3>
+<ul>
+<li>用 <code>@tool</code> 装饰普通函数即可把任意 Python 函数变成 Agent 可调用的工具；函数 <strong>docstring 即为工具描述</strong>（给模型看，务必写清楚）。</li>
+<li>类型注解会被自动转为 JSON Schema 入参；<code>TypedDict</code> / <code>pydantic.BaseModel</code> 可做更精细的结构化入参。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> get_weather(city: <span class="tok-type">str</span>, unit: <span class="tok-type">str</span> = <span class="tok-str">"celsius"</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""查询指定城市的当前天气。
+
+    Args:
+        city: 城市名，如 "北京"
+        unit: 温度单位，"celsius" 或 "fahrenheit"
+    """</span>
+    <span class="tok-kw">return</span> <span class="tok-str">f"{city} 当前 25 度（{unit}），晴"</span>
+
+<span class="tok-kw">print</span>(get_weather.name)        <span class="tok-cmt"># "get_weather"</span>
+<span class="tok-kw">print</span>(get_weather.args)        <span class="tok-cmt"># {'city':..., 'unit':...} 自动生成的 JSON Schema</span></code></pre>
+<h3 id="sec-4042">4.2 结构化入参与状态注入</h3>
+<ul>
+<li>工具函数可用 <code>InjectedState</code>（<code>from langchain.agents</code>）注入运行时状态（如 <code>context</code> 或图状态），而不占用模型可见的入参。</li>
+<li>错误处理：工具内部抛异常会被框架捕获并作为「工具错误信息」回传给模型，让模型自行纠错重试，无需额外包装。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> InjectedState
+<span class="tok-kw">from</span> typing <span class="tok-kw">import</span> Annotated
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> reply_with_user(ctx: Annotated[<span class="tok-type">dict</span>, InjectedState(<span class="tok-str">"context"</span>)], msg: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""把消息和当前登录用户名拼起来返回。"""</span>
+    <span class="tok-kw">return</span> <span class="tok-str">f"[{ctx['user_id']}] {msg}"</span></code></pre>
+<hr class="sep">
+<h2 id="sec-405">五、消息与标准内容块 content_blocks</h2>
+<h3 id="sec-4051">5.1 content_blocks：跨供应商统一</h3>
+<ul>
+<li>现代模型输出已从「纯字符串」演进为<strong>内容块列表</strong>：推理轨迹（reasoning）、引用（citations）、服务器端工具调用等。</li>
+<li>v1.0 给消息新增 <code>.content_blocks</code> 属性，提供<strong>跨供应商一致的类型化视图</strong>；旧的 <code>.content</code> 字段保持完全向后兼容（仍是字符串或厂商原生结构）。</li>
+<li>支持的块类型：<code>text</code>、<code>reasoning</code>、<code>image</code>、<code>audio</code>、<code>tool_call</code>、<code>citation</code> 等。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-5-mini"</span>)
+resp = model.invoke(<span class="tok-str">"解释一下强化学习"</span>)
+
+<span class="tok-kw">for</span> block <span class="tok-kw">in</span> resp.content_blocks:
+    <span class="tok-kw">if</span> block[<span class="tok-str">"type"</span>] == <span class="tok-str">"reasoning"</span>:
+        <span class="tok-kw">print</span>(<span class="tok-str">"思考："</span>, block.get(<span class="tok-str">"reasoning"</span>))
+    <span class="tok-kw">elif</span> block[<span class="tok-str">"type"</span>] == <span class="tok-str">"text"</span>:
+        <span class="tok-kw">print</span>(<span class="tok-str">"回答："</span>, block.get(<span class="tok-str">"text"</span>))</code></pre>
+<p>旧写法（v0）需针对每个厂商单独处理 <code>reasoning</code> / <code>thinking</code> 等字段，<code>content_blocks</code> 把这层差异抹平。</p>
+<h3 id="sec-4052">5.2 多模态消息</h3>
+<ul>
+<li>通过 <code>HumanMessage(content_blocks=[...])</code> 以标准化方式传入文本、图片、音频等，无需再写 OpenAI 风格 / Anthropic 风格两套结构。</li>
+<li>图片块可用 <code>url</code>（远程）或 <code>data</code>（base64）提供，并指定 <code>mime_type</code>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.messages <span class="tok-kw">import</span> HumanMessage
+
+msg = HumanMessage(content_blocks=[
+    {<span class="tok-str">"type"</span>: <span class="tok-str">"text"</span>, <span class="tok-str">"text"</span>: <span class="tok-str">"描述这张图片"</span>},
+    {<span class="tok-str">"type"</span>: <span class="tok-str">"image"</span>, <span class="tok-str">"url"</span>: <span class="tok-str">"https://example.com/cat.png"</span>, <span class="tok-str">"mime_type"</span>: <span class="tok-str">"image/png"</span>},
+])
+res = model.invoke([msg])</code></pre>
+<h3 id="sec-4053">5.3 序列化与 <code>LC_OUTPUT_VERSION</code></h3>
+<ul>
+<li>默认 <code>content_blocks</code> 不会写回 <code>content</code> 字段。若需把标准块序列化进 <code>content</code>（如发给前端客户端），可开启：</li>
+<li>环境变量 <code>LC_OUTPUT_VERSION=v1</code>，或初始化时 <code>init_chat_model(..., output_version="v1")</code>。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-406">六、构建智能体 <code>create_agent</code></h2>
+<h3 id="sec-4061">6.1 最小可运行的 Agent</h3>
+<ul>
+<li><code>create_agent(model, tools, prompt/system_prompt)</code> 是 v1.0 推荐的唯一起点，替代旧 <code>AgentExecutor</code> 与 <code>langgraph.prebuilt.create_react_agent</code>。</li>
+<li>返回的 agent 是一个 LangGraph 编译后的图，支持 <code>.invoke()</code> / <code>.stream()</code> / <code>.ainvoke()</code>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+<span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> add(a: <span class="tok-type">int</span>, b: <span class="tok-type">int</span>) -&gt; <span class="tok-type">int</span>:
+    <span class="tok-str">"""把两个数相加。"""</span>
+    <span class="tok-kw">return</span> a + b
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-4o-mini"</span>)
+agent = create_agent(model, tools=[add], prompt=<span class="tok-str">"你是一个爱用中文的计算助手。"</span>)
+
+result = agent.invoke({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"3 加 5 等于多少？"</span>}]})
+<span class="tok-kw">print</span>(result[<span class="tok-str">"messages"</span>][-1].content)</code></pre>
+<p>Node.js 等价写法：<code>import { createAgent } from "@langchain/langchain"</code>。</p>
+<h3 id="sec-4062">6.2 system_prompt 与运行时 context</h3>
+<ul>
+<li>v0 用 <code>prompt</code> 参数；v1 推荐用 <code>system_prompt</code>，并支持 <code>SystemMessage</code> 实例。</li>
+<li><strong>静态上下文</strong>（如 user_id、session_id，整轮对话不变）通过 <code>context</code> 参数注入，配合 <code>context_schema</code> 声明结构；动态对话状态仍是 messages。旧 <code>config["configurable"]</code> 方式保留兼容。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> dataclasses <span class="tok-kw">import</span> dataclass
+<span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+
+<span class="tok-kw">@dataclass</span>
+<span class="tok-kw">class</span> <span class="tok-type">Context</span>:
+    user_id: <span class="tok-type">str</span>
+    session_id: <span class="tok-type">str</span>
+
+agent = create_agent(model, tools=[add], context_schema=Context)
+
+result = agent.invoke(
+    {<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"你好"</span>}]},
+    context=Context(user_id=<span class="tok-str">"123"</span>, session_id=<span class="tok-str">"abc"</span>),
+)</code></pre>
+<h3 id="sec-4063">6.3 流式调用</h3>
+<ul>
+<li><code>agent.stream(...)</code> 逐块产出消息增量（含工具调用与最终文本），适合做打字机式 UI。</li>
+<li>每个流式事件含 <code>messages</code> 列表，用法与 <code>invoke</code> 一致，只是分多次返回。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">for</span> chunk <span class="tok-kw">in</span> agent.stream({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"讲个冷笑话"</span>}]}):
+    <span class="tok-kw">for</span> m <span class="tok-kw">in</span> chunk.get(<span class="tok-str">"messages"</span>, []):
+        <span class="tok-kw">if</span> <span class="tok-kw">hasattr</span>(m, <span class="tok-str">"content"</span>) <span class="tok-kw">and</span> m.content:
+            <span class="tok-kw">print</span>(m.content, end=<span class="tok-str">""</span>, flush=<span class="tok-type">True</span>)</code></pre>
+<hr class="sep">
+<h2 id="sec-407">七、智能体中间件 Middleware</h2>
+<h3 id="sec-4071">7.1 内置中间件</h3>
+<ul>
+<li>中间件是可插拔的钩子，挂在 Agent 循环的<strong>每一步</strong>，替代以前「子类化 + 自己包一层」的写法。</li>
+<li>内置三件套：
+<ul>
+<li><strong>Human-in-the-loop</strong>：关键步骤暂停，等待人工审批 / 修改。</li>
+<li><strong>Summarization（摘要）</strong>：自动压缩历史对话，防止上下文溢出（1.1 起利用 model profile 更聪明地决策）。</li>
+<li><strong>PII Redaction（隐私擦除）</strong>：内容传递前自动脱敏敏感信息。</li>
+</ul></li>
+<li>1.1 额外提供：<strong>OpenAI Moderation 中间件</strong>、内置带退避的模型重试。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.agents.middleware <span class="tok-kw">import</span> HumanInTheLoop, Summarization
+
+agent = create_agent(
+    model, tools=[transfer_money],
+    middleware=[
+        HumanInTheLoop(tools=[<span class="tok-str">"transfer_money"</span>]),   <span class="tok-cmt"># 转账前人工确认</span>
+        Summarization(threshold=<span class="tok-num">20</span>),                    <span class="tok-cmt"># 超过 20 条消息自动摘要</span>
+    ],
+)</code></pre>
+<h3 id="sec-4072">7.2 自定义中间件</h3>
+<ul>
+<li>实现中间件协议（提供 <code>init</code> / <code>process_model_input</code> / <code>process_model_output</code> 等钩子）即可在循环任意阶段插入逻辑，比如日志、限流、二次校验。</li>
+<li>钩子粒度：进入模型前改写输入、模型返回后改写输出、工具调用前/后拦截。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-408">八、结构化输出 Structured Output</h2>
+<h3 id="sec-4081">8.1 response_format + ToolStrategy</h3>
+<ul>
+<li>v1.0 把<strong>结构化输出生成整合进主 Agent 循环</strong>，不再额外多调一次 LLM，降低延迟与成本。</li>
+<li>用 <code>response_format</code> 指定 pydantic 模型 + 策略（<code>ToolStrategy</code> 走工具调用，或厂商原生 structured output），让模型最终输出强类型对象。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.agents.structured_output <span class="tok-kw">import</span> ToolStrategy
+<span class="tok-kw">from</span> pydantic <span class="tok-kw">import</span> BaseModel
+
+<span class="tok-kw">class</span> <span class="tok-type">WeatherReport</span>(BaseModel):
+    temperature: <span class="tok-type">float</span>
+    condition: <span class="tok-type">str</span>
+
+agent = create_agent(
+    <span class="tok-str">"openai:gpt-4o-mini"</span>,
+    tools=[get_weather],
+    response_format=ToolStrategy(WeatherReport),
+    prompt=<span class="tok-str">"请查天气并以结构化报告返回。"</span>,
+)
+
+report = agent.invoke({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"北京天气？"</span>}]})
+<span class="tok-kw">print</span>(report.structured_response)   <span class="tok-cmt"># WeatherReport(temperature=25.0, condition="晴")</span></code></pre>
+<h3 id="sec-4082">8.2 厂商原生结构化输出</h3>
+<ul>
+<li>若厂商支持原生 structured output（如 OpenAI / Anthropic），可改用原生策略以获得更好性能；跨厂商统一则用 <code>ToolStrategy</code> 兜底。</li>
+<li>细粒度控制权：开发者可决定「用工具调用」还是「厂商原生」，框架在 Agent 循环内统一收敛。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-409">九、持久化与 LangGraph 运行时</h2>
+<h3 id="sec-4091">9.1 Durable State 与断点恢复</h3>
+<ul>
+<li>LangGraph 是 LangChain 的底层运行时，提供<strong>持久化状态</strong>：Agent 执行状态自动落盘，服务器重启或长任务中断后可<strong>从断点精确恢复</strong>，用户无需重来。</li>
+<li><strong>内置持久化</strong>：通过 <code>checkpointer</code> 保存/恢复任意时刻的工作流，无需手写数据库逻辑，支持多天审批、跨会话后台任务。</li>
+<li>用法：给 agent 传入 <code>checkpointer=MemorySaver()</code>（演示）或 <code>PostgresSaver</code>（生产），并在调用时带 <code>thread_id</code>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langgraph.checkpoint.memory <span class="tok-kw">import</span> MemorySaver
+
+agent = create_agent(model, tools=[add], checkpointer=MemorySaver())
+cfg = {<span class="tok-str">"configurable"</span>: {<span class="tok-str">"thread_id"</span>: <span class="tok-str">"sess-1"</span>}}
+
+agent.invoke({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"记住我叫小明"</span>}]}, cfg)
+<span class="tok-cmt"># 下次同一 thread_id 调用会带着上轮记忆继续</span></code></pre>
+<h3 id="sec-4092">9.2 人在回路 HITL</h3>
+<ul>
+<li>LangGraph 对「暂停 → 人工审查 / 修改 / 批准」提供一等公民 API，配合上一节中间件可轻松构建高风险决策的人类兜底。</li>
+<li>典型流程：agent 跑到需审批节点 → 暂停并等待人类输入 → resume 带批准结果继续。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-410">十、RAG 与检索（1.0 的变化）</h2>
+<h3 id="sec-4101">10.1 检索器迁移到 classic</h3>
+<ul>
+<li><strong>v1.0 把绝大多数检索相关能力搬到 <code>langchain-classic</code></strong>：<code>MultiQueryRetriever</code>、<code>ParentDocumentRetriever</code>、Indexing API、<code>CacheBackedEmbeddings</code> 等。</li>
+<li>向量库（PGVector、FAISS、Chroma…）与文档加载/切分（<code>DirectoryLoader</code>、<code>RecursiveCharacterTextSplitter</code>）属于 <code>langchain-community</code> 与独立集成包。</li>
+<li><strong>主包只保留 <code>init_embeddings</code> 与消息/工具/模型抽象</strong>，RAG 编排交给 Agent + 检索工具。</li>
+</ul>
+<h3 id="sec-4102">10.2 用 create_agent + 检索工具做 RAG</h3>
+<ul>
+<li>1.0 的推荐 RAG 模式：把「检索」包成一个工具，交给 <code>create_agent</code>，由模型自己决定何时检索，而不是旧的固定 <code>RetrievalQA</code> 链。</li>
+<li>好处：检索与对话、工具调用统一在同一个 Agent 循环里，支持多轮、追问、混合工具。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> search_docs(query: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""在本地知识库中检索与 query 相关的片段。"""</span>
+    hits = vectorstore.similarity_search(query, k=<span class="tok-num">3</span>)
+    <span class="tok-kw">return</span> <span class="tok-str">"\n---\n"</span>.join(h.page_content <span class="tok-kw">for</span> h <span class="tok-kw">in</span> hits)
+
+rag_agent = create_agent(model, tools=[search_docs],
+                          prompt=<span class="tok-str">"你是一个严谨的客服，答案必须来自检索结果。"</span>)</code></pre>
+<hr class="sep">
+<h2 id="sec-411">十一、迁移指南（0.x → 1.0）</h2>
+<h3 id="sec-4111">11.1 常见 import 对照</h3>
+<table><thead><tr><th>能力</th><th>v0.x（旧）</th><th>v1.0（新）</th></tr></thead><tbody>
+<tr><td>构建 Agent</td><td><code>langgraph.prebuilt.create_react_agent</code> / <code>AgentExecutor</code></td><td><code>langchain.agents.create_agent</code></td></tr>
+<tr><td>模型</td><td><code>langchain.chat_models.ChatOpenAI</code></td><td><code>langchain.chat_models.init_chat_model</code></td></tr>
+<tr><td>Chain</td><td><code>langchain.chains.LLMChain</code></td><td>迁移到 <code>langchain_classic.chains</code></td></tr>
+<tr><td>Retriever</td><td><code>langchain.retrievers.MultiQueryRetriever</code></td><td>迁移到 <code>langchain_classic.retrievers</code></td></tr>
+<tr><td>Prompt 参数名</td><td><code>prompt</code></td><td><code>system_prompt</code>（推荐）</td></tr>
+<tr><td>静态上下文</td><td><code>config["configurable"]</code></td><td><code>context</code> + <code>context_schema</code>（推荐）</td></tr>
+<tr><td>多模态输入</td><td>厂商原生 <code>content</code> 结构</td><td><code>content_blocks</code>（统一）</td></tr>
+</tbody></table>
+<h3 id="sec-4112">11.2 升级步骤建议</h3>
+<ul>
+<li><strong>新项目</strong>：直接 <code>pip install langchain</code> + 厂商包，从 <code>create_agent</code> 起步，防护/摘要/人工审核用中间件实现。</li>
+<li><strong>老项目</strong>：先锁定当前版本 → 读官方迁移指南 → 装 <code>langchain-classic</code> 改 import → 逐步把旧 Chain/Agent 重构成 <code>create_agent</code>。</li>
+<li>多厂商应用：尽早用 <code>content_blocks</code> 统一 reasoning/citation 处理，用 1.1 的 model <code>.profile</code> 探测能力而非硬编码。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-412">十二、实战：工具调用 Agent 完整示例</h2>
+<p>下面把前面知识点串起来：初始化模型 → 定义两个工具 → 加 HITL 与摘要中间件 → 流式运行。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Python</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">from</span> langchain.agents <span class="tok-kw">import</span> create_agent
+<span class="tok-kw">from</span> langchain.agents.middleware <span class="tok-kw">import</span> Summarization
+<span class="tok-kw">from</span> langchain.chat_models <span class="tok-kw">import</span> init_chat_model
+<span class="tok-kw">from</span> langchain.tools <span class="tok-kw">import</span> tool
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> search(query: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""联网搜索关键词，返回摘要。"""</span>
+    <span class="tok-kw">return</span> f"关于「{query}」的搜索结果：LangChain 1.0 已发布。"</span>
+
+<span class="tok-kw">@tool</span>
+<span class="tok-kw">def</span> calc(expr: <span class="tok-type">str</span>) -&gt; <span class="tok-type">str</span>:
+    <span class="tok-str">"""计算数学表达式，如 '23*7'。"""</span>
+    <span class="tok-kw">return</span> <span class="tok-kw">str</span>(eval(expr))   <span class="tok-cmt"># 仅演示，生产请用安全解析</span>
+
+model = init_chat_model(<span class="tok-str">"openai:gpt-4o-mini"</span>)
+agent = create_agent(
+    model,
+    tools=[search, calc],
+    system_prompt=<span class="tok-str">"你是一个严谨助理，先检索再计算，给出带出处的中文回答。"</span>,
+    middleware=[Summarization(threshold=<span class="tok-num">16</span>)],
+)
+
+<span class="tok-kw">for</span> chunk <span class="tok-kw">in</span> agent.stream({<span class="tok-str">"messages"</span>: [{<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>,
+                              <span class="tok-str">"content"</span>: <span class="tok-str">"LangChain 1.0 是哪天发布的？再算一下 23 乘 7。"</span>}]}):
+    <span class="tok-kw">for</span> m <span class="tok-kw">in</span> chunk.get(<span class="tok-str">"messages"</span>, []):
+        <span class="tok-kw">if</span> <span class="tok-kw">getattr</span>(m, <span class="tok-str">"content"</span>, <span class="tok-str">""</span>):
+            <span class="tok-kw">print</span>(m.content, end=<span class="tok-str">""</span>, flush=<span class="tok-type">True</span>)</code></pre>
+<hr class="sep">
+<h2 id="sec-413">十三、1.1 与版本演进（model profiles）</h2>
+<ul>
+<li><strong>v1.1（2025-12-02）</strong>：Chat 模型暴露 <code>.profile</code> 属性，描述能力（结构化输出、函数调用等），数据来自开放的 <code>models.dev</code> 目录。</li>
+<li>摘要中间件与原生结构化输出策略会读取 <code>profile</code> 做更聪明的决策；<code>create_agent</code> 新增对 <code>SystemMessage</code> 实例的支持、内置带退避的模型重试、OpenAI Moderation 中间件。</li>
+<li>API 稳定性承诺：1.x 期间<strong>不再有重大破坏性变更</strong>，直到未来的 2.0。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-414">十四、最佳实践与常见坑</h2>
+<ul>
+<li><strong>日常开发</strong>：<code>pip install langchain</code> + 厂商包即可，从 <code>langchain</code> 主包导入一切；生产尽量用官方厂商包（如 <code>langchain_openai</code>）。</li>
+<li><strong>多模型切换</strong>：用 <code>init_chat_model("provider:model")</code>，避免散落各处的 <code>ChatXxx</code> 实例化。</li>
+<li><strong>国产 / OpenAI 兼容模型</strong>：复用 <code>langchain-openai</code> + 改 <code>base_url</code> 与 key（DeepSeek、通义、火山方舟、Ollama 等）。</li>
+<li><strong>旧代码不要强行留在主包</strong>：Chain / Retriever / Indexing / Hub 已迁移 classic，新项目直接上 <code>create_agent</code>。</li>
+<li><strong>结构化输出别再单独多调一次</strong>：用 <code>response_format</code> 在主循环内生成，省延迟省成本。</li>
+<li><strong>上下文溢出</strong>：长对话挂 <code>Summarization</code> 中间件或用 <code>trim_messages</code> 裁剪。</li>
+<li><strong>版本</strong>：1.0 要求 Python 3.10+；LangGraph 1.0 是底层运行时，复杂编排/持久化/人工审核直接用 LangGraph。</li>
+</ul>
+<hr class="sep">
+<p style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">— LangChain 1.0+ 知识库结束 · 内容基于官方 1.0 / 1.1 公告与迁移指南整理 —</p>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('3')">下一个知识库：Embabel Agent →</button></div>
+  </section>
+  <section class="page" data-page="3"><h1 id="sec-500">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</h1>
+<blockquote>Embabel（发音 Em-BAY-bel）是由 <strong>Spring Framework 创始人 Rod Johnson</strong> 打造的 JVM 智能体框架，构建于 Spring AI 之上，用 <strong>Kotlin</strong> 编写但对 Java 极其友好。它的核心主张是：用<strong>非 LLM 的确定性规划算法（GOAP/A*）动态编排 Actions</strong>，把 LLM 调用与普通 JVM 代码、强类型领域模型无缝混合，从而得到「可解释、可调试、可重构」的智能体。本知识库基于官方文档 docs.embabel.com 与 GitHub 仓库整理，答法遵循「概念 → 注解 → 代码 → 原理 → 坑点」。</blockquote>
+<hr class="sep">
+<h2 id="sec-501">一、定位与背景</h2>
+<h3 id="sec-5011">1.1 它解决什么问题</h3>
+<ul>
+<li>绝大多数 Agent 框架活在 Python 生态；JVM 开发者要么调用 Python 服务，要么在裸 LLM 客户端上手写编排逻辑。</li>
+<li>LangChain 等依赖 LLM 做路由决策，非确定性、难调试；Embabel 用<strong>经典 AI 规划（非 LLM）</strong>决定「下一步执行哪个 Action」。</li>
+<li>目标：成为在 JVM（尤其是 Spring 应用）上做 GenAI 的「自然方式」，证明模型能力，并逐步演化为「自然语言 PaaS」。</li>
+</ul>
+<h3 id="sec-5012">1.2 与 Spring AI / LangChain 的关系</h3>
+<table><thead><tr><th>维度</th><th>Spring AI</th><th>Embabel</th><th>LangChain(1.0)</th></tr></thead><tbody>
+<tr><td>定位</td><td>AI 集成基础库（ChatClient/VectorStore/Tool）</td><td>构建于 Spring AI 之上的智能体<strong>编排框架</strong></td><td>智能体抽象（create_agent）</td></tr>
+<tr><td>规划方式</td><td>无（由你写流程）</td><td><strong>GOAP/A* 确定性规划 + 每步 Replan</strong></td><td>LangGraph 图执行</td></tr>
+<tr><td>强类型</td><td>POJO 映射输出</td><td><strong>全程强类型领域模型驱动</strong></td><td>TypedDict / pydantic</td></tr>
+<tr><td>语言</td><td>Java/Kotlin</td><td>Kotlin 为主，Java 友好</td><td>Python / JS</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-502">二、核心概念</h2>
+<h3 id="sec-5021">2.1 五大支柱</h3>
+<ul>
+<li><strong>Actions</strong>：智能体执行的离散步骤（一个方法），可调用 LLM、工具或普通代码。</li>
+<li><strong>Goals</strong>：智能体要达成的目标，由系统<strong>动态推导</strong>，而非硬编码。</li>
+<li><strong>Conditions</strong>：执行 Action 前需满足的前置条件、以及判定 Goal 是否已达成的后置条件；每个 Action 后都会重新评估。</li>
+<li><strong>Domain Model</strong>：支撑流程的强类型领域对象，为 Actions/Goals/Conditions 提供类型信息。</li>
+<li><strong>Plan</strong>：由系统用非 LLM 算法<strong>动态编排</strong>出的一组 Action 序列；每完成一个 Action 就重新规划（OODA 循环）。</li>
+</ul>
+<h3 id="sec-5022">2.2 为什么「不用 LLM 做规划」是关键差异</h3>
+<ul>
+<li>确定性：规划是经典 AI 算法（A*/GOAP），<strong>可解释、可调试、成本极低</strong>，不消耗 token。</li>
+<li>可扩展：新增 Action/Goal/Condition 即可扩展系统能力，<strong>无需改现有的状态机或代码</strong>。</li>
+<li>强类型：提示词与手写代码通过领域模型干净交互，<strong>没有「魔法 Map」，享受完整重构支持</strong>。</li>
+<li>平台抽象：编程模型与运行时解耦，本地可跑，生产可上更高 QoS 而不改应用代码。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-503">三、快速开始</h2>
+<h3 id="sec-5031">3.1 项目脚手架</h3>
+<p>Embabel 暂不兼容 Spring AI 2.0 / Spring Boot 4，请使用 <strong>Spring Boot 3.5.x</strong>。推荐用 <code>project-creator</code> 或 start.spring.io 建一个空 Spring Boot 项目，再手动加依赖。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">xml</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">&lt;!-- pom.xml：管理 Spring AI BOM 与 Embabel 依赖 --&gt;</span>
+<span class="tok-kw">&lt;properties&gt;</span>
+  <span class="tok-kw">&lt;embabel.version&gt;</span>0.4.0-SNAPSHOT<span class="tok-kw">&lt;/embabel.version&gt;</span>
+  <span class="tok-kw">&lt;spring-ai.version&gt;</span>1.1.4<span class="tok-kw">&lt;/spring-ai.version&gt;</span>
+<span class="tok-kw">&lt;/properties&gt;</span>
+<span class="tok-kw">&lt;dependencyManagement&gt;</span>
+  <span class="tok-kw">&lt;dependencies&gt;</span>
+    <span class="tok-kw">&lt;dependency&gt;</span>
+      <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+      <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-bom<span class="tok-kw">&lt;/artifactId&gt;</span>
+      <span class="tok-kw">&lt;version&gt;</span>${spring-ai.version}<span class="tok-kw">&lt;/version&gt;</span>
+      <span class="tok-kw">&lt;type&gt;</span>pom<span class="tok-kw">&lt;/type&gt;</span><span class="tok-kw">&lt;scope&gt;</span>import<span class="tok-kw">&lt;/scope&gt;</span>
+    <span class="tok-kw">&lt;/dependency&gt;</span>
+  <span class="tok-kw">&lt;/dependencies&gt;</span>
+<span class="tok-kw">&lt;/dependencyManagement&gt;</span>
+<span class="tok-kw">&lt;dependencies&gt;</span>
+  <span class="tok-cmt">&lt;!-- shell starter 自带 Spring Shell，便于调试；也可用普通 Web starter --&gt;</span>
+  <span class="tok-kw">&lt;dependency&gt;</span>
+    <span class="tok-kw">&lt;groupId&gt;</span>com.embabel<span class="tok-kw">&lt;/groupId&gt;</span>
+    <span class="tok-kw">&lt;artifactId&gt;</span>embabel-agent-starter-shell<span class="tok-kw">&lt;/artifactId&gt;</span>
+    <span class="tok-kw">&lt;version&gt;</span>${embabel.version}<span class="tok-kw">&lt;/version&gt;</span>
+  <span class="tok-kw">&lt;/dependency&gt;</span>
+  <span class="tok-kw">&lt;dependency&gt;</span>
+    <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+    <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-openai-spring-boot-starter<span class="tok-kw">&lt;/artifactId&gt;</span>
+  <span class="tok-kw">&lt;/dependency&gt;</span>
+<span class="tok-kw">&lt;/dependencies&gt;</span></code></pre>
+<h3 id="sec-5032">3.2 配置与运行</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">properties</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.properties</span>
+spring.main.web-application-type=none
+spring.shell.interactive.enabled=true
+embabel.models.default-llm=gpt-4o-mini
+spring.ai.openai.api-key=${OPENAI_API_KEY}</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">bash</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># 进入交互式 shell（开发调试神器）</span>
+./shell.sh
+<span class="tok-cmt"># 执行一个 agent，框架会自动选择最匹配的那个</span>
+execute "Lynda is a Scorpio, find news for her" -p -r
+<span class="tok-cmt"># x 是 execute 的快捷方式；-p 打印 prompt，-r 打印 LLM 响应</span>
+x "fact check the following: holden cars are still made in australia"
+<span class="tok-cmt"># 进入对话模式，框架为每个命令挑选最合适的 agent</span>
+chat</code></pre>
+<hr class="sep">
+<h2 id="sec-504">四、领域模型（强类型基石）</h2>
+<h3 id="sec-5041">4.1 用 record / data class 表达类型</h3>
+<p>领域对象既可由 LLM 生成，也可由用户代码构造/操作。用 Jackson 注解帮助 LLM 理解字段含义，并标记要忽略的字段。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@JsonClassDescription</span>(<span class="tok-str">"Person with astrology details"</span>)
+<span class="tok-kw">public record</span> StarPerson(
+    String name,
+    <span class="tok-kw">@JsonPropertyDescription</span>(<span class="tok-str">"Star sign"</span>) String sign
+) {}</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Kotlin</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">data class</span> RelevantNewsStories(<span class="tok-kw">val</span> items: List&lt;NewsStory&gt;)
+<span class="tok-kw">data class</span> NewsStory(<span class="tok-kw">val</span> url: String, <span class="tok-kw">val</span> summary: String)</code></pre>
+<h3 id="sec-5042">4.2 把行为暴露给 LLM</h3>
+<p>领域对象上的方法若标注 Spring AI 的 <code>@Tool</code>，当其处于作用域时会<strong>自动暴露给 LLM</strong> 作为可调用工具。注意：工具方法要安全，避免误触发导致删库/改数据。</p>
+<hr class="sep">
+<h2 id="sec-505">五、@Agent / @Action / @AchievesGoal</h2>
+<h3 id="sec-5051">5.1 Kotlin 示例：StarNewsFinder</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Kotlin</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Agent</span>(description = <span class="tok-str">"Find news based on a person's star sign"</span>)
+<span class="tok-kw">class</span> StarNewsFinder(
+    <span class="tok-kw">private val</span> horoscopeService: HoroscopeService,
+    <span class="tok-kw">@param:Value</span>(<span class="tok-str">"\${star-news-finder.story.count:5}"</span>)
+    <span class="tok-kw">private val</span> storyCount: Int = 5,
+) {
+    <span class="tok-cmt">// 全部 prompt 类型安全；此 Action 用 LLM 抽取结构化对象</span>
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> extractPerson(userInput: UserInput, ai: Ai): StarPerson =
+        ai.withDefaultLlm().createObject(
+            <span class="tok-str">"Create a person from this user input, extracting name and star sign: $userInput"</span>)
+
+    <span class="tok-cmt">// 这个 Action 完全不调 LLM，演示 LLM 与普通代码混合</span>
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> retrieveHoroscope(starPerson: StarPerson) =
+        Horoscope(horoscopeService.dailyHoroscope(starPerson.sign))
+
+    <span class="tok-cmt">// toolGroups 声明本 Action 需要 WEB 工具组</span>
+    <span class="tok-kw">@Action</span>(toolGroups = [ToolGroup.WEB])
+    <span class="tok-kw">fun</span> findNewsStories(person: StarPerson, horoscope: Horoscope, ai: Ai): RelevantNewsStories =
+        ai.withDefaultLlm().createObject(<span class="tok-str">"..."</span>)
+
+    <span class="tok-cmt">// @AchievesGoal 标记「完成此 Action 即达成目标」，agent 运行结束</span>
+    <span class="tok-kw">@AchievesGoal</span>(description = <span class="tok-str">"Write an amusing writeup based on horoscope and news"</span>)
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">fun</span> writeup(person: StarPerson, relevantNewsStories: RelevantNewsStories,
+              horoscope: Horoscope, ai: Ai): Writeup =
+        ai.withLlm(LlmOptions.withModel(model).withTemperature(0.9))
+            .createObject(<span class="tok-str">"..."</span>)
+}</code></pre>
+<h3 id="sec-5052">5.2 Java 示例：BlogWriterAgent</h3>
+<p><code>@Agent</code> 把类同时标记为 Spring Bean 与 Embabel Agent；每个 <code>@Action</code> 方法的<strong>参数即它需要的对象，返回值即它产出的对象</strong>，框架据此推断流程路径。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Agent</span>(description = <span class="tok-str">"Write and review a blog post about a given topic"</span>)
+<span class="tok-kw">public class</span> BlogWriterAgent {
+
+    <span class="tok-cmt">// 用 OperationContext 访问 AI 能力与运行时</span>
+    <span class="tok-kw">@AchievesGoal</span>(description = <span class="tok-str">"Produce a reviewed blog post"</span>)
+    <span class="tok-kw">@Action</span>
+    <span class="tok-kw">public</span> ReviewedPost writePost(Topic topic, OperationContext context) {
+        BlogDraft draft = context.ai().withDefaultLlm()
+            .createObject(<span class="tok-str">"Write a blog post about "</span> + topic, BlogDraft.<span class="tok-kw">class</span>);
+        <span class="tok-cmt">// 领域服务做确定性校验/改写</span>
+        <span class="tok-kw">return</span> reviewService.review(draft);
+    }
+}</code></pre>
+<h3 id="sec-5053">5.3 @Action 的元数据：cost / value / toolGroups</h3>
+<table><thead><tr><th>属性</th><th>含义</th><th>用途</th></tr></thead><tbody>
+<tr><td><code>description</code></td><td>动作说明</td><td>规划与选择时参考</td></tr>
+<tr><td><code>cost</code></td><td>相对成本（如 0.1）</td><td>规划时权衡花费</td></tr>
+<tr><td><code>value</code></td><td>相对价值（如 0.8）</td><td>规划时评估收益</td></tr>
+<tr><td><code>toolGroups</code></td><td>所需工具组如 <code>[ToolGroup.WEB]</code></td><td>声明前置依赖，不满足则跳过</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-506">六、AI 与 LLM 抽象</h2>
+<h3 id="sec-5061">6.1 Ai 与 OperationContext</h3>
+<ul>
+<li><code>OperationContext</code>：运行时上下文，通过 <code>context.ai()</code> 拿到 <code>Ai</code> 入口。</li>
+<li><code>ai.withDefaultLlm()</code>：用应用配置的默认模型。</li>
+<li><code>ai.withLlm(LlmOptions.withModel("gpt-4").withTemperature(0.9))</code>：自定义模型与超参。</li>
+<li><code>createObject(prompt, Class)</code>：让 LLM 输出可反序列化为指定类型的对象——<strong>把 LLM 当类型安全的解析器</strong>。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>IncidentSignal signal = context.ai().withDefaultLlm().createObject(<span class="tok-str">"""
+    Extract an IncidentSignal from the user's message.
+    - lon is a number in [-180, 180]; lat in [-90, 90]
+    - metric is one of: neuralLatencyMs, cpuUsagePct, powerUsageUw
+    User message: %s"""</span>.formatted(input.getContent()), IncidentSignal.<span class="tok-kw">class</span>);</code></pre>
+<h3 id="sec-5062">6.2 模型提供商与自定义 LLM</h3>
+<ul>
+<li>内置支持：OpenAI、Anthropic、Ollama（设 <code>ollama</code> profile 自动接入本地模型）、Docker（<code>docker</code> profile）。</li>
+<li>自定义：对任意提供了 Spring AI <code>ChatModel</code> 的厂商，定义类型为 <code>Llm</code> 的 Spring Bean 即可（参考 <code>OpenAiConfiguration</code>）。配置类应 <code>@ConditionalOnProperty</code> 依赖对应 API Key。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-507">七、规划引擎（GOAP / A*）</h2>
+<h3 id="sec-5071">7.1 工作原理</h3>
+<ol>
+<li><strong>Goal Resolver</strong>：把用户意图映射到最匹配的目标。</li>
+<li><strong>Planning Engine</strong>：用<strong>非 LLM 的 A* 算法</strong>在「当前世界状态」与「目标」之间搜索最优 Action 序列——这是经典 AI 规划，不是让 LLM 决定下一步。</li>
+<li><strong>OODA 循环</strong>：Observe → Orient → Decide → Act。每执行一个 Action 后<strong>重新评估 Conditions 并重新规划</strong>，从而对新信息做出反应。</li>
+<li><strong>Blackboard</strong>：各 Action 的输入/输出对象挂在 Blackboard 上，规划器据此串接（类型 A 产出 → 类型 B 消费）。</li>
+</ol>
+<h3 id="sec-5072">7.2 为什么不是状态机</h3>
+<ul>
+<li>有限状态机 / 线性链是「写死的流程」；Embabel 是「已知步骤的新组合」，能完成从未显式编程的任务。</li>
+<li>新增领域对象、Action、Goal、Condition 即可扩展能力，<strong>无需改 FSM 定义或既有代码</strong>。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-508">八、工具与 ToolGroup</h2>
+<h3 id="sec-5081">8.1 声明工具组</h3>
+<p>Action 用 <code>toolGroups</code> 声明运行所需工具；<code>ToolGroup.WEB</code> 等标准组由框架/扩展提供。工具也可通过领域对象上的 <code>@Tool</code> 方法暴露（见 4.2）。</p>
+<h3 id="sec-5082">8.2 安全提示</h3>
+<ul>
+<li>即使最好的 LLM 也可能「手痒」乱触发工具，对会<strong>改数据/删数据</strong>的方法要特别谨慎。</li>
+<li>更稳妥的做法：把危险操作建模为同一领域类上的<strong>非工具方法</strong>，在代码 Action 里显式调用。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-509">九、MCP 集成</h2>
+<h3 id="sec-5091">9.1 作为 MCP 服务器暴露</h3>
+<p>Embabel 平台本身可作为 MCP Server（通过 SSE）被 Claude Desktop 等 UI 消费：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">json</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// claude_desktop_config.yml</span>
+{
+  <span class="tok-str">"mcpServers"</span>: {
+    <span class="tok-str">"embabel"</span>: { <span class="tok-str">"command"</span>: <span class="tok-str">"npx"</span>, <span class="tok-str">"args"</span>: [<span class="tok-str">"-y"</span>, <span class="tok-str">"mcp-remote"</span>, <span class="tok-str">"http://localhost:8080/sse"</span>] }
+  }
+}</code></pre>
+<h3 id="sec-5092">9.2 消费 MCP 服务器</h3>
+<p>框架内建支持消费 Model Context Protocol 服务器，通过标准接口扩展应用能力；可用 MCP Inspector（<code>npx @modelcontextprotocol/inspector</code>）手动调试。</p>
+<hr class="sep">
+<h2 id="sec-510">十、RAG 与向量检索</h2>
+<h3 id="sec-5101">10.1 embabel-agent-rag 模块</h3>
+<ul>
+<li>独立模块提供检索增强能力，包含分块增强器（如 <code>ChunkMergingEnhancer</code>）与<strong>类型化 Chunk</strong> 处理。</li>
+<li>与 Spring AI 的 <code>VectorStore</code> 打通，可在 Action 中以工具/服务形式检索知识库。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-511">十一、多智能体与 A2A</h2>
+<h3 id="sec-5111">11.1 Agent 联邦</h3>
+<ul>
+<li>路线图中的关键目标：在 GOAP 模型下演示<strong>Agent 联邦（agent federation）</strong>，多个 Agent 协同完成更大任务。</li>
+<li><code>embabel-agent-a2a</code> 模块提供对 Google <strong>A2A（Agent-to-Agent）</strong>协议的支持，实现跨进程/跨平台的智能体协作。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-512">十二、运行、调试与测试</h2>
+<h3 id="sec-5121">12.1 Spring Shell 命令</h3>
+<table><thead><tr><th>命令</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>execute "..."</code> / <code>x "..."</code></td><td>运行匹配目标的 agent</td></tr>
+<tr><td><code>chat</code></td><td>进入交互式会话，保留历史</td></tr>
+<tr><td><code>-p</code></td><td>打印发给 LLM 的 prompt</td></tr>
+<tr><td><code>-r</code></td><td>打印 LLM 原始响应</td></tr>
+<tr><td><code>!!</code></td><td>重复上一条命令（重启后仍保留）</td></tr>
+</tbody></table>
+<h3 id="sec-5122">12.2 单元测试</h3>
+<p>可轻松单测逻辑与 prompt 是否正确，无需真实 LLM：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">public class</span> StarNewsFinderTest {
+    <span class="tok-kw">@Test</span>
+    <span class="tok-kw">void</span> writeupPromptMustContainKeyData() {
+        StarNewsFinder agent = <span class="tok-kw">new</span> StarNewsFinder(mock(HoroscopeService.<span class="tok-kw">class</span>), 5);
+        <span class="tok-kw">var</span> ctx = <span class="tok-kw">new</span> FakeOperationContext();
+        ctx.expectResponse(<span class="tok-kw">new</span> Writeup(<span class="tok-str">"Gonna be a good day"</span>));
+        <span class="tok-cmt">// 验证 agent 把正确数据与 prompt 传给了 LLM</span>
+        String result = agent.writeup(...);
+        assertTrue(result.contains(<span class="tok-str">"good day"</span>));
+    }
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-513">十三、成本与预算意识</h2>
+<h3 id="sec-5131">13.1 预算感知 Agent</h3>
+<ul>
+<li>Action 的 <code>cost</code>/<code>value</code> 元数据让规划器权衡花费，例如：「研究该主题，若仍在摸索阶段花费上限 20 美分」。</li>
+<li>设计上鼓励<strong>混用多个 LLM</strong>（贵的做判断、便宜的做解析），兼顾成本与能力。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-514">十四、最佳实践与常见坑</h2>
+<h3 id="sec-5141">14.1 实践清单</h3>
+<ul>
+<li><strong>类型优先</strong>：所有 LLM 输出尽量映射为 record/data class，享受重构与强类型。</li>
+<li><strong>LLM 只做它擅长的</strong>：抽取、生成、判断用 LLM；查库、计算、校验用确定性代码。</li>
+<li><strong>明确工具边界</strong>：会改/删数据的操作不要用 <code>@Tool</code> 暴露给 LLM，改在代码里显式调用。</li>
+<li><strong>描述即契约</strong>：<code>@Agent</code>/<code>@Action</code>/<code>@JsonClassDescription</code> 的 description 是规划与选择依据，要写清楚。</li>
+<li><strong>用 shell 调试</strong>：<code>-p -r</code> 看 prompt 与响应，快速定位规划/提示词问题。</li>
+</ul>
+<h3 id="sec-5142">14.2 迁移 / 版本注意</h3>
+<ul>
+<li>Embabel <strong>尚不兼容 Spring AI 2.0 / Spring Boot 4</strong>，当前用 Spring Boot 3.5.x + Spring AI 1.1.x。</li>
+<li>版本演进快（如 1.5.0-SNAPSHOT 主线），引入新特性前先核对对应版本的文档与依赖坐标。</li>
+<li>License：Apache 2.0，仓库 <code>github.com/embabel/embabel-agent</code>，文档 <code>docs.embabel.com</code>。</li>
+</ul>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('4')">下一个知识库：Spring AI →</button></div>
+  </section>
+  <section class="page" data-page="4"><h1 id="sec-600">Spring AI 知识库（Java 生态的 AI 工程框架）</h1>
+<blockquote>Spring AI 是 Spring 官方出品的 <strong>AI 工程应用框架</strong>，于 <strong>2025-05-20 发布 1.0 GA</strong>。它把 Spring 生态的设计原则（可移植、模块化、以 POJO 为积木）带到 AI 领域，核心挑战是<strong>把企业数据与 API 连接到大模型</strong>。核心 API 是 <code>ChatClient</code>（可移植、易用的模型交互入口）。本库基于 spring.io 官方文档与参考手册整理，答法遵循「概念 → API → 代码 → 实战 → 坑点」。</blockquote>
+<hr class="sep">
+<h2 id="sec-601">一、定位与版本</h2>
+<h3 id="sec-6011">1.1 设计目标</h3>
+<ul>
+<li>把 Spring 的可移植性、模块化原则应用于 AI 领域，提倡用 <strong>POJO</strong> 作为应用构建块。</li>
+<li>统一抽象：同一套 API 跨多家模型/向量库厂商，切换厂商只需改配置。</li>
+<li>不止无状态问答：内置 RAG、对话记忆、工具调用、评估、可观测等「增强 LLM」能力。</li>
+</ul>
+<h3 id="sec-6012">1.2 版本与模块</h3>
+<table><thead><tr><th>版本</th><th>状态</th><th>要点</th></tr></thead><tbody>
+<tr><td>1.0 GA</td><td>2025-05-20 稳定</td><td>ChatClient、Advisors、Tool Calling、VectorStore、MCP、ETL、Eval 齐备</td></tr>
+<tr><td>1.1.x</td><td>稳定</td><td>新增模型支持与小幅改进（如阿里云 DashScope）</td></tr>
+<tr><td>2.0（参考文档）</td><td>预览/演进中</td><td>把工具调用循环统一收归 <code>ToolCallingAdvisor</code>，<code>ChatClient</code> 自动注册</td></tr>
+</tbody></table>
+<hr class="sep">
+<h2 id="sec-602">二、核心 API 全景</h2>
+<h3 id="sec-6021">2.1 能力矩阵</h3>
+<table><thead><tr><th>能力</th><th>说明</th></tr></thead><tbody>
+<tr><td>Chat / Embedding / Image / Audio / TTS / Moderation</td><td>可移植模型 API，同步 + 流式</td></tr>
+<tr><td>Structured Output</td><td>AI 输出映射为 POJO</td></tr>
+<tr><td>Vector Store</td><td>20+ 向量库，含类 SQL 的元数据过滤</td></tr>
+<tr><td>Tools / Function Calling</td><td>模型请求执行客户端工具函数</td></tr>
+<tr><td>Advisors</td><td>封装通用生成式 AI 模式（RAG、记忆等）</td></tr>
+<tr><td>MCP</td><td>消费/暴露 Model Context Protocol 服务</td></tr>
+<tr><td>ETL / Eval / Observability</td><td>数据工程、内容评估、可观测</td></tr>
+<tr><td>Spring Boot Starters</td><td>全模型/向量库的自动配置</td></tr>
+</tbody></table>
+<h3 id="sec-6022">2.2 支持的厂商</h3>
+<ul>
+<li>模型：Anthropic、OpenAI、Microsoft、Amazon、Google、Ollama 等，ChatClient 可对接 20+ 模型。</li>
+<li>向量库：Cassandra、Azure、Chroma、Milvus、MongoDB Atlas、Neo4j、Oracle、PostgreSQL/PGVector、Pinecone、Qdrant、Redis、Weaviate 等。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-603">三、快速开始</h2>
+<h3 id="sec-6031">3.1 起步依赖</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">xml</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">&lt;dependency&gt;</span>
+  <span class="tok-kw">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-kw">&lt;/groupId&gt;</span>
+  <span class="tok-kw">&lt;artifactId&gt;</span>spring-ai-starter-model-openai<span class="tok-kw">&lt;/artifactId&gt;</span>
+<span class="tok-kw">&lt;/dependency&gt;</span>
+<span class="tok-cmt">&lt;!-- 也可在 start.spring.io 勾选对应模型/向量库 --&gt;</span></code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">properties</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.properties</span>
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o</code></pre>
+<h3 id="sec-6032">3.2 第一个调用</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Bean</span>
+<span class="tok-kw">public</span> CommandLineRunner runner(ChatClient.Builder builder) {
+    <span class="tok-kw">return</span> args -&gt; {
+        ChatClient chatClient = builder.build();
+        String response = chatClient.prompt(<span class="tok-str">"Tell me a joke"</span>).call().content();
+        System.out.println(response);
+    };
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-604">四、ChatClient Fluent API</h2>
+<h3 id="sec-6041">4.1 链式调用</h3>
+<p>ChatClient 的流式 API 与 WebClient/RestClient 风格一致：构造 prompt → 调模型 → 取结果。</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@RestController</span>
+<span class="tok-kw">class</span> MyController {
+    <span class="tok-kw">private final</span> ChatClient chatClient;
+    MyController(ChatClient.Builder b) { <span class="tok-kw">this</span>.chatClient = b.build(); }
+
+    <span class="tok-kw">@GetMapping</span>(<span class="tok-str">"/ai"</span>)
+    String generation(String userInput) {
+        <span class="tok-kw">return</span> chatClient.prompt()
+            .system(sp -&gt; sp.param(<span class="tok-str">"voice"</span>, <span class="tok-str">"pirate"</span>))  <span class="tok-cmt">// 模板变量</span>
+            .user(userInput)
+            .call()
+            .content();
+    }
+}</code></pre>
+<h3 id="sec-6042">4.2 流式与默认值</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// 响应式流式输出</span>
+Flux&lt;String&gt; out = chatClient.prompt().user(<span class="tok-str">"Tell me a joke"</span>).stream().content();
+
+<span class="tok-cmt">// 在 @Configuration 里固定 system 文本与模型超参</span>
+<span class="tok-kw">@Bean</span> ChatClient chatClient(ChatClient.Builder b) {
+    <span class="tok-kw">return</span> b.defaultSystem(<span class="tok-str">"You are a friendly bot in the voice of a {voice}"</span>).build();
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-605">五、结构化输出</h2>
+<h3 id="sec-6051">5.1 entity 映射到 POJO</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">record</span> ActorFilms(String actor, List&lt;String&gt; movies) {}
+
+ActorFilms result = chatClient.prompt()
+    .user(<span class="tok-str">"Generate the filmography for a random actor."</span>)
+    .call()
+    .entity(ActorFilms.<span class="tok-kw">class</span>);   <span class="tok-cmt">// 直接拿到强类型对象</span></code></pre>
+<h3 id="sec-6052">5.2 让模型理解字段</h3>
+<p>配合 Jackson 注解描述字段，提升抽取准确率：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@JsonClassDescription</span>(<span class="tok-str">"Person with astrology details"</span>)
+<span class="tok-kw">record</span> StarPerson(String name,
+    <span class="tok-kw">@JsonPropertyDescription</span>(<span class="tok-str">"Star sign"</span>) String sign) {}</code></pre>
+<hr class="sep">
+<h2 id="sec-606">六、PromptTemplate</h2>
+<h3 id="sec-6061">6.1 变量与外部资源</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>PromptTemplate template = <span class="tok-kw">new</span> PromptTemplate(
+    <span class="tok-kw">new</span> ClassPathResource(<span class="tok-str">"prompts/support-system.st"</span>));
+Prompt prompt = template.create(Map.of(<span class="tok-str">"customer"</span>, <span class="tok-str">"Alice"</span>));</code></pre>
+<hr class="sep">
+<h2 id="sec-607">七、模型提供商与 ChatOptions</h2>
+<h3 id="sec-6071">7.1 切换模型与参数</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">yaml</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.yml：用阿里云 DashScope 兼容 OpenAI 接口</span>
+spring:
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${DASHSCOPE_KEY}
+      chat:
+        options:
+          model: qwen-plus
+          temperature: 0.3</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>OpenAiChatOptions opts = OpenAiChatOptions.builder()
+    .model(<span class="tok-str">"gpt-4o-mini"</span>).temperature(0.2).maxTokens(600).build();
+chatClient.prompt().user(q).options(opts).call().content();</code></pre>
+<hr class="sep">
+<h2 id="sec-608">八、Embedding 与 VectorStore</h2>
+<h3 id="sec-6081">8.1 注入与检索</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Bean</span> VectorStore vectorStore(EmbeddingModel embeddingModel) {
+    <span class="tok-kw">return</span> <span class="tok-kw">new</span> PgVectorStore(embeddingModel, pgVectorTemplate);
+}
+
+<span class="tok-cmt">// 写入</span>
+vectorStore.add(List.of(<span class="tok-kw">new</span> Document(<span class="tok-str">"content"</span>, Map.of(<span class="tok-str">"source"</span>, <span class="tok-str">"kb"</span>))));
+<span class="tok-cmt">// 相似检索</span>
+List&lt;Document&gt; hits = vectorStore.similaritySearch(
+    SearchRequest.builder().query(<span class="tok-str">"如何重置密码"</span>).topK(5).build());</code></pre>
+<h3 id="sec-6082">8.2 可移植的元数据过滤</h3>
+<p>各家向量库查询语言各异，Spring AI 提供<strong>类 SQL 的可移植过滤表达式</strong>：</p>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>Filter.Expression f = <span class="tok-kw">new</span> Filter.Expression(Filter.Operator.AND, List.of(
+    <span class="tok-kw">new</span> Filter.Expression(Filter.Operator.EQ,  <span class="tok-kw">new</span> Filter.Key(<span class="tok-str">"genre"</span>), <span class="tok-kw">new</span> Filter.Value(<span class="tok-str">"drama"</span>)),
+    <span class="tok-kw">new</span> Filter.Expression(Filter.Operator.GTE, <span class="tok-kw">new</span> Filter.Key(<span class="tok-str">"year"</span>),  <span class="tok-kw">new</span> Filter.Value(2000))
+));
+SearchRequest req = SearchRequest.builder().query(<span class="tok-str">"..."</span>).filterExpression(f).build();</code></pre>
+<hr class="sep">
+<h2 id="sec-609">九、文档 ETL 流水线</h2>
+<h3 id="sec-6091">9.1 读 → 切 → 嵌 → 写</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>TextReader reader = <span class="tok-kw">new</span> TextReader(<span class="tok-str">"data/policy.txt"</span>);
+List&lt;Document&gt; docs = reader.get();
+TokenTextSplitter splitter = <span class="tok-kw">new</span> TokenTextSplitter();
+List&lt;Document&gt; chunks = splitter.apply(docs);  <span class="tok-cmt">// 切分避免超长</span>
+vectorStore.add(chunks);                        <span class="tok-cmt">// 嵌入并落库</span></code></pre>
+<hr class="sep">
+<h2 id="sec-610">十、工具调用（Tool Calling）</h2>
+<h3 id="sec-6101">10.1 用 @Tool 定义工具</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Service</span>
+<span class="tok-kw">class</span> WeatherTools {
+    <span class="tok-kw">@Tool</span>(description = <span class="tok-str">"根据城市名查询当前天气"</span>)
+    <span class="tok-kw">public</span> String getWeather(
+        <span class="tok-kw">@ToolParam</span>(description = <span class="tok-str">"城市名称，不含'市'字"</span>) String city) {
+        <span class="tok-kw">return</span> weatherService.query(city);
+    }
+}</code></pre>
+<h3 id="sec-6102">10.2 注册为 ToolCallback 并接线</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-kw">@Configuration</span>
+<span class="tok-kw">class</span> ToolConfig {
+    <span class="tok-kw">@Bean</span> MethodToolCallbackProvider weatherProvider(WeatherTools t) {
+        <span class="tok-kw">return</span> MethodToolCallbackProvider.builder().toolObjects(t).build();
+    }
+}
+<span class="tok-cmt">// 接线到 ChatClient</span>
+chatClient.prompt().user(q).tools(weatherTools).call().content();</code></pre>
+<h3 id="sec-6103">10.3 2.0 的工具循环</h3>
+<ul>
+<li>2.0 起把工具调用循环从各 ChatModel 抽出，统一由 <strong>ToolCallingAdvisor</strong> 管理，<code>ChatClient</code> 自动注册，跨模型切换更一致、更易调试。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-611">十一、Advisors API</h2>
+<h3 id="sec-6111">11.1 拦截器链模式</h3>
+<p>Advisor 类似 AOP 环绕通知，在 LLM 调用前后变换数据，提供跨模型/场景的可移植性（记忆、工具、RAG）。</p>
+<table><thead><tr><th>Advisor</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>QuestionAnswerAdvisor</code></td><td>RAG：从向量库检索上下文注入 prompt</td></tr>
+<tr><td><code>MessageChatMemoryAdvisor</code></td><td>把对话历史加入请求（聊天记忆）</td></tr>
+<tr><td><code>SimpleLoggerAdvisor</code></td><td>把内部 trace 打到日志，便于调试</td></tr>
+</tbody></table>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>ChatClient client = builder
+    .defaultAdvisors(
+        <span class="tok-kw">new</span> QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults().withTopK(5)),
+        MessageChatMemoryAdvisor.builder(chatMemory).build())
+    .defaultTools(orderTools, productTools)
+    .build();</code></pre>
+<hr class="sep">
+<h2 id="sec-612">十二、对话记忆（Chat Memory）</h2>
+<h3 id="sec-6121">12.1 记忆仓库与窗口</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>ChatMemory chatMemory = MessageWindowChatMemory.builder()
+    .chatMemoryRepository(<span class="tok-kw">new</span> InMemoryChatMemoryRepository())
+    .build();
+
+<span class="tok-cmt">// 按会话隔离：每次请求带上 CONVERSATION_ID</span>
+chatClient.prompt().user(q)
+    .advisors(a -&gt; a.param(ChatMemory.CONVERSATION_ID, chatId))
+    .call().content();</code></pre>
+<hr class="sep">
+<h2 id="sec-613">十三、RAG 实战</h2>
+<h3 id="sec-6131">13.1 RAG 与工具天然可组合</h3>
+<ul>
+<li><code>QuestionAnswerAdvisor</code> 在<strong>调用前</strong>检索并注入上下文；<code>@Tool</code> 在<strong>调用中</strong>由模型决定是否调用——两者不冲突。</li>
+<li>常见场景（如保修咨询）：政策用 RAG（知识库），订单/产品用工具（实时系统）。</li>
+</ul>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>ChatClient support = builder
+    .defaultAdvisors(
+        <span class="tok-kw">new</span> QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults().withTopK(5)),
+        MessageChatMemoryAdvisor.builder(chatMemory).conversationWindowSize(20).build())
+    .defaultTools(orderTools, productTools)
+    .build();</code></pre>
+<h3 id="sec-6132">13.2 给模型明确指引</h3>
+<p>当同时有 RAG 上下文与工具时，<strong>在 system prompt 里显式说明何时用哪个</strong>（如「政策类问题用 CONTEXT，订单/产品细节用 TOOLS」），否则模型可能偏废其一。</p>
+<hr class="sep">
+<h2 id="sec-614">十四、MCP 集成</h2>
+<h3 id="sec-6141">14.1 暴露为 MCP 工具服务器</h3>
+<p>标注 <code>@Tool</code> 的 Spring Bean 会被自动发现，通过 Streamable HTTP / SSE 暴露为 MCP 工具，零样板注册。</p>
+<h3 id="sec-6142">14.2 消费远程 MCP 服务器</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">properties</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt"># application.properties 连接远程 MCP 工具</span>
+spring.ai.mcp.client.toolcallback.enabled=true
+spring.ai.mcp.client.sse.connections.news-tool.url=http://localhost:8090</code></pre>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code><span class="tok-cmt">// ToolCallbackProvider 自动集齐所有 MCP 工具，透明地发给 LLM 并执行</span>
+<span class="tok-kw">@Bean</span> ChatClient researchAgent(ChatClient.Builder b, ToolCallbackProvider mcpTools,
+                               VectorStore vs) {
+    <span class="tok-kw">return</span> b.defaultToolCallbacks(mcpTools)
+            .defaultAdvisors(<span class="tok-kw">new</span> QuestionAnswerAdvisor(vs))
+            .build();
+}</code></pre>
+<hr class="sep">
+<h2 id="sec-615">十五、评估（Evaluation）</h2>
+<h3 id="sec-6151">15.1 相关性评估器</h3>
+<pre class="code-block"><div class="code-bar"><span class="code-lang">Java</span><span class="code-dots"><i></i><i></i><i></i></span></div><code>RelevancyEvaluator evaluator = <span class="tok-kw">new</span> RelevancyEvaluator(ChatClient.builder(model));
+EvaluationRequest req = <span class="tok-kw">new</span> EvaluationRequest(userText, List.of(contextDoc), response);
+EvaluationResponse res = evaluator.evaluate(req);
+<span class="tok-kw">boolean</span> relevant = res.getEvaluationResult().isPass();  <span class="tok-cmt">// 防幻觉/兜底</span></code></pre>
+<hr class="sep">
+<h2 id="sec-616">十六、可观测性</h2>
+<h3 id="sec-6161">16.1 开启观测</h3>
+<ul>
+<li>Spring AI 提供对 AI 相关操作的洞察（token 用量、调用链）。</li>
+<li>调高日志级别可看 Advisor 内部 trace：<code>logging.level.org.springframework.ai.chat.client.advisor=DEBUG</code>。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-617">十七、Spring Boot 自动配置与 Starters</h2>
+<h3 id="sec-6171">17.1 约定优于配置</h3>
+<ul>
+<li>所有模型与向量库都有对应的 <code>spring-ai-starter-*</code>，引入即自动配置。</li>
+<li><code>ChatClient.Builder</code> 由 Spring Boot 自动注入，直接 <code>@Autowired</code> 使用。</li>
+<li>从 <code>start.spring.io</code> 勾选模型/向量库即可一键 bootstrap。</li>
+</ul>
+<hr class="sep">
+<h2 id="sec-618">十八、最佳实践与常见坑</h2>
+<h3 id="sec-6181">18.1 实践清单</h3>
+<ul>
+<li><strong>以 ChatClient 为入口</strong>：不要直接调 <code>ChatModel</code>，让 advisor 链、工具注册、流式支持一肩挑。</li>
+<li><strong>System Prompt 优先于换模型</strong>：用清晰的角色/边界/工具规则/system prompt 往往比换模型更有效、更省钱。</li>
+<li><strong>结构化输出用 record + @JsonClassDescription</strong>：稳定拿到强类型结果。</li>
+<li><strong>RAG + 工具组合时给模型指引</strong>：明确「何时用上下文、何时用工具」。</li>
+<li><strong>控制工具数量与记忆窗口</strong>：工具过多会稀释模型决策；记忆窗口按需裁剪控制 token。</li>
+<li><strong>加可观测性</strong>：生产环境务必开启评估与日志，及时发现幻觉/越界。</li>
+</ul>
+<h3 id="sec-6182">18.2 版本注意</h3>
+<ul>
+<li>1.0 GA 是当前主流稳定版；2.0 引入 <code>ToolCallingAdvisor</code> 统一工具循环，迁移时留意 advisor 注册方式变化。</li>
+<li>多模态（图文/音视频）取决于底层模型是否支持，使用前核对厂商能力。</li>
+</ul>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('5')">下一个知识库：业务开发模板 →</button></div>
+  </section>
+  <section class="page" data-page="5"><h1 id="sec-7000">后端业务项目开发模板（以 Ragent 为蓝本）</h1>
+<h2 id="sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</h2>
+<p>很多人一上来就「先堆 CRUD、再补功能」，结果越写越乱、越改越怕。正确的顺序是<strong>先想清楚、再动手</strong>：<strong>需求 → 选型 → 架构 → 实现 → 运维</strong> 五个阶段闭环推进，而不是一条直线冲到底。本库以「Ragent（一个 AI 智能问答 / 知识库系统）」为蓝本，把<strong>一个真实业务项目从 0 到 1 该考虑的每件事</strong>拆给你看——既能当方法论，也能当检查清单。</p>
+<table><thead><tr><th>阶段</th><th>核心问题</th><th>产出物</th></tr></thead><tbody>
+<tr><td>① 需求</td><td>到底要解决谁的什么问题？做到什么程度算成功？</td><td>功能清单 + 非功能指标 + MVP 边界</td></tr>
+<tr><td>② 选型</td><td>在团队 / 成本 / 性能 / 可维护的约束下，用什么？</td><td>技术选型表（含备选与理由）</td></tr>
+<tr><td>③ 架构</td><td>模块怎么分、依赖怎么走、数据怎么流？</td><td>分层图 + 模块边界 + 时序</td></tr>
+<tr><td>④ 实现</td><td>每个功能点落地时，技术的优缺点怎么权衡？</td><td>逐功能技术拆解 + 取舍记录</td></tr>
+<tr><td>⑤ 运维</td><td>怎么上线、怎么扛量、出事怎么查？</td><td>部署拓扑 + 监控 + 上线 Checklist</td></tr>
+</tbody></table>
+<blockquote>记住一句总纲：<strong>「先定约束，再选技术；先分边界，再写代码；先能跑通，再谈优雅。」</strong></blockquote>
+<hr class="sep">
+
+<h2 id="sec-7001">一、阶段一：需求梳理与范围界定</h2>
+<h3 id="sec-7002">1.1 功能需求：用「用户故事」拆，而不是用「我要做个系统」</h3>
+<ul>
+<li>每个功能写成 <code>作为&lt;角色&gt;，我希望&lt;动作&gt;，以便&lt;价值&gt;</code>。例：作为<strong>访客</strong>，我希望<strong>输入问题得到流式回答</strong>，以便<strong>像聊天一样获取知识</strong>。</li>
+<li>功能要能<strong>验收</strong>：能写出「满足 X 条件即算通过」的测试标准，否则等于没需求。</li>
+<li>功能要<strong>可排优先级</strong>：用 MoSCoW（Must / Should / Could / Won't）区分，避免一上来全做。</li>
+</ul>
+<h3 id="sec-7003">1.2 非功能需求（NFR）：决定技术难度的往往是它</h3>
+<table><thead><tr><th>维度</th><th>要问的问题</th><th>典型指标</th></tr></thead><tbody>
+<tr><td>性能</td><td>单次请求多久要回？</td><td>P95 &lt; 800ms（首包 &lt; 1.5s）</td></tr>
+<tr><td>并发</td><td>同时多少人用？</td><td>峰值 200 QPS / 全局 50 并发</td></tr>
+<tr><td>可用性</td><td>挂了多久能恢复？</td><td>99.9%（月停 &lt; 43 分钟）</td></tr>
+<tr><td>安全</td><td>谁能用、数据归谁？</td><td>登录鉴权 + 多租户隔离</td></tr>
+<tr><td>合规</td><td>数据要存境内吗？</td><td>等保 / 数据不出境</td></tr>
+<tr><td>可演进</td><td>半年后要不要加能力？</td><td>插件化 / 配置化预留</td></tr>
+</tbody></table>
+<h3 id="sec-7004">1.3 以 Ragent 模拟：需求怎么拆</h3>
+<ul>
+<li><strong>Must</strong>：问答接口（流式）、知识库上传与检索、用户登录。</li>
+<li><strong>Should</strong>：意图识别、多路混合检索、限流防刷、会话记忆。</li>
+<li><strong>Could</strong>：文档定时刷新、MCP 外部工具、Rerank 精排。</li>
+<li><strong>Won't（本期不做）</strong>：多模态图文问答、私有化小模型微调。</li>
+</ul>
+<blockquote>「Won't」和「Must」一样重要——它帮你挡住无底洞需求，保护 MVP 能按时上线。</blockquote>
+<hr class="sep">
+
+<h2 id="sec-7005">二、阶段二：技术选型的总原则</h2>
+<h3 id="sec-7006">2.1 先定约束，再选技术</h3>
+<ul>
+<li><strong>团队约束</strong>：团队只会 Java？就别硬上 Go/Rust；只会单体？先别强上微服务。</li>
+<li><strong>成本约束</strong>：云上 GPU 推理很贵，能走 API 就别自建集群。</li>
+<li><strong>性能约束</strong>：要毫秒级检索？就得上向量索引，不能靠 LIKE 全表扫。</li>
+<li><strong>可维护约束</strong>：招不到人维护的技术栈，再先进也不能碰。</li>
+</ul>
+<h3 id="sec-7007">2.2 自研 vs 开源 vs 云服务的权衡</h3>
+<table><thead><tr><th>路径</th><th>优点</th><th>缺点</th><th>何时选</th></tr></thead><tbody>
+<tr><td>直接用云服务（如大模型 API）</td><td>零运维、弹性、上线快</td><td>长期成本高、锁定、数据出境风险</td><td>MVP / 不确定规模时</td></tr>
+<tr><td>用成熟开源（如 Spring AI / LangChain）</td><td>可控、社区活跃、可改</td><td>要自己集成、踩坑</td><td>有定制需求、团队能 hold 住</td></tr>
+<tr><td>完全自研（如 Ragent 的 infra-ai）</td><td>完全贴合业务、无依赖绑架</td><td>成本高、需长期养</td><td>核心差异化能力、已有沉淀</td></tr>
+</tbody></table>
+<h3 id="sec-7008">2.3 选型要留「演进后路」</h3>
+<ul>
+<li>抽象一层接口，底层可替换：今天用 DeepSeek，明天换通义，业务代码不动。</li>
+<li>配置驱动：开关、阈值、权重都放配置，不写死在代码里。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7009">三、阶段三：总体架构设计</h2>
+<h3 id="sec-7010">3.1 经典四层（自顶向下）</h3>
+<table><thead><tr><th>层</th><th>职责</th><th>Ragent 对应</th></tr></thead><tbody>
+<tr><td>接入层</td><td>路由、鉴权、限流、协议转换（HTTP/SSE/WS）</td><td>Nginx + Controller + Sa-Token + RateLimiter</td></tr>
+<tr><td>业务层</td><td>编排用例、领域逻辑</td><td>Service + Pipeline + Intent</td></tr>
+<tr><td>能力层</td><td>模型、检索、存储等通用能力</td><td>infra-ai / Retrieval / Ingestion</td></tr>
+<tr><td>基础设施</td><td>DB / 缓存 / MQ / 对象存储</td><td>PostgreSQL+PGVector / Redis / RocketMQ / RustFS</td></tr>
+</tbody></table>
+<h3 id="sec-7011">3.2 模块边界：用「限界上下文」思路分</h3>
+<ul>
+<li>每个上下文<strong>只对自己负责的数据有写权</strong>，对外只暴露接口。</li>
+<li>依赖方向单向：接入 → 业务 → 能力 → 基础设施；<strong>禁止反向调用</strong>。</li>
+<li>Ragent 把「对话」「检索」「入库」「意图」「模型路由」拆成独立包，互不污染。</li>
+</ul>
+<h3 id="sec-7012">3.3 以 Ragent 模拟：一次问答的数据流</h3>
+<p><code>前端 → 网关鉴权 → 限流排队 → 服务编排(雪花ID) → 加载记忆 → 改写问题 → 意图识别 → 多路检索 → RRF融合 → Rerank → 模型首包探测流式输出 → SSE 推前端</code>。每一环都是一个可独立替换、可独立观测的节点。</p>
+<hr class="sep">
+
+<h2 id="sec-7013">四、阶段四：逐功能技术拆解（核心，含优缺点）</h2>
+<p>下面把 Ragent 的每个功能拆开，讲「用什么技术、为什么、优缺点、备选」。这是本库最值钱的部分。</p>
+
+<h3 id="sec-7014">4.1 对话问答核心链路：SSE 还是 WebSocket？</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th><th>适用</th></tr></thead><tbody>
+<tr><td>SSE（Server-Sent Events）</td><td>基于 HTTP、天然断线重连、单向推送简单、好过代理</td><td>只能服务端→客户端单向；二进制弱</td><td>AI 流式回答（Ragent 选它）</td></tr>
+<tr><td>WebSocket</td><td>全双工、双向实时、可传二进制</td><td>需自己管心跳/重连、代理/CDN 支持参差</td><td>协同编辑、聊天室、游戏</td></tr>
+<tr><td>普通轮询</td><td>实现最简单</td><td>延迟高、空转浪费</td><td>极简场景、临时方案</td></tr>
+</tbody></table>
+<ul><li><strong>取舍</strong>：AI 回答是「服务端一直推、客户端只发一次问题」，SSE 最契合；还要支持「中途停止」，用单独的 <code>POST /stop</code> 接口即可，不必为双向而 WebSocket。</li></ul>
+
+<h3 id="sec-7015">4.2 并发限流：队列式限流 vs 令牌桶</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
+<tr><td>令牌桶 / 漏桶（Guava / Redis）</td><td>实现简单、平滑限平均速率</td><td>突发时直接拒绝，用户体验差；不保证「先到先服务」</td></tr>
+<tr><td>信号量 + 排队（Ragent 队列式）</td><td>满负载时<strong>排队等待</strong>而非拒绝，公平且体验好</td><td>实现复杂（需 Lua 原子出队、僵尸清理、超时状态机）</td></tr>
+</tbody></table>
+<ul><li><strong>参数示例</strong>：全局并发 50、排队上限 20s、许可租约 600s 兜底防泄漏；被拒回写记忆并推「系统繁忙」。</li>
+<li><strong>何时选队列</strong>：下游（LLM）是稀缺资源、且希望用户「等一下而非直接失败」；<strong>何时选令牌桶</strong>：纯接口防刷、不在乎个别请求失败。</li></ul>
+
+<h3 id="sec-7016">4.3 检索增强（RAG）：向量 / 关键词 / 混合，怎么选？</h3>
+<table><thead><tr><th>检索方式</th><th>优点</th><th>缺点</th><th>典型用</th></tr></thead><tbody>
+<tr><td>向量检索（Embedding + 近似近邻）</td><td>语义匹配强，问法不同也能命中</td><td>精确值/专名弱；依赖 Embedding 质量</td><td>口语化、语义相似问题</td></tr>
+<tr><td>关键词检索（ES / 倒排）</td><td>精确匹配、专名/编号准、可解释</td><td>同义/泛化能力差</td><td>订单号、术语、法规条文</td></tr>
+<tr><td>混合检索（多路并行 + RRF 融合）</td><td>兼顾语义与精确，召回更全</td><td>链路更长、要调权重与融合参数</td><td>生产级知识库（Ragent 选它）</td></tr>
+<tr><td>Rerank 精排</td><td>在召回基础上重排，相关性更高</td><td>额外一次模型调用、有成本</td><td>候选多、要保 Top 质量时开启</td></tr>
+</tbody></table>
+<ul><li><strong>RRF 融合公式</strong>：<code>score = Σ weight / (k + rank + 1)</code>；各通道权重可配（vector/keyword/graph/web），融合后截断再送 Rerank。</li>
+<li><strong>取舍</strong>：MVP 先上向量检索跑通；召回不够再补关键词；质量不稳再加 Rerank——<strong>逐级加复杂度</strong>。</li></ul>
+
+<h3 id="sec-7017">4.4 意图识别：LLM 分类 vs 传统 ML/NLP</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
+<tr><td>LLM 一次性打分（Ragent）</td><td>零训练、可改 Prompt、多意图一次出</td><td>有延迟与成本、需设阈值防误判</td></tr>
+<tr><td>传统文本分类（BERT 微调）</td><td>快、便宜、可本地化</td><td>要标注数据、要训练维护、改意图要重训</td></tr>
+<tr><td>关键词/规则路由</td><td>极快、可控</td><td>死板、覆盖低、维护地狱</td></tr>
+</tbody></table>
+<ul><li><strong>参数</strong>：意图阈值 0.35、最多 3 个意图、temperature=0.1/topP=0.3 求稳；结果缓存 7 天减少重复调用。</li></ul>
+
+<h3 id="sec-7018">4.5 会话记忆与上下文压缩</h3>
+<ul>
+<li><strong>不压缩</strong>：实现简单，但长对话爆 token、贵且慢。</li>
+<li><strong>滑动窗口</strong>（保留最近 N 轮）：简单有效，但会丢早期上下文。</li>
+<li><strong>摘要压缩</strong>（Ragent）：保留 8 轮原文 + 超 9 轮开始摘要（≤200 字）；优点是不丢全局背景，缺点是异步摘要有延迟、要分布式锁防并发。</li>
+<li><strong>取舍</strong>：MVP 用滑动窗口；对话长、要连续性的业务再上摘要。Ragent 默认关摘要，按需开。</li>
+</ul>
+
+<h3 id="sec-7019">4.6 模型路由与容错：多模型 / 熔断 / 降级 / 首包探测</h3>
+<table><thead><tr><th>机制</th><th>解决什么</th><th>要点</th></tr></thead><tbody>
+<tr><td>多模型路由</td><td>不同任务用不同模型（快/贵）</td><td>分 defaultTier / deepThinkingTier 档位</td></tr>
+<tr><td>熔断（三态）</td><td>某模型连续失败不再傻等</td><td>连续失败 2 次→OPEN 30s→半开放探针</td></tr>
+<tr><td>降级</td><td>主模型挂了切备胎</td><td>候选有序列表即降级顺序</td></tr>
+<tr><td>首包探测</td><td>流式过程中某个模型不吐字就换</td><td>按各模型 timeoutMs 探测，ERROR/TIMEOUT 即切下一个</td></tr>
+</tbody></table>
+<ul><li><strong>取舍</strong>：单模型能跑通就别上全套容错；当依赖外部 LLM API（不稳定）时，熔断+降级是<strong>必选项</strong>而非可选项。</li></ul>
+
+<h3 id="sec-7020">4.7 知识库管理与文档入库 Pipeline</h3>
+<ul>
+<li><strong>四步</strong>：解析（PDF/Word/网页）→ 分块（按语义/固定长度）→ Embedding → 写库（文档-分块-向量三级）。</li>
+<li><strong>分块策略</strong>：固定长度简单但易切断语义；按标题/段落切更连贯但实现复杂。Ragent 用 <code>NodeConfig</code> 连线执行，<code>validatePipeline</code> 校验环防死循环。</li>
+<li><strong>入库异步化</strong>：大文件走后台任务 + 状态表（pipeline/node/task 三级状态），前端轮询进度。</li>
+</ul>
+
+<h3 id="sec-7021">4.8 认证授权与多租户</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th><th>适用</th></tr></thead><tbody>
+<tr><td>JWT（无状态）</td><td>不用查库、易横向扩展</td><td>注销难（需黑名单）、过期固定</td><td>纯 API、无强制即时注销</td></tr>
+<tr><td>Session + Redis</td><td>可即时注销、可控</td><td>要存服务端状态</td><td>要强管控的后台</td></tr>
+<tr><td>Sa-Token（Ragent 选）</td><td>API 简洁、登录/踢人/权限一体</td><td>引入框架依赖</td><td>中后台快速落地</td></tr>
+</tbody></table>
+<ul><li><strong>多租户</strong>：数据隔离三档——独立库（最安全最贵）/ 共享库+tenant_id 行级（最省最易漏）/ 独立 schema（折中）。Ragent 用 <code>UserContextInterceptor</code> 把用户上下文透传，查询统一带租户条件。</li></ul>
+
+<h3 id="sec-7022">4.9 可观测性：Trace / 日志 / 指标 / 审计</h3>
+<ul>
+<li><strong>Trace</strong>：一次问答用 TraceId 串起所有节点（run/节点两级），出问题时一眼定位慢在哪。</li>
+<li><strong>日志</strong>：结构化（JSON）+ 级别分级；敏感信息脱敏。</li>
+<li><strong>指标</strong>：QPS / 延迟 / 限流拒绝数 / 模型失败率，接 Prometheus + Grafana。</li>
+<li><strong>审计</strong>：关键写操作留 <code>t_biz_change_log</code>，合规与排错都要。</li>
+</ul>
+
+<h3 id="sec-7023">4.10 异步与消息队列（RocketMQ / Kafka）</h3>
+<table><thead><tr><th>中间件</th><th>优点</th><th>缺点</th><th>适用</th></tr></thead><tbody>
+<tr><td>RocketMQ</td><td>事务消息、低延迟、Java 生态友好</td><td>运维略重</td><td>金融/订单/国内业务（Ragent 选）</td></tr>
+<tr><td>Kafka</td><td>超高吞吐、生态广</td><td>事务弱、延迟略高</td><td>日志流、大数据管道</td></tr>
+<tr><td>RabbitMQ</td><td>路由灵活、易上手</td><td>吞吐中等</td><td>中小业务、复杂路由</td></tr>
+</tbody></table>
+<ul><li><strong>用在哪</strong>：文档入库完成通知、记忆摘要触发、异步审计——把「可延迟」的事从主链路摘出去。</li></ul>
+
+<h3 id="sec-7024">4.11 文件与对象存储（S3 兼容）</h3>
+<ul>
+<li>自建 MinIO / RustFS 还是云 OSS？<strong>有合规/成本考量选自建，求省心选云</strong>。</li>
+<li>抽象 <code>storage.type=oss/s3</code>，业务只调统一接口，换厂商不动代码。</li>
+</ul>
+
+<h3 id="sec-7025">4.12 多级缓存（Redis）</h3>
+<ul>
+<li><strong>本地缓存（Caffeine）</strong>：极快、扛读多场景；缺点是多实例不一致。</li>
+<li><strong>分布式缓存（Redis）</strong>：实例间共享；缺点是多一跳网络。</li>
+<li><strong>典型用法</strong>：意图树缓存（TTL 7 天，节点变更主动失效）、限流计数、会话存活标记。</li>
+<li><strong>坑</strong>：缓存穿透（空值也缓存 / 布隆）、击穿（热点 key 互斥重建）、雪崩（TTL 加随机）。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7026">五、阶段五：数据存储设计</h2>
+<h3 id="sec-7027">5.1 关系型库：PostgreSQL vs MySQL</h3>
+<table><thead><tr><th>维度</th><th>PostgreSQL</th><th>MySQL</th></tr></thead><tbody>
+<tr><td>向量能力</td><td>原生 PGVector 扩展，一套库搞定关系+向量</td><td>需外接向量库</td></tr>
+<tr><td>复杂查询</td><td>CTE/窗口函数/JSON 强</td><td>够用但偏弱</td></tr>
+<tr><td>生态/人力</td><td>略少</td><td>人多、资料多</td></tr>
+</tbody></table>
+<ul><li><strong>Ragent 选 PostgreSQL 17 + PGVector</strong>：少养一个向量库、事务一致、运维简单。若团队只熟 MySQL 且向量量小，可 MySQL + 外挂 Milvus。</li></ul>
+<h3 id="sec-7028">5.2 向量库选型</h3>
+<table><thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead><tbody>
+<tr><td>PGVector（Ragent 默认）</td><td>与关系库同实例、事务一致、运维省</td><td>超大数据量性能不如专用库</td></tr>
+<tr><td>Milvus</td><td>十亿级向量、高性能、云原生</td><td>重、独立集群、运维成本高</td></tr>
+<tr><td>Elasticsearch</td><td>关键词+向量一体、检索生态强</td><td>资源吃、版本坑多</td></tr>
+</tbody></table>
+<ul><li><strong>量级决策</strong>：百万级向量以内 PGVector 足够；上亿再考虑 Milvus。</li></ul>
+<h3 id="sec-7029">5.3 表设计要点（以 Ragent 23 张表为参考）</h3>
+<ul>
+<li><strong>按域分表</strong>：会话域 / 知识库域 / 意图域 / 入库域 / 观测域，互不交叉。</li>
+<li><strong>四级知识模型</strong>：库 → 文档 → 分块 → 向量，分块与向量可独立扩。</li>
+<li><strong>状态表</strong>：长任务（入库/调度）必有状态表，前端才能查进度。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7030">六、阶段六：工程化与并发治理</h2>
+<h3 id="sec-7031">6.1 线程池隔离：别一个大池子打天下</h3>
+<ul>
+<li>按<strong>工作负载特征</strong>拆池：IO 密集池大（如检索 4×CPU）、保 LLM 的池小（摘要 1~2 线程防打爆模型）、入口池与限流许可严格对齐。</li>
+<li>用 <code>TtlExecutors</code> 包装保证用户上下文 / TraceId 跨线程透传（否则异步后日志全乱）。</li>
+<li>拒绝策略：CallerRuns（降速自保）vs AbortPolicy（快速失败），按场景选。</li>
+</ul>
+<h3 id="sec-7032">6.2 配置中心与环境管理</h3>
+<ul>
+<li>本地 / 测试 / 生产三套 <code>application.yaml</code>，敏感信息走环境变量或配置中心（Nacos/Apollo），<strong>别提交密码进代码库</strong>。</li>
+<li>所有阈值（限流/熔断/记忆轮数）配置化，运维可热更不重启。</li>
+</ul>
+<h3 id="sec-7033">6.3 幂等与防重</h3>
+<ul>
+<li>入口按 <code>userId + 请求指纹</code> 幂等（Ragent 的 <code>@IdempotentSubmit</code>），防止用户连点产生重复回答/扣费。</li>
+<li>写操作带唯一键 / 乐观锁，防并发重复插入。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7034">七、阶段七：部署与运维</h2>
+<h3 id="sec-7035">7.1 容器化起步</h3>
+<ul>
+<li>一键 <code>docker-compose</code> 起中间件（PG+Redis+MQ+对象存储），开发者本地一条命令跑全流程。</li>
+<li>应用本身也打镜像，保证「本地能跑=线上能跑」。</li>
+</ul>
+<h3 id="sec-7036">7.2 编排与高可用（K8s）</h3>
+<ul>
+<li>无状态服务（接入/业务）多副本 + HPA 自动扩；有状态（DB）用托管服务。</li>
+<li>探针（liveness/readiness）保证流量只进健康实例。</li>
+</ul>
+<h3 id="sec-7037">7.3 灰度与回滚</h3>
+<ul>
+<li>蓝绿 / 金丝雀：新版本先放 5% 流量，指标正常再全量。</li>
+<li>每次发布保留上一个镜像，出问题一键回滚。</li>
+</ul>
+<h3 id="sec-7038">7.4 监控告警</h3>
+<ul>
+<li>四件套：日志（ELK/Loki）+ 指标（Prometheus/Grafana）+ Trace（Jaeger/自建）+ 告警（Webhook/钉钉）。</li>
+<li>告警要有「阈值 + 静默 + 升级」，否则告警风暴等于没告警。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7039">八、阶段八：上线 Checklist 与复盘</h2>
+<h3 id="sec-7040">8.1 上线前清单（逐项打勾）</h3>
+<table><thead><tr><th>类别</th><th>检查项</th></tr></thead><tbody>
+<tr><td>功能</td><td>核心链路跑通、边界用例覆盖、幂等验证</td></tr>
+<tr><td>性能</td><td>压测达预期 QPS、限流/熔断生效、慢 SQL 清零</td></tr>
+<tr><td>安全</td><td>鉴权全覆盖、敏感信息脱敏、依赖无已知漏洞</td></tr>
+<tr><td>数据</td><td>表结构评审、备份策略、迁移脚本可回滚</td></tr>
+<tr><td>运维</td><td>监控/告警就绪、日志可查、回滚预案演练</td></tr>
+</tbody></table>
+<h3 id="sec-7041">8.2 复盘模板（每次上线后必做）</h3>
+<ul>
+<li>做得好的 / 踩的坑 / 下次改进，三条必写；把「坑」沉淀进本模板，形成团队资产。</li>
+<li>把这次新发现的技术取舍补回「阶段四」对应小节，模板越用越厚。</li>
+</ul>
+<hr class="sep">
+
+<h2 id="sec-7042">九、速查表：功能 → 技术 → 优缺点（一页背完）</h2>
+<table><thead><tr><th>功能</th><th>首选技术</th><th>最大优点</th><th>最大缺点 / 风险</th><th>备选</th></tr></thead><tbody>
+<tr><td>流式问答</td><td>SSE</td><td>简单、好过代理、可重连</td><td>单向，需另做停止接口</td><td>WebSocket</td></tr>
+<tr><td>并发限流</td><td>队列式（信号量+排队）</td><td>满负载排队不拒用户</td><td>实现复杂、要 Lua 原子</td><td>令牌桶</td></tr>
+<tr><td>知识检索</td><td>混合检索+RRF</td><td>语义+精确兼顾</td><td>链路长、要调参</td><td>纯向量</td></tr>
+<tr><td>意图识别</td><td>LLM 一次性打分</td><td>零训练、可改 Prompt</td><td>有延迟成本、需阈值</td><td>微调分类器</td></tr>
+<tr><td>会话记忆</td><td>滑动窗口→摘要</td><td>不丢背景</td><td>摘要异步有延迟</td><td>纯窗口</td></tr>
+<tr><td>模型容错</td><td>熔断+降级+首包探测</td><td>外部 API 不稳也不挂</td><td>链路复杂</td><td>单模型</td></tr>
+<tr><td>文档入库</td><td>Pipeline 异步</td><td>大文件不阻塞主链路</td><td>要状态表与进度查询</td><td>同步入库</td></tr>
+<tr><td>认证多租户</td><td>Sa-Token + tenant_id</td><td>登录/权限一体</td><td>框架依赖</td><td>JWT / Session</td></tr>
+<tr><td>可观测</td><td>Trace+指标+审计</td><td>出事一眼定位</td><td>接入有工作量</td><td>仅日志</td></tr>
+<tr><td>异步解耦</td><td>RocketMQ</td><td>事务消息、低延迟</td><td>运维略重</td><td>Kafka / RabbitMQ</td></tr>
+<tr><td>对象存储</td><td>S3 兼容抽象</td><td>换厂商不动代码</td><td>多一层抽象</td><td>云 OSS 直连</td></tr>
+<tr><td>缓存</td><td>本地+Redis 多级</td><td>读多场景极快</td><td>穿透/击穿/雪崩</td><td>单 Redis</td></tr>
+<tr><td>关系库</td><td>PostgreSQL+PGVector</td><td>关系+向量一套</td><td>超大向量量性能弱</td><td>MySQL+Milvus</td></tr>
+</tbody></table>
+<blockquote>把这页存成「选型速查卡」，每次接到新功能先来这里对照——它就是把 Ragent 真实踩坑浓缩成的「后端业务开发模板」。</blockquote>
+
+    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('0')">↻ 回到：Java 面试八股</button></div>
   </section>
   <div class="empty-tip" id="emptyTip">暂无知识库，点击左侧「＋ 新建知识库」开始添加。</div>
 </div></main>
@@ -1344,6 +2614,12 @@ orderTx.execute(() -&gt; {
     <input type="text" id="aiProxy" placeholder="代理地址（可选，解决跨域/网络拦截，如 https://corsproxy.io/v1?url=）">
     <div class="row"><button class="m-btn primary" onclick="saveAiCfg()">保存并启用</button><button class="m-btn ghost" onclick="clearAiCfg()">清除，用回本地检索</button></div>
     <div class="hint">支持任意 OpenAI 兼容接口（DeepSeek / 通义 / 硅基流动等）。配置后回答由大模型生成，上下文取自当前知识库。<b>若 AI 调用报“Failed to fetch”</b>：多半是打开方式（预览面板/本地文件）或网络访问不了 api.deepseek.com，可在「代理地址」填一个 CORS 代理（如 https://corsproxy.io/v1?url=），代理会转发你的 Key，仅在你本浏览器生效。</div>
+    <div class="lsp-cfg">
+      <div class="lsp-title">智能补全（IDEA 级 · 需本地 Java 语言服务器）</div>
+      <input type="text" id="lspWs" placeholder="ws://localhost:5008（本地 LSP 后端地址）">
+      <div class="row"><button class="m-btn primary" onclick="lspConnectBtn()">连接</button><button class="m-btn ghost" onclick="lspDisconnectBtn()">断开</button><span class="lsp-status" id="lspStatus">未连接</span></div>
+      <div class="hint">在本地运行 Java 语言服务器（jdtls）桥接服务后，填上面的 ws 地址并点「连接」，即可获得真正的类型推断 / 成员补全 / 参数提示 / 报错诊断。未连接时自动回退到内置静态补全。桥接服务见项目目录 <code>lsp-bridge/</code>（需 JDK 17+ 与 jdtls）。</div>
+    </div>
   </div>
   <div class="ai-msgs" id="aiMsgs"></div>
   <div class="ai-input"><textarea id="aiQ" placeholder="问点什么吧，如：HashMap 为什么线程不安全？" onkeydown="aiKeydown(event)"></textarea><button id="aiSend" onclick="askAI()">发送</button></div>
@@ -2451,7 +3727,7 @@ function togglePractice(id, btn){
   if (!h) return;
   var card = h.nextElementSibling;
   if (card && card.classList.contains("prac-card-wrap")){
-    if (card.style.display === "none"){ card.style.display = ""; btn.classList.add("active"); }
+    if (card.style.display === "none"){ card.style.display = ""; btn.classList.add("active"); if (card._monacoEditor) setTimeout(function(){ try { card._monacoEditor.layout(); } catch(e){} }, 30); }
     else { card.style.display = "none"; btn.classList.remove("active"); }
     return;
   }
@@ -2468,6 +3744,7 @@ function togglePractice(id, btn){
     var c = chunkById(id);
     if (!c){ card.innerHTML = '<div class="prac"><div class="pd empty">未找到该知识点内容</div></div>'; return; }
     genPracticeTask(c, function(task){
+      setPrac(lib, id, { task: task, code: task.skeleton || "", verdict: "" });
       renderPracticeCard(card, id, { task: task, code: task.skeleton || "", verdict: "" });
     }, function(msg, raw){
       var hint = /Failed to fetch|NetworkError|TypeError|加载|abort/i.test(msg)
@@ -2504,12 +3781,441 @@ function retryPractice(id){
   var c = chunkById(id);
   if (!c){ card.innerHTML = '<div class="prac"><div class="pd empty">未找到该知识点内容</div></div>'; return; }
   genPracticeTask(c, function(task){
+    setPrac(lib, id, { task: task, code: task.skeleton || "", verdict: "" });
     renderPracticeCard(card, id, { task: task, code: task.skeleton || "", verdict: "" });
   }, function(msg, raw){
     var hint = /Failed to fetch|NetworkError|TypeError|加载|abort/i.test(msg)
       ? "<br><small style=\"color:var(--muted)\">多为浏览器跨域(CORS)拦截或网络问题。请通过本地预览服务器打开本页，并确认网络可访问 api.deepseek.com。</small>" : "";
     card.innerHTML = '<div class="prac"><div class="pd empty">⚠️ ' + esc(msg) + hint +
       '<br><br><button class="sub" onclick="retryPractice(\'' + id + '\')">重试</button></div></div>';
+  });
+}
+function mapMonacoLang(lang){
+  var L = (lang || "").toLowerCase();
+  if (L.indexOf("typescript") >= 0) return "typescript";
+  if (L.indexOf("json") >= 0) return "json";
+  if (L.indexOf("python") >= 0) return "python";
+  if (L.indexOf("javascript") >= 0) return "javascript";
+  if (L.indexOf("java") >= 0) return "java";
+  if (L.indexOf("sql") >= 0) return "sql";
+  if (L.indexOf("go") >= 0) return "go";
+  if (L.indexOf("html") >= 0) return "html";
+  if (L.indexOf("js") >= 0) return "javascript";
+  return "plaintext";
+}
+function getCodeVal(card){
+  if (card._monacoEditor){ try { return card._monacoEditor.getValue(); } catch(e){} }
+  var ta = card.querySelector("textarea.code"); return ta ? ta.value : "";
+}
+function startEdResize(e, grip){
+  e.preventDefault();
+  var card = grip.closest(".prac");
+  if (!card) return;
+  var mount = card.querySelector(".monaco-mount");
+  var ta = card.querySelector("textarea.code");
+  var target = null, startH = 0;
+  if (mount && mount.style.display !== "none"){ target = mount; startH = mount.getBoundingClientRect().height; }
+  else if (ta && ta.style.display !== "none"){ target = ta; startH = ta.getBoundingClientRect().height; }
+  if (!target) return;
+  var pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
+  var startY = pt.clientY;
+  function mm(ev){
+    var p = (ev.touches && ev.touches[0]) ? ev.touches[0] : ev;
+    var h = Math.max(120, startH + (p.clientY - startY));
+    target.style.height = h + "px";
+    if (target === mount && card._monacoEditor){ try { card._monacoEditor.layout(); } catch(_){} }
+  }
+  function mu(){
+    document.removeEventListener("mousemove", mm);
+    document.removeEventListener("touchmove", mm);
+    document.removeEventListener("mouseup", mu);
+    document.removeEventListener("touchend", mu);
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
+  }
+  document.body.style.userSelect = "none";
+  document.body.style.cursor = "ns-resize";
+  document.addEventListener("mousemove", mm);
+  document.addEventListener("touchmove", mm, { passive: false });
+  document.addEventListener("mouseup", mu);
+  document.addEventListener("touchend", mu);
+}
+function registerKbCompletions(){
+  if (window.__kbCompletionsRegistered){ return; }
+  window.__kbCompletionsRegistered = true;
+  var ANN = ["@Override","@Deprecated","@SuppressWarnings","@FunctionalInterface","@SafeVarargs","@Test","@Before","@After","@BeforeEach","@AfterEach","@BeforeAll","@AfterAll","@Ignore","@DisplayName","@ParameterizedTest","@RepeatedTest","@SpringBootApplication","@EnableAutoConfiguration","@ComponentScan","@Configuration","@Component","@Service","@Repository","@Controller","@RestController","@ControllerAdvice","@RestControllerAdvice","@RequestMapping","@GetMapping","@PostMapping","@PutMapping","@DeleteMapping","@PatchMapping","@ExceptionHandler","@RequestParam","@PathVariable","@RequestBody","@ResponseBody","@RequestHeader","@ModelAttribute","@CookieValue","@RequestPart","@Autowired","@Qualifier","@Value","@Bean","@Primary","@Lazy","@Scope","@Profile","@PropertySource","@Import","@ConditionalOnProperty","@ConditionalOnMissingBean","@ConditionalOnClass","@Entity","@Table","@Id","@GeneratedValue","@Column","@ManyToOne","@OneToMany","@OneToOne","@ManyToMany","@JoinColumn","@JoinTable","@Transient","@Embedded","@Embeddable","@MappedSuperclass","@NotNull","@NotEmpty","@NotBlank","@Size","@Pattern","@Email","@Min","@Max","@Positive","@Future","@Past","@DecimalMin","@DecimalMax","@Transactional","@Modifying","@Scheduled","@Async","@EventListener","@Cacheable","@CacheEvict","@CachePut","@EnableCaching","@EnableScheduling","@EnableAsync","@Data","@Getter","@Setter","@NoArgsConstructor","@AllArgsConstructor","@RequiredArgsConstructor","@Builder","@ToString","@EqualsAndHashCode","@Slf4j","@Log","@Log4j2","@Accessors","@JsonProperty","@JsonIgnore","@JsonInclude","@JsonFormat","@JsonSerialize","@JsonDeserialize","@Mapper","@Select","@Insert","@Update","@Delete","@Param","@Results","@Result","@ResultMap","@Options","@SelectProvider","@UpdateProvider","@CrossOrigin","@ResponseStatus","@PreAuthorize","@PostAuthorize","@Secured","@EnableWebSecurity","@DateTimeFormat","@NumberFormat","@Valid","@Validated","@InitBinder"];
+  var KW = ["public","private","protected","static","final","abstract","class","interface","enum","extends","implements","new","return","if","else","for","while","do","switch","case","break","continue","default","try","catch","finally","throw","throws","import","package","void","int","long","double","float","boolean","char","byte","short","this","super","synchronized","volatile","transient","instanceof","var","record","sealed","permits","yield","assert"];
+  var CLS = ["Object","String","Integer","Long","Double","Float","Boolean","Character","Byte","Short","StringBuilder","StringBuffer","List","ArrayList","LinkedList","Map","HashMap","TreeMap","LinkedHashMap","Set","HashSet","TreeSet","LinkedHashSet","Collection","Queue","Deque","PriorityQueue","Stack","Vector","Arrays","Collections","Math","System","Runtime","Optional","Objects","Thread","Runnable","Callable","ExecutorService","Executors","Future","ScheduledExecutorService","ThreadPoolExecutor","ReentrantLock","Semaphore","CountDownLatch","CyclicBarrier","AtomicInteger","ConcurrentHashMap","Iterable","Iterator","Comparable","Comparator","Stream","Collectors","Exception","RuntimeException","NullPointerException","IllegalArgumentException","IllegalStateException","IOException","ClassNotFoundException","InterruptedException","SQLException","ParseException","Function","Predicate","Consumer","Supplier","BiFunction","UnaryOperator","Class","ClassLoader","Method","Field","Constructor","ApplicationContext","BeanFactory","CommandLineRunner","InitializingBean","BeanPostProcessor","LocalDate","LocalDateTime","DateTimeFormatter","BigDecimal","BigInteger","UUID","Random"];
+  var langs = ["java","kotlin","typescript","javascript","python","go","sql","html","plaintext"];
+  var K = monaco.languages.CompletionItemKind;
+  langs.forEach(function(lang){
+    try {
+      monaco.languages.registerCompletionItemProvider(lang, {
+        triggerCharacters: ["@"],
+        provideCompletionItems: function(model, position){
+          var line = model.getLineContent(position.lineNumber);
+          var before = line.substring(0, position.column - 1);
+          var m = before.match(/(@)([A-Za-z_]*)$/);
+          var startCol;
+          if (m){
+            startCol = position.column - m[0].length;
+          } else {
+            var w = model.getWordUntilPosition(position);
+            startCol = w.startColumn;
+          }
+          var range = new monaco.Range(position.lineNumber, startCol, position.lineNumber, position.column);
+          var items = [];
+          ANN.forEach(function(a){
+            items.push({ label: a, kind: K.Property, insertText: a, detail: "注解 (annotation)", range: range, sortText: "0" + a });
+          });
+          KW.forEach(function(k){
+            items.push({ label: k, kind: K.Keyword, insertText: k, detail: "关键字", range: range, sortText: "1" + k });
+          });
+          CLS.forEach(function(c){
+            items.push({ label: c, kind: K.Class, insertText: c, detail: "类 / 类型", range: range, sortText: "2" + c });
+          });
+          return { suggestions: items };
+        }
+      });
+    } catch(e){}
+  });
+}
+/* ===== KB-LSP：浏览器端 Java 语言服务器客户端（手写 JSON-RPC over WebSocket） =====
+   仅当在 ⚙ 里配置了本地 LSP 后端（jdtls 桥接）并连接成功后，才会接管补全/悬浮/诊断；
+   未连接时所有 provider 返回空，自动回退到 kb-dark 静态补全，不影响使用。 */
+var LSP = { ws: null, ready: false, caps: null, nextId: 1, pending: {}, docs: {}, modelOf: {}, url: null };
+var LSP_WS_KEY = "kb_lsp_ws";
+function lspSetStatus(s){ var el = document.getElementById("lspStatus"); if (el) el.textContent = s; }
+function lspInit(){
+  var url = ""; try { url = localStorage.getItem(LSP_WS_KEY) || ""; } catch(e){}
+  if (url){ LSP.url = url; lspConnect(url); }
+}
+function lspConnect(url){
+  if (!url){ lspSetStatus("未填写地址"); return; }
+  if (LSP.ws && (LSP.ws.readyState === 0 || LSP.ws.readyState === 1)){ try { LSP.ws.close(); } catch(e){} }
+  LSP.url = url; lspSetStatus("连接中…");
+  var ws; try { ws = new WebSocket(url); } catch(e){ lspSetStatus("地址无效"); return; }
+  LSP.ws = ws;
+  ws.onopen = function(){
+    lspSend("initialize", lspInitParams()).then(function(res){
+      LSP.caps = res && res.capabilities;
+      return lspSend("initialized", {}, true);
+    }).then(function(){
+      LSP.ready = true; lspSetStatus("已连接 ✓");
+      Object.keys(LSP.docs).forEach(function(uri){
+        var d = LSP.docs[uri];
+        lspSend("textDocument/didOpen", { textDocument: { uri: uri, languageId: d.languageId, version: d.version, text: d.text } }, true).catch(function(){});
+      });
+    }).catch(function(err){ LSP.ready = false; lspSetStatus("初始化失败：" + ((err && err.message) || err)); });
+  };
+  ws.onmessage = function(ev){
+    var msg; try { msg = JSON.parse(ev.data); } catch(e){ return; }
+    if (msg.id !== undefined && msg.id !== null && LSP.pending[msg.id]){
+      var p = LSP.pending[msg.id]; delete LSP.pending[msg.id];
+      if (msg.error) p.reject(new Error((msg.error.message) || "LSP error")); else p.resolve(msg.result);
+      return;
+    }
+    if (msg.method) lspHandleNotification(msg);
+  };
+  ws.onerror = function(){ LSP.ready = false; lspSetStatus("连接错误"); };
+  ws.onclose = function(){ LSP.ready = false; lspSetStatus("已断开"); };
+}
+function lspInitParams(){
+  return {
+    processId: null, rootUri: "file:///kb-workspace", rootPath: "/kb-workspace",
+    capabilities: {
+      textDocument: {
+        completion: { contextSupport: true, completionItem: { snippetSupport: true, documentationFormat: ["markdown","plaintext"], insertReplaceSupport: true } },
+        hover: { contentFormat: ["markdown","plaintext"] },
+        publishDiagnostics: { relatedInformation: true },
+        synchronization: { didSave: true, willSave: true }
+      },
+      workspace: { workspaceFolders: true, configuration: true }
+    },
+    workspaceFolders: [{ uri: "file:///kb-workspace", name: "kb-workspace" }]
+  };
+}
+function lspSend(method, params, isNotify){
+  return new Promise(function(resolve, reject){
+    if (!LSP.ws || LSP.ws.readyState !== 1){ reject(new Error("not connected")); return; }
+    var msg = { jsonrpc: "2.0", method: method };
+    if (!isNotify) msg.id = LSP.nextId++;
+    if (params !== undefined) msg.params = params;
+    if (!isNotify) LSP.pending[msg.id] = { resolve: resolve, reject: reject };
+    try { LSP.ws.send(JSON.stringify(msg)); } catch(e){ if (!isNotify) reject(e); }
+    if (isNotify) resolve();
+  });
+}
+function lspHandleNotification(msg){
+  var m = msg.method, p = msg.params || {};
+  if (m === "textDocument/publishDiagnostics"){ lspShowDiagnostics(p); return; }
+  /* window/logMessage、client/registerCapability 等忽略 */
+}
+function lspDocOpen(model, languageId, text){
+  var uri = model.uri.toString();
+  LSP.docs[uri] = { version: 1, languageId: languageId, text: text };
+  LSP.modelOf[uri] = model;
+  if (LSP.ready) lspSend("textDocument/didOpen", { textDocument: { uri: uri, languageId: languageId, version: 1, text: text } }, true).catch(function(){});
+}
+function lspDocChange(model, text){
+  var uri = model.uri.toString(); var d = LSP.docs[uri];
+  if (!d) return; d.version++; d.text = text;
+  if (LSP.ready) lspSend("textDocument/didChange", { textDocument: { uri: uri, version: d.version }, contentChanges: [{ text: text }] }, true).catch(function(){});
+}
+function lspDocClose(model){
+  var uri = model.uri.toString();
+  if (LSP.docs[uri]){
+    if (LSP.ready) lspSend("textDocument/didClose", { textDocument: { uri: uri } }, true).catch(function(){});
+    delete LSP.docs[uri]; delete LSP.modelOf[uri];
+  }
+}
+function lspCompletion(model, position, ctx){
+  return new Promise(function(resolve){
+    var uri = model.uri.toString();
+    if (!LSP.ready || !LSP.docs[uri]){ resolve({ suggestions: [] }); return; }
+    var params = { textDocument: { uri: uri }, position: { line: position.lineNumber - 1, character: position.column - 1 } };
+    if (ctx){ params.context = { triggerKind: ctx.triggerKind || 1 }; if (ctx.triggerCharacter) params.context.triggerCharacter = ctx.triggerCharacter; }
+    lspSend("textDocument/completion", params).then(function(res){
+      var items = Array.isArray(res) ? res : (res && res.items ? res.items : []);
+      resolve({ suggestions: items.map(function(it){ return lspToMonacoItem(it, model, position); }) });
+    }).catch(function(){ resolve({ suggestions: [] }); });
+  });
+}
+function lspHover(model, position){
+  return new Promise(function(resolve){
+    var uri = model.uri.toString();
+    if (!LSP.ready || !LSP.docs[uri]){ resolve(null); return; }
+    lspSend("textDocument/hover", { textDocument: { uri: uri }, position: { line: position.lineNumber - 1, character: position.column - 1 } })
+      .then(function(res){ resolve(res || null); }).catch(function(){ resolve(null); });
+  });
+}
+function lspToMonacoTextEdit(te){
+  return { range: new monaco.Range(te.range.start.line+1, te.range.start.character+1, te.range.end.line+1, te.range.end.character+1), text: te.newText };
+}
+function lspToMonacoItem(it, model, position){
+  var label = (typeof it.label === "string") ? it.label : ((it.label && it.label.label) || "");
+  var detail = it.detail || ((it.label && it.label.detail) || "");
+  var doc = ""; if (it.documentation){ doc = (typeof it.documentation === "string") ? it.documentation : (it.documentation.value || ""); }
+  var insertText = it.insertText || label;
+  var range = null;
+  if (it.textEdit && it.textEdit.range){
+    range = new monaco.Range(it.textEdit.range.start.line+1, it.textEdit.range.start.character+1, it.textEdit.range.end.line+1, it.textEdit.range.end.character+1);
+    insertText = it.textEdit.newText;
+  }
+  if (!range){
+    var col = position.column;
+    var line = model.getLineContent(position.lineNumber);
+    var at = line.substring(0, col-1).match(/@([A-Za-z_]*)$/);
+    var startCol = at ? (col - at[0].length) : model.getWordUntilPosition(position).startColumn;
+    range = new monaco.Range(position.lineNumber, startCol, position.lineNumber, col);
+  }
+  var kind = (typeof it.kind === "number" && it.kind >= 1 && it.kind <= 25) ? it.kind : 1;
+  var item = { label: label, kind: kind, detail: detail, documentation: doc ? { value: doc } : undefined, insertText: insertText, range: range, sortText: it.sortText || label, filterText: it.filterText || label, preselect: !!it.preselect, commitCharacters: it.commitCharacters };
+  if (it.insertTextFormat === 2) item.insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  if (it.additionalTextEdits){ try { item.additionalTextEdits = it.additionalTextEdits.map(lspToMonacoTextEdit); } catch(e){} }
+  return item;
+}
+function lspShowDiagnostics(p){
+  var model = LSP.modelOf[p.uri]; if (!model) return;
+  var markers = (p.diagnostics || []).map(function(dg){
+    var r = dg.range;
+    return { severity: (dg.severity === 1) ? monaco.MarkerSeverity.Error : ((dg.severity === 2) ? monaco.MarkerSeverity.Warning : monaco.MarkerSeverity.Info), message: dg.message, startLineNumber: r.start.line+1, startColumn: r.start.character+1, endLineNumber: r.end.line+1, endColumn: r.end.character+1 };
+  });
+  try { monaco.editor.setModelMarkers(model, "lsp", markers); } catch(e){}
+}
+function lspRegisterProviders(){
+  if (window.__kbLspProviders) return; window.__kbLspProviders = true;
+  var langs = ["java","kotlin","typescript","javascript","python","go","sql","html","plaintext"];
+  langs.forEach(function(lang){
+    try {
+      monaco.languages.registerCompletionItemProvider(lang, {
+        triggerCharacters: [".", "@"],
+        provideCompletionItems: function(model, position, context){ return lspCompletion(model, position, context); }
+      });
+    } catch(e){}
+    try {
+      monaco.languages.registerHoverProvider(lang, {
+        provideHover: function(model, position){
+          return lspHover(model, position).then(function(res){
+            if (!res || !res.contents) return null;
+            var c = res.contents;
+            var value = (typeof c === "string") ? c : (c.value || (Array.isArray(c) ? c.join("\n") : ""));
+            return { contents: [{ value: value }] };
+          });
+        }
+      });
+    } catch(e){}
+  });
+}
+function lspConnectBtn(){
+  var v = ""; try { v = (document.getElementById("lspWs")||{}).value || ""; } catch(e){}
+  v = (v || "").trim();
+  if (!v){ lspSetStatus("请填写 ws 地址"); return; }
+  try { localStorage.setItem(LSP_WS_KEY, v); } catch(e){}
+  lspConnect(v);
+}
+function lspDisconnectBtn(){ if (LSP.ws){ try { LSP.ws.close(); } catch(e){} LSP.ws = null; } LSP.ready = false; lspSetStatus("已断开"); }
+var __monacoState = 0, __monacoCbs = [];
+var MONACO_CDNS = [
+  "https://registry.npmmirror.com/monaco-editor/0.52.2/files/min",
+  "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min"
+];
+function ensureMonaco(cb){
+  if (__monacoState === 2){ cb(true); return; }
+  if (__monacoState === 3){ cb(false); return; }
+  if (__monacoState === 1){ __monacoCbs.push(cb); return; }
+  __monacoState = 1; __monacoCbs.push(cb);
+  (function tryIdx(i){
+    if (i >= MONACO_CDNS.length){ failMonaco(); return; }
+    var CDN = MONACO_CDNS[i];
+    try {
+      window.MonacoEnvironment = { getWorkerUrl: function(){
+        return "data:text/javascript;charset=utf-8," + encodeURIComponent(
+          "self.MonacoEnvironment={baseUrl:'" + CDN + "/'};importScripts('" + CDN + "/vs/base/worker/workerMain.js');"
+        );
+      }};
+    } catch(e){}
+    var s = document.createElement("script");
+    s.src = CDN + "/vs/loader.js";
+    s.onload = function(){
+      try {
+        require.config({ paths: { vs: CDN + "/vs" } });
+        require.onError = function(){ failMonaco(); };
+        require(["vs/editor/editor.main"], function(){
+          __monacoState = 2;
+          try { registerKbCompletions(); } catch(e){}
+          try { lspRegisterProviders(); } catch(e){}
+          __monacoCbs.forEach(function(f){ try { f(true); } catch(e){} });
+          __monacoCbs = [];
+        });
+      } catch(e){ tryIdx(i + 1); }
+    };
+    s.onerror = function(){ tryIdx(i + 1); };
+    document.head.appendChild(s);
+  })(0);
+}
+function failMonaco(){
+  __monacoState = 3;
+  __monacoCbs.forEach(function(f){ try { f(false); } catch(e){} });
+  __monacoCbs = [];
+}
+function mountMonaco(card, id, code, lang){
+  var mount = card.querySelector(".monaco-mount");
+  if (!mount) return;
+  ensureMonaco(function(ok){
+    if (!ok || !mount.isConnected){
+      if (mount) mount.style.display = "none";
+      var t0 = card.querySelector("textarea.code"); if (t0) t0.style.display = "";
+      return;
+    }
+    try {
+      try { monaco.editor.defineTheme('kb-dark', {
+        base: 'vs-dark', inherit: true, rules: [],
+        colors: {
+          'editor.background': '#1e1e1e',
+          'editor.foreground': '#d4d4d4',
+          'editorSuggestWidget.background': '#252526',
+          'editorSuggestWidget.border': '#454545',
+          'editorSuggestWidget.foreground': '#e6e6e6',
+          'editorSuggestWidget.highlightForeground': '#4ec9b0',
+          'editorSuggestWidget.selectedBackground': '#094771',
+          'editorSuggestWidget.focusHighlightForeground': '#4ec9b0',
+          'list.hoverBackground': '#2a2d2e',
+          'list.focusBackground': '#094771',
+          'list.activeSelectionBackground': '#094771',
+          'list.focusForeground': '#ffffff',
+          'list.highlightForeground': '#4ec9b0',
+          'list.foreground': '#e6e6e6'
+        }
+      }); } catch(e){}
+      if (card._monacoEditor){ try { lspDocClose(card._monacoEditor); } catch(e){} try { card._monacoEditor.dispose(); } catch(e){} }
+      var ed = monaco.editor.create(mount, {
+        value: code, language: mapMonacoLang(lang), theme: "kb-dark",
+        fontSize: 13, minimap: { enabled: false }, scrollBeyondLastLine: false,
+        automaticLayout: true, tabSize: 4, insertSpaces: true,
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        padding: { top: 8, bottom: 6 }, lineNumbersMinChars: 3,
+        renderLineHighlight: "line", wordWrap: "on",
+        scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+      });
+      card._monacoEditor = ed;
+      try { var L0 = ed.getModel(); if (L0) lspDocOpen(L0, mapMonacoLang(lang), code); } catch(e){}
+      ed.onDidChangeModelContent(function(){
+        var val = ed.getValue();
+        var t = card.querySelector("textarea.code"); if (t) t.value = val;
+        var task = card._pracTask;
+        var d = getPrac(pageOf(id), id) || { task: task };
+        d.task = task; d.code = val;
+        var vd = card.querySelector(".verdict"); d.verdict = vd ? (vd.innerHTML || "") : "";
+        setPrac(pageOf(id), id, d);
+        try { var m1 = ed.getModel(); if (m1) lspDocChange(m1, val); } catch(e){}
+      });
+    } catch(e){
+      if (mount) mount.style.display = "none";
+      var t = card.querySelector("textarea.code"); if (t) t.style.display = "";
+    }
+  });
+}
+function attachTaFallback(ta, card, id, lib, task){
+  ta.addEventListener("keydown", function(e){
+    if (e.isComposing || e.metaKey || e.ctrlKey) return;
+    var v = this.value, s = this.selectionStart, en = this.selectionEnd;
+    if (e.key === "Tab"){
+      e.preventDefault();
+      this.value = v.slice(0, s) + "    " + v.slice(en);
+      this.selectionStart = this.selectionEnd = s + 4;
+      this.dispatchEvent(new Event("input"));
+      return;
+    }
+    var pair = { "{":"}", "(":")", "[":"]", "\"":"\"", "'":"'", "`":"`" };
+    if (pair[e.key]){
+      var nx = v[en];
+      if ((nx && /[\w]/.test(nx)) || nx === pair[e.key]) return;
+      e.preventDefault();
+      var sel = v.slice(s, en);
+      if (sel){
+        this.value = v.slice(0, s) + e.key + sel + pair[e.key] + v.slice(en);
+        this.selectionStart = this.selectionEnd = s + 1 + sel.length;
+      } else {
+        this.value = v.slice(0, s) + e.key + pair[e.key] + v.slice(en);
+        this.selectionStart = this.selectionEnd = s + 1;
+      }
+      this.dispatchEvent(new Event("input"));
+      return;
+    }
+    var close = { "}":"{", ")":"(", "]":"[" };
+    if (close[e.key] && s === en && v[s] === e.key){
+      e.preventDefault();
+      this.selectionStart = this.selectionEnd = s + 1;
+      return;
+    }
+    if (e.key === "Backspace" && s === en && s > 0){
+      var pm = { "{":"}", "(":")", "[":"]", "\"":"\"", "'":"'" };
+      if (pm[v[s-1]] === v[s]){
+        e.preventDefault();
+        this.value = v.slice(0, s-1) + v.slice(s+1);
+        this.selectionStart = this.selectionEnd = s - 1;
+        this.dispatchEvent(new Event("input"));
+        return;
+      }
+    }
+    if (e.key === "Enter"){
+      e.preventDefault();
+      var ls = v.lastIndexOf("\n", s - 1) + 1;
+      var ind = (v.slice(ls, s).match(/^[ \t]*/) || [""])[0];
+      var tail = v.slice(0, s).replace(/\s+$/, "").slice(-1);
+      var extra = (tail === "{" || tail === "(" || tail === "[") ? "    " : "";
+      var ins = "\n" + ind + extra;
+      this.value = v.slice(0, s) + ins + v.slice(en);
+      this.selectionStart = this.selectionEnd = s + ins.length;
+      this.dispatchEvent(new Event("input"));
+      return;
+    }
+  });
+  ta.addEventListener("input", function(){
+    var d = getPrac(lib, id) || { task: task };
+    d.task = task; d.code = ta.value; var vd = card.querySelector(".verdict"); d.verdict = vd ? (vd.innerHTML || "") : "";
+    setPrac(lib, id, d);
   });
 }
 function renderPracticeCard(card, id, data){
@@ -2519,27 +4225,18 @@ function renderPracticeCard(card, id, data){
   card.innerHTML = '<div class="prac">' +
     '<div class="ph"><div class="pt">🛠 ' + esc(task.title || "动手实践") + '</div><div class="pm">' + esc(task.lang || "代码") + " · " + esc(task.difficulty || "") + "</div></div>" +
     '<div class="pd"><div class="lab">题目</div>' + esc(task.desc || "") + (pts ? '<div class="lab">考察点</div><ul>' + pts + "</ul>" : "") + "</div>" +
-    '<div class="ed"><div class="lh"><span>' + esc(task.lang || "code") + '</span><span>Tab 缩进 · 自动保存</span></div><textarea class="code" spellcheck="false"></textarea></div>' +
-    '<div class="acts"><button class="run" onclick="runPracticeInline(\'' + id + '\')">▶ 运行</button><button class="hint-btn" onclick="hintPracticeInline(\'' + id + '\')">💡 提示</button><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
+    '<div class="ed"><div class="lh"><span>' + esc(task.lang || "code") + '</span><span>Monaco 编辑器 · 语法高亮 · 自动保存</span></div><div class="monaco-mount" id="mm-' + id + '"></div><textarea class="code" spellcheck="false" style="display:none"></textarea><div class="ed-grip" onmousedown="startEdResize(event,this)" ontouchstart="startEdResize(event,this)" title="拖动调整高度"> </div></div>' +
+    '<div class="acts"><button class="run" onclick="runPracticeInline(\'' + id + '\')">▶ 运行</button><button class="hint-btn" onclick="hintPracticeInline(\'' + id + '\')">💡 提示</button><button class="ans-btn" onclick="answerPracticeInline(\'' + id + '\')">🔑 答案</button><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
     '<div class="term" style="display:none"></div>' +
     '<div class="hint" style="display:none"></div>' +
+    '<div class="answer" style="display:none"></div>' +
     (verdict ? '<div class="verdict">' + verdict + "</div>" : '<div class="verdict" style="display:none"></div>') +
     "</div>";
   var ta = card.querySelector("textarea.code");
-  ta.value = code;
-  ta.addEventListener("keydown", function(e){
-    if (e.key === "Tab"){
-      e.preventDefault();
-      var s = this.selectionStart, en = this.selectionEnd;
-      this.value = this.value.slice(0, s) + "    " + this.value.slice(en);
-      this.selectionStart = this.selectionEnd = s + 4;
-    }
-  });
-  ta.addEventListener("input", function(){
-    var d = getPrac(lib, id) || { task: task };
-    d.task = task; d.code = ta.value; d.verdict = card.querySelector(".verdict").innerHTML || "";
-    setPrac(lib, id, d);
-  });
+  if (ta) ta.value = code;
+  card._pracTask = task;
+  if (ta) attachTaFallback(ta, card, id, lib, task);
+  mountMonaco(card, id, code, task.lang);
   card.dataset.sec = id;
 }
 function hintPracticeInline(id){
@@ -2552,18 +4249,21 @@ function hintPracticeInline(id){
   var d = getPrac(lib, id);
   if (!d || !d.task){ alert("题目未就绪"); return; }
   var task = d.task, c = chunkById(id);
-  if (d.hint){ box.style.display = "block"; box.innerHTML = d.hint; return; }
+  if (d.hint && d.hint.replace(/<[^>]*>/g, "").trim()){ box.style.display = "block"; box.innerHTML = d.hint; box.scrollIntoView({ behavior: "smooth", block: "nearest" }); return; }
   box.style.display = "block";
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   box.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> 正在生成解题提示…';
   var sys = "你是耐心导师。学习者面对下面这道实践题卡住了，需要解题提示。严格做到：【绝对不要给出完整代码，也不要直接给标准答案】。请只提供：(1) 思路点拨（从哪入手、用何种数据结构/API/算法）(2) 关键步骤拆解（分步说明要点，每步只讲做什么、不写实现）(3) 易错点提醒 (4) 可参考的知识点。简洁中文，用有序列表。";
   callLLM([
     { role: "system", content: sys },
     { role: "user", content: "题目：" + (task.title || "") + "\n描述：" + (task.desc || "") + "\n考察点：" + JSON.stringify(task.points || []) + (c ? "\n参考知识（来自知识点「" + c.title + "」）：\n" + c.text.slice(0, 800) : "") + "\n请给出解题提示（不要答案）。" }
   ], function(txt){
-    var html = "<h5>💡 解题提示（思路，非答案）</h5>" + simpleMd(txt);
+    txt = (txt || "").trim();
+    if (!txt) txt = "（模型返回空内容，请检查 API Key / 模型名是否有效，或换个模型重试）";
+    var html = "<h5>思路点拨（非标准答案）</h5>" + simpleMd(txt);
     box.innerHTML = html;
     var dd = getPrac(lib, id) || { task: task };
-    dd.task = task; dd.code = card.querySelector("textarea.code").value;
+    dd.task = task; dd.code = getCodeVal(card);
     dd.verdict = card.querySelector(".verdict").innerHTML || "";
     dd.hint = html;
     setPrac(lib, id, dd);
@@ -2571,13 +4271,44 @@ function hintPracticeInline(id){
     box.innerHTML = "提示生成失败：" + esc(err);
   });
 }
+function answerPracticeInline(id){
+  var h = document.getElementById(id);
+  var card = h && h.nextElementSibling;
+  if (!card || !card.classList.contains("prac-card-wrap")) return;
+  var box = card.querySelector(".answer");
+  if (!box) return;
+  var lib = pageOf(id);
+  var d = getPrac(lib, id);
+  if (!d || !d.task){ alert("题目未就绪"); return; }
+  var task = d.task, c = chunkById(id);
+  if (d.answer && d.answer.replace(/<[^>]*>/g, "").trim()){ box.style.display = "block"; box.innerHTML = d.answer; return; }
+  box.style.display = "block";
+  box.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> 正在生成参考答案…';
+  var sys = "你是严谨的编程导师。下面是一道实践题，请直接给出【完整可运行的参考答案】（包含必要的 import、函数/类完整实现、以及能体现结果的主流程/main）。要求：(1) 代码必须正确、可直接运行，用代码块包裹 (2) 代码后附 2-4 句关键思路说明（不要剧透式逐行讲解，只点明核心技巧/易错点）。用中文。语言与题目一致：" + (task.lang || "代码") + "。";
+  callLLM([
+    { role: "system", content: sys },
+    { role: "user", content: "题目：" + (task.title || "") + "\n描述：" + (task.desc || "") + "\n考察点：" + JSON.stringify(task.points || []) + (c ? "\n参考知识（来自知识点「" + c.title + "」）：\n" + c.text.slice(0, 800) : "") + "\n请给出完整参考答案（代码 + 关键思路）。" }
+  ], function(txt){
+    txt = (txt || "").trim();
+    if (!txt) txt = "（模型返回空内容，请检查 API Key / 模型名是否有效，或换个模型重试）";
+    var html = "<h5>🔑 参考答案（完整实现）</h5>" + simpleMd(txt) + '<div class="note">提示：先自己写，再看答案对照思路～</div>';
+    box.innerHTML = html;
+    var dd = getPrac(lib, id) || { task: task };
+    dd.task = task; dd.code = getCodeVal(card);
+    dd.verdict = card.querySelector(".verdict").innerHTML || "";
+    // 不要从当前 DOM 覆盖 hint 缓存，避免把空/加载态写回 localStorage
+    if (!dd.hint) dd.hint = "";
+    dd.answer = html;
+    setPrac(lib, id, dd);
+  }, function(err){
+    box.innerHTML = "答案生成失败：" + esc(err);
+  });
+}
 function submitPracticeInline(id){
   var h = document.getElementById(id);
   var card = h && h.nextElementSibling;
   if (!card || !card.classList.contains("prac-card-wrap")) return;
-  var ta = card.querySelector("textarea.code");
-  if (!ta) return;
-  var code = ta.value;
+  var code = getCodeVal(card);
   var lib = pageOf(id);
   var d = getPrac(lib, id);
   if (!d || !d.task){ alert("题目未就绪"); return; }
@@ -2609,10 +4340,9 @@ function runPracticeInline(id){
   var h = document.getElementById(id);
   var card = h && h.nextElementSibling;
   if (!card || !card.classList.contains("prac-card-wrap")) return;
-  var ta = card.querySelector("textarea.code");
   var term = card.querySelector(".term");
-  if (!ta || !term) return;
-  var code = ta.value;
+  if (!term) return;
+  var code = getCodeVal(card);
   var d = getPrac(pageOf(id), id);
   if (!d || !d.task){ alert("题目未就绪"); return; }
   var task = d.task, lang = task.lang || "代码";
@@ -2850,6 +4580,7 @@ function renderPlan(plan, start, lib, titles){
   updateDueBadge();
   onScroll();
   checkOrigin();
+  try { lspInit(); } catch(e){}
 })();
 function realAppUrl(){
   var APP_URL = "https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net";
