@@ -2476,7 +2476,7 @@ function genPracticeTask(c, onTask, onErr){
   function go(){
     attempt++;
     callLLM([
-      { role: "system", content: "你是技术导师。根据知识点设计一道动手实践题，让学习者写代码或写方案。严格只输出 JSON（不要任何 markdown、不要解释、不要代码块围栏 ```），直接以 { 开头、} 结尾。格式：{\"title\":\"题目\",\"desc\":\"题目描述与要求\",\"lang\":\"Java/SQL/Shell/文本\",\"skeleton\":\"起始代码骨架，含 // TODO 标注待填写处\",\"points\":[\"考察点1\",\"考察点2\",\"考察点3\"],\"difficulty\":\"简单/中等/困难\"}。知识点标题：" + c.title + "\n内容：" + c.text.slice(0, 600) },
+      { role: "system", content: "你是技术导师。根据知识点设计一道动手实践题，让学习者写代码或写方案。严格只输出 JSON（不要任何 markdown、不要解释、不要代码块围栏 ```），直接以 { 开头、} 结尾。格式：{\"title\":\"题目\",\"desc\":\"题目描述与要求\",\"lang\":\"Java/Python/JavaScript/SQL/Shell/文本\",\"skeleton\":\"起始代码骨架\",\"points\":[\"考察点1\",\"考察点2\",\"考察点3\"],\"difficulty\":\"简单/中等/困难\"}。\n【skeleton 硬性要求】skeleton 必须是「不完整的脚手架」：只给出必要的 import、类/函数签名与清晰的中文 // TODO 注释（指明要补全哪里），绝对不要写出完整可运行的实现，也不要给出标准答案；学习者必须自己填入 TODO 处的核心逻辑，运行/评阅才会通过。若 lang 为 文本 或 SQL，skeleton 设为空字符串 \"\"（让学习者从零书写）。\n知识点标题：" + c.title + "\n内容：" + c.text.slice(0, 600) },
       { role: "user", content: "只输出 JSON，不要其他文字。" }
     ], function(txt){
       var t = parsePracticeJSON(txt);
@@ -2568,7 +2568,7 @@ function submitPracticeInline(id){
     v.innerHTML = "评阅失败：" + esc(err);
   });
 }
-/* AI 模拟运行：把代码交给模型当运行环境，返回真实会打印的输出 / 报错（语言无关，Java/Python/SQL 均可） */
+/* 运行按钮：按语言分流——Python 真跑(Pyodide)、JavaScript 真跑(沙箱)、其余 AI 模拟 */
 function runPracticeInline(id){
   var h = document.getElementById(id);
   var card = h && h.nextElementSibling;
@@ -2577,16 +2577,69 @@ function runPracticeInline(id){
   var term = card.querySelector(".term");
   if (!ta || !term) return;
   var code = ta.value;
-  var lib = pageOf(id);
-  var d = getPrac(lib, id);
+  var d = getPrac(pageOf(id), id);
   if (!d || !d.task){ alert("题目未就绪"); return; }
   var task = d.task, lang = task.lang || "代码";
+  var L = lang.toLowerCase();
+  if (L.indexOf("python") >= 0) return runPy(code, term, task);
+  if (L.indexOf("javascript") >= 0 || L.indexOf("js") >= 0) return runJs(code, term);
+  return runAiSim(code, term, task, lang);
+}
+function runJs(code, term){
+  term.style.display = "block"; term.className = "term";
+  term.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> JavaScript 运行中…';
+  var logs = [];
+  var cap = { log:function(){ logs.push(Array.prototype.slice.call(arguments).join(" ")); },
+              error:function(){ logs.push("[err] " + Array.prototype.slice.call(arguments).join(" ")); },
+              warn:function(){}, info:function(){} };
+  try {
+    var fn = new Function("console", code);
+    fn(cap);
+    term.className = "term has-out";
+    term.innerHTML = '<div class="term-h"><span>●</span> 运行结果（JavaScript 真运行）</div><pre>' + esc(logs.join("\n")) + "</pre>";
+  } catch (e){
+    term.className = "term has-out";
+    term.innerHTML = '<div class="term-h"><span>●</span> 运行出错</div><pre>' + esc(String(e)) + "</pre>";
+  }
+}
+var _py = null;
+function runPy(code, term, task){
+  term.style.display = "block"; term.className = "term";
+  term.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> Python 运行中…';
+  function exec(py){
+    var out = [];
+    try {
+      py.setStdout({ batched: function(s){ out.push(s); } });
+      py.setStderr({ batched: function(s){ out.push(s); } });
+      py.runPython(code);
+      term.className = "term has-out";
+      term.innerHTML = '<div class="term-h"><span>●</span> 运行结果（Python 真运行）</div><pre>' + esc(out.join("")) + "</pre>";
+    } catch (e){
+      term.className = "term has-out";
+      term.innerHTML = '<div class="term-h"><span>●</span> 运行出错</div><pre>' + esc(String(e)) + "</pre>";
+    }
+  }
+  if (_py) return exec(_py);
+  var s = document.createElement("script");
+  s.src = "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js";
+  s.onload = function(){
+    if (typeof loadPyodide !== "function"){ return fallbackPy(code, term, task); }
+    loadPyodide().then(function(py){ _py = py; exec(py); }).catch(function(){ fallbackPy(code, term, task); });
+  };
+  s.onerror = function(){ fallbackPy(code, term, task); };
+  document.head.appendChild(s);
+}
+function fallbackPy(code, term, task){
+  // Pyodide 加载失败（多为网络访问不了 CDN）→ 自动回退 AI 模拟
+  runAiSim(code, term, task, (task && task.lang) || "Python");
+}
+function runAiSim(code, term, task, lang){
   term.style.display = "block"; term.className = "term";
   term.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> AI 模拟运行中…';
   var sys = "你是 " + lang + " 语言的运行环境/解释器。用户提交了一段针对题目的实现，请严格按语言语义模拟执行，只输出程序运行后的真实结果，不要解释、不要给出修正后的代码。";
   callLLM([
     { role: "system", content: sys },
-    { role: "user", content: "请运行以下" + lang + "代码：\n```\n" + code + "\n```\n题目背景：" + (task.title || "") + "。" + (task.desc || "") + "\n只按下面格式输出（去掉 ``` 代码块围栏）：\n输出：\n<程序真实会打印到标准输出的内容，逐字还原；若无任何输出写（无输出）>\n若代码有编译/运行时错误，再追加一行：\n错误：\n<具体的错误信息>" }
+    { role: "user", content: "请运行以下" + lang + "代码：\n```\n" + code + "\n```\n题目背景：" + (task ? task.title : "") + "。" + (task ? task.desc : "") + "\n只按下面格式输出（去掉 ``` 代码块围栏）：\n输出：\n<程序真实会打印到标准输出的内容，逐字还原；若无任何输出写（无输出）>\n若代码有编译/运行时错误，再追加一行：\n错误：\n<具体的错误信息>" }
   ], function(txt){
     txt = txt.replace(/```/g, "").trim();
     term.className = "term has-out";
