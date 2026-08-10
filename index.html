@@ -3547,6 +3547,46 @@ function startEdResize(e, grip){
   document.addEventListener("mouseup", mu);
   document.addEventListener("touchend", mu);
 }
+function registerKbCompletions(){
+  if (window.__kbCompletionsRegistered){ return; }
+  window.__kbCompletionsRegistered = true;
+  var ANN = ["@Override","@Deprecated","@SuppressWarnings","@FunctionalInterface","@SafeVarargs","@Test","@Before","@After","@BeforeEach","@AfterEach","@BeforeAll","@AfterAll","@Ignore","@DisplayName","@ParameterizedTest","@RepeatedTest","@SpringBootApplication","@EnableAutoConfiguration","@ComponentScan","@Configuration","@Component","@Service","@Repository","@Controller","@RestController","@ControllerAdvice","@RestControllerAdvice","@RequestMapping","@GetMapping","@PostMapping","@PutMapping","@DeleteMapping","@PatchMapping","@ExceptionHandler","@RequestParam","@PathVariable","@RequestBody","@ResponseBody","@RequestHeader","@ModelAttribute","@CookieValue","@RequestPart","@Autowired","@Qualifier","@Value","@Bean","@Primary","@Lazy","@Scope","@Profile","@PropertySource","@Import","@ConditionalOnProperty","@ConditionalOnMissingBean","@ConditionalOnClass","@Entity","@Table","@Id","@GeneratedValue","@Column","@ManyToOne","@OneToMany","@OneToOne","@ManyToMany","@JoinColumn","@JoinTable","@Transient","@Embedded","@Embeddable","@MappedSuperclass","@NotNull","@NotEmpty","@NotBlank","@Size","@Pattern","@Email","@Min","@Max","@Positive","@Future","@Past","@DecimalMin","@DecimalMax","@Transactional","@Modifying","@Scheduled","@Async","@EventListener","@Cacheable","@CacheEvict","@CachePut","@EnableCaching","@EnableScheduling","@EnableAsync","@Data","@Getter","@Setter","@NoArgsConstructor","@AllArgsConstructor","@RequiredArgsConstructor","@Builder","@ToString","@EqualsAndHashCode","@Slf4j","@Log","@Log4j2","@Accessors","@JsonProperty","@JsonIgnore","@JsonInclude","@JsonFormat","@JsonSerialize","@JsonDeserialize","@Mapper","@Select","@Insert","@Update","@Delete","@Param","@Results","@Result","@ResultMap","@Options","@SelectProvider","@UpdateProvider","@CrossOrigin","@ResponseStatus","@PreAuthorize","@PostAuthorize","@Secured","@EnableWebSecurity","@DateTimeFormat","@NumberFormat","@Valid","@Validated","@InitBinder"];
+  var KW = ["public","private","protected","static","final","abstract","class","interface","enum","extends","implements","new","return","if","else","for","while","do","switch","case","break","continue","default","try","catch","finally","throw","throws","import","package","void","int","long","double","float","boolean","char","byte","short","this","super","synchronized","volatile","transient","instanceof","var","record","sealed","permits","yield","assert"];
+  var CLS = ["Object","String","Integer","Long","Double","Float","Boolean","Character","Byte","Short","StringBuilder","StringBuffer","List","ArrayList","LinkedList","Map","HashMap","TreeMap","LinkedHashMap","Set","HashSet","TreeSet","LinkedHashSet","Collection","Queue","Deque","PriorityQueue","Stack","Vector","Arrays","Collections","Math","System","Runtime","Optional","Objects","Thread","Runnable","Callable","ExecutorService","Executors","Future","ScheduledExecutorService","ThreadPoolExecutor","ReentrantLock","Semaphore","CountDownLatch","CyclicBarrier","AtomicInteger","ConcurrentHashMap","Iterable","Iterator","Comparable","Comparator","Stream","Collectors","Exception","RuntimeException","NullPointerException","IllegalArgumentException","IllegalStateException","IOException","ClassNotFoundException","InterruptedException","SQLException","ParseException","Function","Predicate","Consumer","Supplier","BiFunction","UnaryOperator","Class","ClassLoader","Method","Field","Constructor","ApplicationContext","BeanFactory","CommandLineRunner","InitializingBean","BeanPostProcessor","LocalDate","LocalDateTime","DateTimeFormatter","BigDecimal","BigInteger","UUID","Random"];
+  var langs = ["java","kotlin","typescript","javascript","python","go","sql","html","plaintext"];
+  var K = monaco.languages.CompletionItemKind;
+  langs.forEach(function(lang){
+    try {
+      monaco.languages.registerCompletionItemProvider(lang, {
+        triggerCharacters: ["@"],
+        provideCompletionItems: function(model, position){
+          var line = model.getLineContent(position.lineNumber);
+          var before = line.substring(0, position.column - 1);
+          var m = before.match(/(@)([A-Za-z_]*)$/);
+          var startCol;
+          if (m){
+            startCol = position.column - m[0].length;
+          } else {
+            var w = model.getWordUntilPosition(position);
+            startCol = w.startColumn;
+          }
+          var range = new monaco.Range(position.lineNumber, startCol, position.lineNumber, position.column);
+          var items = [];
+          ANN.forEach(function(a){
+            items.push({ label: a, kind: K.Property, insertText: a, detail: "注解 (annotation)", range: range, sortText: "0" + a });
+          });
+          KW.forEach(function(k){
+            items.push({ label: k, kind: K.Keyword, insertText: k, detail: "关键字", range: range, sortText: "1" + k });
+          });
+          CLS.forEach(function(c){
+            items.push({ label: c, kind: K.Class, insertText: c, detail: "类 / 类型", range: range, sortText: "2" + c });
+          });
+          return { suggestions: items };
+        }
+      });
+    } catch(e){}
+  });
+}
 var __monacoState = 0, __monacoCbs = [];
 var MONACO_CDNS = [
   "https://registry.npmmirror.com/monaco-editor/0.52.2/files/min",
@@ -3575,6 +3615,7 @@ function ensureMonaco(cb){
         require.onError = function(){ failMonaco(); };
         require(["vs/editor/editor.main"], function(){
           __monacoState = 2;
+          try { registerKbCompletions(); } catch(e){}
           __monacoCbs.forEach(function(f){ try { f(true); } catch(e){} });
           __monacoCbs = [];
         });
