@@ -2471,6 +2471,7 @@ function togglePractice(id, btn){
     var c = chunkById(id);
     if (!c){ card.innerHTML = '<div class="prac"><div class="pd empty">未找到该知识点内容</div></div>'; return; }
     genPracticeTask(c, function(task){
+      setPrac(lib, id, { task: task, code: task.skeleton || "", verdict: "" });
       renderPracticeCard(card, id, { task: task, code: task.skeleton || "", verdict: "" });
     }, function(msg, raw){
       var hint = /Failed to fetch|NetworkError|TypeError|加载|abort/i.test(msg)
@@ -2507,6 +2508,7 @@ function retryPractice(id){
   var c = chunkById(id);
   if (!c){ card.innerHTML = '<div class="prac"><div class="pd empty">未找到该知识点内容</div></div>'; return; }
   genPracticeTask(c, function(task){
+    setPrac(lib, id, { task: task, code: task.skeleton || "", verdict: "" });
     renderPracticeCard(card, id, { task: task, code: task.skeleton || "", verdict: "" });
   }, function(msg, raw){
     var hint = /Failed to fetch|NetworkError|TypeError|加载|abort/i.test(msg)
