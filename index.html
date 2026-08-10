@@ -267,6 +267,12 @@ body.review h3.open::before{content:"\25BE  ";}
 .ai-cfg .row{display:flex;gap:8px;align-items:center;}
 .ai-cfg .hint{font-size:11px;color:var(--muted);margin-top:2px;}
 .ai-cfg .m-btn{padding:6px 14px;font-size:12px;}
+.lsp-cfg{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+.lsp-cfg .lsp-title{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;}
+.lsp-cfg input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:12px;margin-bottom:7px;outline:none;font-family:inherit;}
+.lsp-cfg input:focus{border-color:var(--gold-2);}
+.lsp-cfg .lsp-status{font-size:11.5px;color:var(--muted);margin-left:4px;}
+.lsp-cfg .lsp-status:empty{display:none;}
 .ai-msgs{flex:1;overflow-y:auto;padding:16px 16px 8px;}
 .ai-msg{margin-bottom:14px;display:flex;gap:9px;animation:pageIn .25s ease;}
 .ai-msg .av{width:28px;height:28px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;}
@@ -2327,6 +2333,12 @@ EvaluationResponse res = evaluator.evaluate(req);
     <input type="text" id="aiProxy" placeholder="代理地址（可选，解决跨域/网络拦截，如 https://corsproxy.io/v1?url=）">
     <div class="row"><button class="m-btn primary" onclick="saveAiCfg()">保存并启用</button><button class="m-btn ghost" onclick="clearAiCfg()">清除，用回本地检索</button></div>
     <div class="hint">支持任意 OpenAI 兼容接口（DeepSeek / 通义 / 硅基流动等）。配置后回答由大模型生成，上下文取自当前知识库。<b>若 AI 调用报“Failed to fetch”</b>：多半是打开方式（预览面板/本地文件）或网络访问不了 api.deepseek.com，可在「代理地址」填一个 CORS 代理（如 https://corsproxy.io/v1?url=），代理会转发你的 Key，仅在你本浏览器生效。</div>
+    <div class="lsp-cfg">
+      <div class="lsp-title">智能补全（IDEA 级 · 需本地 Java 语言服务器）</div>
+      <input type="text" id="lspWs" placeholder="ws://localhost:5008（本地 LSP 后端地址）">
+      <div class="row"><button class="m-btn primary" onclick="lspConnectBtn()">连接</button><button class="m-btn ghost" onclick="lspDisconnectBtn()">断开</button><span class="lsp-status" id="lspStatus">未连接</span></div>
+      <div class="hint">在本地运行 Java 语言服务器（jdtls）桥接服务后，填上面的 ws 地址并点「连接」，即可获得真正的类型推断 / 成员补全 / 参数提示 / 报错诊断。未连接时自动回退到内置静态补全。桥接服务见项目目录 <code>lsp-bridge/</code>（需 JDK 17+ 与 jdtls）。</div>
+    </div>
   </div>
   <div class="ai-msgs" id="aiMsgs"></div>
   <div class="ai-input"><textarea id="aiQ" placeholder="问点什么吧，如：HashMap 为什么线程不安全？" onkeydown="aiKeydown(event)"></textarea><button id="aiSend" onclick="askAI()">发送</button></div>
@@ -3587,6 +3599,181 @@ function registerKbCompletions(){
     } catch(e){}
   });
 }
+/* ===== KB-LSP：浏览器端 Java 语言服务器客户端（手写 JSON-RPC over WebSocket） =====
+   仅当在 ⚙ 里配置了本地 LSP 后端（jdtls 桥接）并连接成功后，才会接管补全/悬浮/诊断；
+   未连接时所有 provider 返回空，自动回退到 kb-dark 静态补全，不影响使用。 */
+var LSP = { ws: null, ready: false, caps: null, nextId: 1, pending: {}, docs: {}, modelOf: {}, url: null };
+var LSP_WS_KEY = "kb_lsp_ws";
+function lspSetStatus(s){ var el = document.getElementById("lspStatus"); if (el) el.textContent = s; }
+function lspInit(){
+  var url = ""; try { url = localStorage.getItem(LSP_WS_KEY) || ""; } catch(e){}
+  if (url){ LSP.url = url; lspConnect(url); }
+}
+function lspConnect(url){
+  if (!url){ lspSetStatus("未填写地址"); return; }
+  if (LSP.ws && (LSP.ws.readyState === 0 || LSP.ws.readyState === 1)){ try { LSP.ws.close(); } catch(e){} }
+  LSP.url = url; lspSetStatus("连接中…");
+  var ws; try { ws = new WebSocket(url); } catch(e){ lspSetStatus("地址无效"); return; }
+  LSP.ws = ws;
+  ws.onopen = function(){
+    lspSend("initialize", lspInitParams()).then(function(res){
+      LSP.caps = res && res.capabilities;
+      return lspSend("initialized", {}, true);
+    }).then(function(){
+      LSP.ready = true; lspSetStatus("已连接 ✓");
+      Object.keys(LSP.docs).forEach(function(uri){
+        var d = LSP.docs[uri];
+        lspSend("textDocument/didOpen", { textDocument: { uri: uri, languageId: d.languageId, version: d.version, text: d.text } }, true).catch(function(){});
+      });
+    }).catch(function(err){ LSP.ready = false; lspSetStatus("初始化失败：" + ((err && err.message) || err)); });
+  };
+  ws.onmessage = function(ev){
+    var msg; try { msg = JSON.parse(ev.data); } catch(e){ return; }
+    if (msg.id !== undefined && msg.id !== null && LSP.pending[msg.id]){
+      var p = LSP.pending[msg.id]; delete LSP.pending[msg.id];
+      if (msg.error) p.reject(new Error((msg.error.message) || "LSP error")); else p.resolve(msg.result);
+      return;
+    }
+    if (msg.method) lspHandleNotification(msg);
+  };
+  ws.onerror = function(){ LSP.ready = false; lspSetStatus("连接错误"); };
+  ws.onclose = function(){ LSP.ready = false; lspSetStatus("已断开"); };
+}
+function lspInitParams(){
+  return {
+    processId: null, rootUri: "file:///kb-workspace", rootPath: "/kb-workspace",
+    capabilities: {
+      textDocument: {
+        completion: { contextSupport: true, completionItem: { snippetSupport: true, documentationFormat: ["markdown","plaintext"], insertReplaceSupport: true } },
+        hover: { contentFormat: ["markdown","plaintext"] },
+        publishDiagnostics: { relatedInformation: true },
+        synchronization: { didSave: true, willSave: true }
+      },
+      workspace: { workspaceFolders: true, configuration: true }
+    },
+    workspaceFolders: [{ uri: "file:///kb-workspace", name: "kb-workspace" }]
+  };
+}
+function lspSend(method, params, isNotify){
+  return new Promise(function(resolve, reject){
+    if (!LSP.ws || LSP.ws.readyState !== 1){ reject(new Error("not connected")); return; }
+    var msg = { jsonrpc: "2.0", method: method };
+    if (!isNotify) msg.id = LSP.nextId++;
+    if (params !== undefined) msg.params = params;
+    if (!isNotify) LSP.pending[msg.id] = { resolve: resolve, reject: reject };
+    try { LSP.ws.send(JSON.stringify(msg)); } catch(e){ if (!isNotify) reject(e); }
+    if (isNotify) resolve();
+  });
+}
+function lspHandleNotification(msg){
+  var m = msg.method, p = msg.params || {};
+  if (m === "textDocument/publishDiagnostics"){ lspShowDiagnostics(p); return; }
+  /* window/logMessage、client/registerCapability 等忽略 */
+}
+function lspDocOpen(model, languageId, text){
+  var uri = model.uri.toString();
+  LSP.docs[uri] = { version: 1, languageId: languageId, text: text };
+  LSP.modelOf[uri] = model;
+  if (LSP.ready) lspSend("textDocument/didOpen", { textDocument: { uri: uri, languageId: languageId, version: 1, text: text } }, true).catch(function(){});
+}
+function lspDocChange(model, text){
+  var uri = model.uri.toString(); var d = LSP.docs[uri];
+  if (!d) return; d.version++; d.text = text;
+  if (LSP.ready) lspSend("textDocument/didChange", { textDocument: { uri: uri, version: d.version }, contentChanges: [{ text: text }] }, true).catch(function(){});
+}
+function lspDocClose(model){
+  var uri = model.uri.toString();
+  if (LSP.docs[uri]){
+    if (LSP.ready) lspSend("textDocument/didClose", { textDocument: { uri: uri } }, true).catch(function(){});
+    delete LSP.docs[uri]; delete LSP.modelOf[uri];
+  }
+}
+function lspCompletion(model, position, ctx){
+  return new Promise(function(resolve){
+    var uri = model.uri.toString();
+    if (!LSP.ready || !LSP.docs[uri]){ resolve({ suggestions: [] }); return; }
+    var params = { textDocument: { uri: uri }, position: { line: position.lineNumber - 1, character: position.column - 1 } };
+    if (ctx){ params.context = { triggerKind: ctx.triggerKind || 1 }; if (ctx.triggerCharacter) params.context.triggerCharacter = ctx.triggerCharacter; }
+    lspSend("textDocument/completion", params).then(function(res){
+      var items = Array.isArray(res) ? res : (res && res.items ? res.items : []);
+      resolve({ suggestions: items.map(function(it){ return lspToMonacoItem(it, model, position); }) });
+    }).catch(function(){ resolve({ suggestions: [] }); });
+  });
+}
+function lspHover(model, position){
+  return new Promise(function(resolve){
+    var uri = model.uri.toString();
+    if (!LSP.ready || !LSP.docs[uri]){ resolve(null); return; }
+    lspSend("textDocument/hover", { textDocument: { uri: uri }, position: { line: position.lineNumber - 1, character: position.column - 1 } })
+      .then(function(res){ resolve(res || null); }).catch(function(){ resolve(null); });
+  });
+}
+function lspToMonacoTextEdit(te){
+  return { range: new monaco.Range(te.range.start.line+1, te.range.start.character+1, te.range.end.line+1, te.range.end.character+1), text: te.newText };
+}
+function lspToMonacoItem(it, model, position){
+  var label = (typeof it.label === "string") ? it.label : ((it.label && it.label.label) || "");
+  var detail = it.detail || ((it.label && it.label.detail) || "");
+  var doc = ""; if (it.documentation){ doc = (typeof it.documentation === "string") ? it.documentation : (it.documentation.value || ""); }
+  var insertText = it.insertText || label;
+  var range = null;
+  if (it.textEdit && it.textEdit.range){
+    range = new monaco.Range(it.textEdit.range.start.line+1, it.textEdit.range.start.character+1, it.textEdit.range.end.line+1, it.textEdit.range.end.character+1);
+    insertText = it.textEdit.newText;
+  }
+  if (!range){
+    var col = position.column;
+    var line = model.getLineContent(position.lineNumber);
+    var at = line.substring(0, col-1).match(/@([A-Za-z_]*)$/);
+    var startCol = at ? (col - at[0].length) : model.getWordUntilPosition(position).startColumn;
+    range = new monaco.Range(position.lineNumber, startCol, position.lineNumber, col);
+  }
+  var kind = (typeof it.kind === "number" && it.kind >= 1 && it.kind <= 25) ? it.kind : 1;
+  var item = { label: label, kind: kind, detail: detail, documentation: doc ? { value: doc } : undefined, insertText: insertText, range: range, sortText: it.sortText || label, filterText: it.filterText || label, preselect: !!it.preselect, commitCharacters: it.commitCharacters };
+  if (it.insertTextFormat === 2) item.insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  if (it.additionalTextEdits){ try { item.additionalTextEdits = it.additionalTextEdits.map(lspToMonacoTextEdit); } catch(e){} }
+  return item;
+}
+function lspShowDiagnostics(p){
+  var model = LSP.modelOf[p.uri]; if (!model) return;
+  var markers = (p.diagnostics || []).map(function(dg){
+    var r = dg.range;
+    return { severity: (dg.severity === 1) ? monaco.MarkerSeverity.Error : ((dg.severity === 2) ? monaco.MarkerSeverity.Warning : monaco.MarkerSeverity.Info), message: dg.message, startLineNumber: r.start.line+1, startColumn: r.start.character+1, endLineNumber: r.end.line+1, endColumn: r.end.character+1 };
+  });
+  try { monaco.editor.setModelMarkers(model, "lsp", markers); } catch(e){}
+}
+function lspRegisterProviders(){
+  if (window.__kbLspProviders) return; window.__kbLspProviders = true;
+  var langs = ["java","kotlin","typescript","javascript","python","go","sql","html","plaintext"];
+  langs.forEach(function(lang){
+    try {
+      monaco.languages.registerCompletionItemProvider(lang, {
+        triggerCharacters: [".", "@"],
+        provideCompletionItems: function(model, position, context){ return lspCompletion(model, position, context); }
+      });
+    } catch(e){}
+    try {
+      monaco.languages.registerHoverProvider(lang, {
+        provideHover: function(model, position){
+          return lspHover(model, position).then(function(res){
+            if (!res || !res.contents) return null;
+            var c = res.contents;
+            var value = (typeof c === "string") ? c : (c.value || (Array.isArray(c) ? c.join("\n") : ""));
+            return { contents: [{ value: value }] };
+          });
+        }
+      });
+    } catch(e){}
+  });
+}
+function lspConnectBtn(){
+  var v = ""; try { v = (document.getElementById("lspWs")||{}).value || ""; } catch(e){}
+  v = (v || "").trim();
+  if (!v){ lspSetStatus("请填写 ws 地址"); return; }
+  try { localStorage.setItem(LSP_WS_KEY, v); } catch(e){}
+  lspConnect(v);
+}
+function lspDisconnectBtn(){ if (LSP.ws){ try { LSP.ws.close(); } catch(e){} LSP.ws = null; } LSP.ready = false; lspSetStatus("已断开"); }
 var __monacoState = 0, __monacoCbs = [];
 var MONACO_CDNS = [
   "https://registry.npmmirror.com/monaco-editor/0.52.2/files/min",
@@ -3616,6 +3803,7 @@ function ensureMonaco(cb){
         require(["vs/editor/editor.main"], function(){
           __monacoState = 2;
           try { registerKbCompletions(); } catch(e){}
+          try { lspRegisterProviders(); } catch(e){}
           __monacoCbs.forEach(function(f){ try { f(true); } catch(e){} });
           __monacoCbs = [];
         });
@@ -3659,7 +3847,7 @@ function mountMonaco(card, id, code, lang){
           'list.foreground': '#e6e6e6'
         }
       }); } catch(e){}
-      if (card._monacoEditor){ try { card._monacoEditor.dispose(); } catch(e){} }
+      if (card._monacoEditor){ try { lspDocClose(card._monacoEditor); } catch(e){} try { card._monacoEditor.dispose(); } catch(e){} }
       var ed = monaco.editor.create(mount, {
         value: code, language: mapMonacoLang(lang), theme: "kb-dark",
         fontSize: 13, minimap: { enabled: false }, scrollBeyondLastLine: false,
@@ -3670,6 +3858,7 @@ function mountMonaco(card, id, code, lang){
         scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
       });
       card._monacoEditor = ed;
+      try { var L0 = ed.getModel(); if (L0) lspDocOpen(L0, mapMonacoLang(lang), code); } catch(e){}
       ed.onDidChangeModelContent(function(){
         var val = ed.getValue();
         var t = card.querySelector("textarea.code"); if (t) t.value = val;
@@ -3678,6 +3867,7 @@ function mountMonaco(card, id, code, lang){
         d.task = task; d.code = val;
         var vd = card.querySelector(".verdict"); d.verdict = vd ? (vd.innerHTML || "") : "";
         setPrac(pageOf(id), id, d);
+        try { var m1 = ed.getModel(); if (m1) lspDocChange(m1, val); } catch(e){}
       });
     } catch(e){
       if (mount) mount.style.display = "none";
@@ -4109,6 +4299,7 @@ function renderPlan(plan, start, lib, titles){
   updateDueBadge();
   onScroll();
   checkOrigin();
+  try { lspInit(); } catch(e){}
 })();
 function realAppUrl(){
   var APP_URL = "https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net";
