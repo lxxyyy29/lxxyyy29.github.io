@@ -29,6 +29,7 @@
 | 3 | 🤖 Embabel Agent | Embabel 目标导向智能体框架（JVM） |
 | 4 | 🌱 Spring AI | Spring AI 工程框架（Java 生态 AI 开发） |
 | 5 | 🧭 业务开发模板 | **后端业务项目从 0 到 1 的开发方法论**：需求→选型→架构→实现→运维五段闭环，逐功能技术选型含「优点/缺点/备选」对照，以 Ragent 为蓝本模拟 |
+| 6 | 📨 消息队列 MQ | **MQ 知识体系**：为什么需要 MQ、核心术语、Kafka/RabbitMQ/RocketMQ/Pulsar 横向对比、点对点 vs 发布订阅、投递语义（最多/至少/精确一次）、顺序性、四大 MQ 逐一深入、可靠性（ACK/重试/死信/幂等）、高可用、Push vs Pull、常见问题排查、最佳实践与速查表 |
 
 除内置库外，点侧栏「＋ 新建知识库」可用 Markdown 简写自建任意知识库，存在本浏览器，可删除/恢复。
 
@@ -63,6 +64,7 @@ frag_langchain.html   库 2 片段
 frag_embabel.html     库 3 片段
 frag_springai.html    库 4 片段
 frag_biztpl.html      库 5 片段（业务开发模板）
+frag_mq.html          库 6 片段（消息队列 MQ）
 src_long.html         原始长页正文（库 0/1 的来源；CI 构建用，本地缺失时回退绝对路径）
 .github/workflows/    GitHub Actions 自动部署
 sync_gitee.sh         一键同步到 Gitee（大陆访问）
