@@ -298,6 +298,14 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .ed .ed-grip::after{content:"拖动调整高度";}
 .prac .ed .ed-grip:hover,.prac .ed .ed-grip:active{background:#2b3848;color:var(--gold-2);}
 .prac .ed .ed-grip:hover::before,.prac .ed .ed-grip:active::before{color:var(--gold-2);}
+/* Monaco 补全下拉框（suggest widget）文字强制可见，避免与主题/缓存冲突导致空白 */
+.monaco-editor .suggest-widget{background:#252526!important;border:1px solid #454545!important;color:#e6e6e6!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label{color:#e6e6e6!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label .match{color:#4ec9b0!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .description,.monaco-editor .suggest-widget .monaco-list .monaco-list-row .type-label{color:#9aa3ad!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused,.monaco-editor .suggest-widget .monaco-list .monaco-list-row.selected{background:#094771!important;color:#fff!important;}
+.monaco-editor .suggest-widget .details,.monaco-editor .suggest-widget .details>.header>.title{color:#e6e6e6!important;}
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .icon-label,.monaco-editor .suggest-widget .monaco-list .monaco-list-row .codicon{color:#e6e6e6!important;}
 .prac .acts{display:flex;flex-wrap:wrap;gap:8px;padding:9px 12px;background:var(--card);border-top:1px solid var(--line);}
 .prac .acts button{flex:1 1 auto;min-width:84px;border:1px solid var(--line);background:var(--bg);color:var(--ink2);border-radius:9px;
   padding:8px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit;}
@@ -3546,9 +3554,28 @@ function mountMonaco(card, id, code, lang){
       return;
     }
     try {
+      try { monaco.editor.defineTheme('kb-dark', {
+        base: 'vs-dark', inherit: true, rules: [],
+        colors: {
+          'editor.background': '#1e1e1e',
+          'editor.foreground': '#d4d4d4',
+          'editorSuggestWidget.background': '#252526',
+          'editorSuggestWidget.border': '#454545',
+          'editorSuggestWidget.foreground': '#e6e6e6',
+          'editorSuggestWidget.highlightForeground': '#4ec9b0',
+          'editorSuggestWidget.selectedBackground': '#094771',
+          'editorSuggestWidget.focusHighlightForeground': '#4ec9b0',
+          'list.hoverBackground': '#2a2d2e',
+          'list.focusBackground': '#094771',
+          'list.activeSelectionBackground': '#094771',
+          'list.focusForeground': '#ffffff',
+          'list.highlightForeground': '#4ec9b0',
+          'list.foreground': '#e6e6e6'
+        }
+      }); } catch(e){}
       if (card._monacoEditor){ try { card._monacoEditor.dispose(); } catch(e){} }
       var ed = monaco.editor.create(mount, {
-        value: code, language: mapMonacoLang(lang), theme: "vs-dark",
+        value: code, language: mapMonacoLang(lang), theme: "kb-dark",
         fontSize: 13, minimap: { enabled: false }, scrollBeyondLastLine: false,
         automaticLayout: true, tabSize: 4, insertSpaces: true,
         fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
