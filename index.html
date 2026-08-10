@@ -302,6 +302,12 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .term-h span{color:#3ecf8e;font-size:9px;}
 .prac .term pre{margin:0;padding:11px 12px;color:#d7e0ec;font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;}
 .prac .term .ai-typing{display:inline-flex;gap:4px;padding:11px 12px;}
+.prac .hint{display:none;margin:0 12px 12px;padding:11px 13px;border:1px dashed #c8a55e;border-radius:10px;background:rgba(200,165,94,.06);color:#6f5b2e;font-size:13px;line-height:1.75;}
+.prac .hint h5{margin:0 0 7px;font-size:12.5px;color:var(--ink);letter-spacing:.5px;}
+.prac .hint ol{margin:4px 0 0;padding-left:20px;}
+.prac .hint li{margin:3px 0;}
+.prac .hint b{color:#9a7b35;}
+.prac .hint-btn{background:linear-gradient(180deg,#fbf3e2,#f3e6cb);color:#8a6d2f;border:1px solid #e1cfa3;}
 .prac .run-ok{color:#3ecf8e;}
 .ai-input{flex:none;display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:var(--card);}
 .ai-input textarea{flex:1;resize:none;height:42px;max-height:110px;padding:10px 12px;border:1px solid var(--line);
@@ -2514,8 +2520,9 @@ function renderPracticeCard(card, id, data){
     '<div class="ph"><div class="pt">🛠 ' + esc(task.title || "动手实践") + '</div><div class="pm">' + esc(task.lang || "代码") + " · " + esc(task.difficulty || "") + "</div></div>" +
     '<div class="pd"><div class="lab">题目</div>' + esc(task.desc || "") + (pts ? '<div class="lab">考察点</div><ul>' + pts + "</ul>" : "") + "</div>" +
     '<div class="ed"><div class="lh"><span>' + esc(task.lang || "code") + '</span><span>Tab 缩进 · 自动保存</span></div><textarea class="code" spellcheck="false"></textarea></div>' +
-    '<div class="acts"><button class="run" onclick="runPracticeInline(\'' + id + '\')">▶ 运行</button><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
+    '<div class="acts"><button class="run" onclick="runPracticeInline(\'' + id + '\')">▶ 运行</button><button class="hint-btn" onclick="hintPracticeInline(\'' + id + '\')">💡 提示</button><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
     '<div class="term" style="display:none"></div>' +
+    '<div class="hint" style="display:none"></div>' +
     (verdict ? '<div class="verdict">' + verdict + "</div>" : '<div class="verdict" style="display:none"></div>') +
     "</div>";
   var ta = card.querySelector("textarea.code");
@@ -2534,6 +2541,35 @@ function renderPracticeCard(card, id, data){
     setPrac(lib, id, d);
   });
   card.dataset.sec = id;
+}
+function hintPracticeInline(id){
+  var h = document.getElementById(id);
+  var card = h && h.nextElementSibling;
+  if (!card || !card.classList.contains("prac-card-wrap")) return;
+  var box = card.querySelector(".hint");
+  if (!box) return;
+  var lib = pageOf(id);
+  var d = getPrac(lib, id);
+  if (!d || !d.task){ alert("题目未就绪"); return; }
+  var task = d.task, c = chunkById(id);
+  if (d.hint){ box.style.display = "block"; box.innerHTML = d.hint; return; }
+  box.style.display = "block";
+  box.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> 正在生成解题提示…';
+  var sys = "你是耐心导师。学习者面对下面这道实践题卡住了，需要解题提示。严格做到：【绝对不要给出完整代码，也不要直接给标准答案】。请只提供：(1) 思路点拨（从哪入手、用何种数据结构/API/算法）(2) 关键步骤拆解（分步说明要点，每步只讲做什么、不写实现）(3) 易错点提醒 (4) 可参考的知识点。简洁中文，用有序列表。";
+  callLLM([
+    { role: "system", content: sys },
+    { role: "user", content: "题目：" + (task.title || "") + "\n描述：" + (task.desc || "") + "\n考察点：" + JSON.stringify(task.points || []) + (c ? "\n参考知识（来自知识点「" + c.title + "」）：\n" + c.text.slice(0, 800) : "") + "\n请给出解题提示（不要答案）。" }
+  ], function(txt){
+    var html = "<h5>💡 解题提示（思路，非答案）</h5>" + simpleMd(txt);
+    box.innerHTML = html;
+    var dd = getPrac(lib, id) || { task: task };
+    dd.task = task; dd.code = card.querySelector("textarea.code").value;
+    dd.verdict = card.querySelector(".verdict").innerHTML || "";
+    dd.hint = html;
+    setPrac(lib, id, dd);
+  }, function(err){
+    box.innerHTML = "提示生成失败：" + esc(err);
+  });
 }
 function submitPracticeInline(id){
   var h = document.getElementById(id);
