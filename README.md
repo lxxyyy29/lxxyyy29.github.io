@@ -17,7 +17,7 @@
 
 ---
 
-## 内置知识库（6 个，可切换）
+## 内置知识库（7 个，可切换）
 
 点击左上角 ☰ 打开侧栏，顶部一排标签即为各知识库：
 
@@ -71,7 +71,7 @@ sync_gitee.sh         一键同步到 Gitee（大陆访问）
 lsp-bridge/           可选：IDEA 级 Java 补全后端（Node WS 桥接 jdtls）
 ```
 
-新增一个知识库的标准做法（**数据驱动，只加一行**）：写 `frag_xxx.html`（以 `<h1>` 作为导航分组标题，章节用 `<h2>/<h3>` 并带 `id="sec-xxxx"`），在 `build_kb.py` 的 `EXTRA_LIBS` 列表加一行 `("6","🚀","新库名","frag_xxx.html")`，再 `python build_kb.py` 重建。库切换逻辑全读 DOM，无需改 JS。
+新增一个知识库的标准做法（**数据驱动，只加一行**）：写 `frag_xxx.html`（以 `<h1>` 作为导航分组标题，章节用 `<h2>/<h3>` 并带 `id="sec-xxxx"`），在 `build_kb.py` 的 `EXTRA_LIBS` 列表加一行 `("7","🚀","新库名","frag_xxx.html")`，再 `python build_kb.py` 重建。库切换逻辑全读 DOM，无需改 JS。
 
 > ⚠️ 导航分组必须以 `<h1>` 作为锚点：如果某个库片段首行不是 `<h1>`，`build_nav` 会得不到分组，导致该库侧边导航为空（库 5 曾踩过这个坑）。
 
@@ -148,6 +148,7 @@ CloudStudio 镜像通过部署工具覆盖重部署（同沙箱 ID），与 GitH
 ## Roadmap（已落地 / 规划）
 
 - [x] 第 6 个知识库「业务开发模板」（Ragent 为蓝本，五段闭环 + 逐功能优缺点）
+- [x] 第 7 个知识库「消息队列 MQ」（Kafka/RabbitMQ/RocketMQ/Pulsar 横向对比 + 逐功能深入 + 最小可运行片段）
 - [x] 工程化：拆分 `TPL`/`JS` 为 `kb_template.html` + `kb_app.js`，新增库改为数据驱动（一行）
 - [x] 备份/恢复：⬇ 导出 / ⬆ 导入 `localStorage` 全部 `kb_` 数据
 - [x] 全局搜索：跨全部知识库检索，结果下拉直达
