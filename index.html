@@ -296,6 +296,13 @@ body.review h3.open::before{content:"\25BE  ";}
 .prac .verdict{padding:10px 12px;font-size:13px;border-top:1px solid var(--line);line-height:1.7;}
 .prac .verdict.pass{background:rgba(34,197,94,.08);color:#15803d;}
 .prac .verdict.fail{background:rgba(194,69,58,.08);color:#b04a40;}
+.prac .term{display:none;margin:0 12px 12px;border:1px solid var(--code-bd);border-radius:10px;overflow:hidden;background:#0f1115;}
+.prac .term.has-out{display:block;}
+.prac .term-h{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11.5px;color:#9aa4b2;background:#171a21;border-bottom:1px solid #232833;letter-spacing:.3px;}
+.prac .term-h span{color:#3ecf8e;font-size:9px;}
+.prac .term pre{margin:0;padding:11px 12px;color:#d7e0ec;font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;}
+.prac .term .ai-typing{display:inline-flex;gap:4px;padding:11px 12px;}
+.prac .run-ok{color:#3ecf8e;}
 .ai-input{flex:none;display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:var(--card);}
 .ai-input textarea{flex:1;resize:none;height:42px;max-height:110px;padding:10px 12px;border:1px solid var(--line);
   border-radius:11px;background:var(--bg);color:var(--ink);font-size:13px;outline:none;font-family:inherit;line-height:1.5;}
@@ -2507,7 +2514,8 @@ function renderPracticeCard(card, id, data){
     '<div class="ph"><div class="pt">🛠 ' + esc(task.title || "动手实践") + '</div><div class="pm">' + esc(task.lang || "代码") + " · " + esc(task.difficulty || "") + "</div></div>" +
     '<div class="pd"><div class="lab">题目</div>' + esc(task.desc || "") + (pts ? '<div class="lab">考察点</div><ul>' + pts + "</ul>" : "") + "</div>" +
     '<div class="ed"><div class="lh"><span>' + esc(task.lang || "code") + '</span><span>Tab 缩进 · 自动保存</span></div><textarea class="code" spellcheck="false"></textarea></div>' +
-    '<div class="acts"><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
+    '<div class="acts"><button class="run" onclick="runPracticeInline(\'' + id + '\')">▶ 运行</button><button class="sub" onclick="submitPracticeInline(\'' + id + '\')">提交评阅</button></div>' +
+    '<div class="term" style="display:none"></div>' +
     (verdict ? '<div class="verdict">' + verdict + "</div>" : '<div class="verdict" style="display:none"></div>') +
     "</div>";
   var ta = card.querySelector("textarea.code");
@@ -2558,6 +2566,34 @@ function submitPracticeInline(id){
   }, function(err){
     v.className = "verdict fail";
     v.innerHTML = "评阅失败：" + esc(err);
+  });
+}
+/* AI 模拟运行：把代码交给模型当运行环境，返回真实会打印的输出 / 报错（语言无关，Java/Python/SQL 均可） */
+function runPracticeInline(id){
+  var h = document.getElementById(id);
+  var card = h && h.nextElementSibling;
+  if (!card || !card.classList.contains("prac-card-wrap")) return;
+  var ta = card.querySelector("textarea.code");
+  var term = card.querySelector(".term");
+  if (!ta || !term) return;
+  var code = ta.value;
+  var lib = pageOf(id);
+  var d = getPrac(lib, id);
+  if (!d || !d.task){ alert("题目未就绪"); return; }
+  var task = d.task, lang = task.lang || "代码";
+  term.style.display = "block"; term.className = "term";
+  term.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span> AI 模拟运行中…';
+  var sys = "你是 " + lang + " 语言的运行环境/解释器。用户提交了一段针对题目的实现，请严格按语言语义模拟执行，只输出程序运行后的真实结果，不要解释、不要给出修正后的代码。";
+  callLLM([
+    { role: "system", content: sys },
+    { role: "user", content: "请运行以下" + lang + "代码：\n```\n" + code + "\n```\n题目背景：" + (task.title || "") + "。" + (task.desc || "") + "\n只按下面格式输出（去掉 ``` 代码块围栏）：\n输出：\n<程序真实会打印到标准输出的内容，逐字还原；若无任何输出写（无输出）>\n若代码有编译/运行时错误，再追加一行：\n错误：\n<具体的错误信息>" }
+  ], function(txt){
+    txt = txt.replace(/```/g, "").trim();
+    term.className = "term has-out";
+    term.innerHTML = '<div class="term-h"><span>●</span> 运行结果（AI 模拟）</div><pre>' + esc(txt) + "</pre>";
+  }, function(err){
+    term.className = "term has-out";
+    term.innerHTML = '<div class="term-h"><span>●</span> 运行失败</div><pre>' + esc(err) + "</pre>";
   });
 }
 
