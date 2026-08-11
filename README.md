@@ -68,8 +68,9 @@ frag_mq.html          库 6 片段（消息队列 MQ）
 src_long.html         原始长页正文（库 0/1 的来源；CI 构建用，本地缺失时回退绝对路径）
 .github/workflows/    GitHub Actions 自动部署
 sync_gitee.sh         一键同步到 Gitee（大陆访问）
-lsp-bridge/           可选：IDEA 级 Java 补全后端（Node WS 桥接 jdtls）
 ```
+
+> ⚠️ `lsp-bridge/`（IDEA 级 Java 补全后端）为**可选本地组件，不在本仓库内**。它位于本地 WorkBuddy 工程，需自行在本地或自有服务器运行（详见其自带 `README.md` / `家用部署说明_Windows.md`），再在站点 ⚙ 里填 `ws://localhost:5008`（或自有服务器的 `wss://域名/lsp`）。未运行时站点自动回退到内置静态补全。
 
 新增一个知识库的标准做法（**数据驱动，只加一行**）：写 `frag_xxx.html`（以 `<h1>` 作为导航分组标题，章节用 `<h2>/<h3>` 并带 `id="sec-xxxx"`），在 `build_kb.py` 的 `EXTRA_LIBS` 列表加一行 `("7","🚀","新库名","frag_xxx.html")`，再 `python build_kb.py` 重建。库切换逻辑全读 DOM，无需改 JS。
 
