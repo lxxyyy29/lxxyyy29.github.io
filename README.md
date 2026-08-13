@@ -10,8 +10,8 @@
 
 | 站点 | 地址 | 说明 |
 | --- | --- | --- |
-| GitHub Pages（主站） | https://lxxyyy29.github.io | 功能最全；**大陆网络可能较慢/被墙** |
-| CloudStudio 镜像 | https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net | 大陆可访问的临时镜像，与主页同步 |
+| **CloudStudio 线上站（推荐）** | https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net | 大陆可直接访问；已含全部最新优化（移动端/PWA、AI 拓展、闪卡随机、护眼主题等）。在手机浏览器打开后「添加到主屏幕」即可像 App 一样离线使用 |
+| GitHub Pages（镜像） | https://lxxyyy29.github.io | 功能一致；需在本机执行一次 `git push origin main` 后由 Actions 自动发布，**当前通常会滞后于 CloudStudio** |
 
 也可以直接把本仓库的 `知识库.html` 下载到本地，双击用浏览器打开即可使用（部分 AI 功能在「文件协议/预览面板」下受浏览器源限制，按页面提示复制到真实浏览器新标签页即可解锁）。
 
@@ -41,7 +41,8 @@
 - **全文搜索**：当前库内实时搜索，并可跨库跳转到结果所在库。
 - **学习计划 / 闪卡 / 复习**：AI 生成学习计划；闪卡速记（可预热预生成题目，**每次打开顺序随机**，避免总从第一个开始）；按艾宾浩斯曲线（1/2/4/7/15/30 天）推送「今日待复习」。
 - **单知识点 AI 拓展**：每个小节标题旁的 ✨ 按钮，点开后 AI 自动基于该知识点做深入拓展讲解（原理 / 例子 / 易错点 / 对比 / 记忆技巧），流式输出；需配置 API Key（⚙）。
-- **暗色 / 亮色主题**：一键切换，记忆偏好。
+- **暗色 / 亮色 / 护眼主题**：一键切换，记忆偏好；手机状态栏颜色随主题同步。
+- **PWA 离线 + 移动端 App 化**：支持「添加到主屏幕」安装为 App；Service Worker 离线缓存，弱网/无网也能打开；刘海/灵动岛安全区适配、窄屏底部抽屉弹窗、安装引导横幅（Android 直接装、iOS 引导「分享→添加到主屏幕」）。
 - **代码练习（实践卡）**：部分章节带可编辑代码框（IDE 风格：自动缩进、括号补全），支持 ▶ 运行（Python/JS 真跑，Java/SQL 走 AI 模拟）、💡 提示、🔑 答案、提交评阅。
 - **Monaco 编辑器 + 补全**：
   - 内置静态补全（Java 注解/关键字/类名，`@` 触发）。
@@ -108,6 +109,12 @@ python build_kb.py          # 生成 知识库.html（同时可 cp 知识库.htm
 
 > 注意：CI 默认读取仓库内的 `src_long.html`。若你只改了 `frag_*.html` / `kb_app.js` 等，直接 push 即可；若改了底层长页源，记得一并更新 `src_long.html`。
 
+> ⚠️ **本机推送命令**（云端 Agent 沙箱无 GitHub 凭据，无法代为推送）：改动已在仓库本地提交，你在本机执行一次即可同步 Pages——
+> ```bash
+> git -C "C:\Users\Administrator\WorkBuddy\2026-08-06-16-05-01\deploy_kb" push origin main
+> ```
+> 推送后即由 Actions 自动构建并发布到 GitHub Pages。
+
 ### 大陆稳定访问（Gitee Pages / 自定义域名 / CDN）
 
 GitHub Pages 在大陆经常不稳定，下面是几条可用的「加速」路径：
@@ -142,7 +149,7 @@ npm pack monaco-editor@0.52.2 && tar -xzf monaco-editor-0.52.2.tgz && mv package
 # 或：直接下载 https://registry.npmmirror.com/monaco-editor/0.52.2/files/min 整目录到 vendor/monaco/min
 ```
 
-CloudStudio 镜像通过部署工具覆盖重部署（同沙箱 ID），与 GitHub Pages 保持同步。
+CloudStudio 线上站是当前常态化部署目标（覆盖重部署，同沙箱 ID），已包含全部最新优化；GitHub Pages 镜像需在本机 `git push origin main` 后由 Actions 同步跟进。
 
 ---
 
@@ -159,6 +166,7 @@ CloudStudio 镜像通过部署工具覆盖重部署（同沙箱 ID），与 GitH
 - [x] Monaco 加载：本地 `vendor` 优先 + npmmirror/jsdelivr/unpkg 多 CDN 兜底
 - [x] 大陆稳定访问：Gitee 同步脚本 + 自定义域名/CDN 指南
 - [x] GitHub Actions 自动部署：push 即构建发布到 Pages
+- [x] 移动端 / PWA 优化：安全区适配、iOS apple-touch-icon、安装引导横幅、动态状态栏主题色、窄屏底部抽屉弹窗、SW 离线缓存增强
 
 ---
 
