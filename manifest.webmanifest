@@ -1,0 +1,14 @@
+{
+  "name": "知识库 · 单文件学习站",
+  "short_name": "知识库",
+  "description": "Java 八股 / Ragent / LangChain / Embabel / Spring AI / 业务开发模板 / 消息队列 MQ 等内置知识库，支持笔记、闪卡、AI 拓展。",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1218",
+  "theme_color": "#0b1218",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
