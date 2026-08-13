@@ -27,7 +27,7 @@
 | 1 | 🤖 Ragent 项目 | Ragent（AI 智能问答/知识库系统）源码深挖：核心类速查、队列限流、RRF 融合、模型熔断、意图识别、线程池、23 张表等 |
 | 2 | 🔗 LangChain 1.0+ | LangChain 1.0+ 独立指南：定位哲学、`init_chat_model`、`@tool`、内容块、Agent、中间件、结构化输出、LangGraph、RAG、迁移对照 |
 | 3 | 🤖 Embabel Agent | Embabel 目标导向智能体框架（JVM） |
-| 4 | 🌱 Spring AI | Spring AI 工程框架（Java 生态 AI 开发） |
+| 4 | 🌱 Spring AI | Spring AI 工程框架（Java 生态 AI 开发）：含 **2.0 GA（2026-05-28，Boot 4/Java 21）** 重大升级、破坏性迁移清单、与 LangChain4j / Semantic Kernel 横向对比 |
 | 5 | 🧭 业务开发模板 | **后端业务项目从 0 到 1 的开发方法论**：需求→选型→架构→实现→运维五段闭环，逐功能技术选型含「优点/缺点/备选」对照，以 Ragent 为蓝本模拟 |
 | 6 | 📨 消息队列 MQ | **MQ 知识体系**：为什么需要 MQ、核心术语、Kafka/RabbitMQ/RocketMQ/Pulsar 横向对比、点对点 vs 发布订阅、投递语义（最多/至少/精确一次）、顺序性、四大 MQ 逐一深入、可靠性（ACK/重试/死信/幂等）、高可用、Push vs Pull、常见问题排查、最佳实践与速查表 |
 
