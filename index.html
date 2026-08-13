@@ -184,6 +184,8 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
 .nav-h2:hover,.nav-h3:hover{background:rgba(255,255,255,.08);color:#fff;}
 .nav-h2.active,.nav-h3.active{background:linear-gradient(90deg,rgba(207,165,83,.34),rgba(207,165,83,.06));
   color:#f6e8c6;font-weight:600;box-shadow:inset 3px 0 0 var(--gold-2);}
+.nav-badge{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;letter-spacing:1px;
+  color:var(--gold-2);white-space:nowrap;pointer-events:none;opacity:.92;}
 
 /* ===== 主区域 ===== */
 /* KB-FIX(monaco-suggest-v2): 必须限定为 main 标签。裸 .main 会命中 Monaco 补全项内部的
@@ -267,6 +269,8 @@ h4{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--muted);}
 .kb-fig .fig-cap{font-size:12px;color:var(--muted);margin-top:8px;}
 /* AI 拓展讲解 */
 .expand-body{max-height:54vh;overflow-y:auto;padding:4px 2px;font-size:14px;line-height:1.8;color:var(--ink2);}
+.expand-cache-hint{margin:6px 2px 0;font-size:11.5px;color:#7e8a96;display:none;}
+.expand-cache-hint.show{display:block;color:var(--gold-2);}
 .expand-body h1,.expand-body h2,.expand-body h3,.expand-body h4{margin:14px 0 8px;color:var(--ink);scroll-margin-top:20px;}
 .expand-body p{margin:10px 0;}
 .expand-body ul,.expand-body ol{margin:8px 0;padding-left:22px;}
@@ -3235,7 +3239,8 @@ p.sendMessageInTransaction(new Message("order", payload.getBytes()), null);</pre
     <h3>✨ AI 拓展讲解 <span class="mn-sub" id="expandSecTitle"></span></h3>
     <p class="tip" id="expandTip">AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。需配置 API Key（⚙）。</p>
     <div class="expand-body" id="expandBody"></div>
-    <div class="actions"><span class="left"><button class="m-btn ghost" onclick="stopExpand()">⏹ 停止</button><button class="m-btn ghost" onclick="saveExpandAsNote()">💾 存为笔记</button><button class="m-btn ghost" onclick="genFlashcardFromSection()">🃏 生成闪卡</button></span><span class="right"><button class="m-btn ghost" onclick="closeExpand()">关闭</button></span></div>
+    <p class="expand-cache-hint" id="expandCacheHint"></p>
+    <div class="actions"><span class="left"><button class="m-btn ghost" onclick="stopExpand()">⏹ 停止</button><button class="m-btn ghost" onclick="regenExpand()">🔄 重新生成</button><button class="m-btn ghost" onclick="saveExpandAsNote()">💾 存为笔记</button><button class="m-btn ghost" onclick="genFlashcardFromSection()">🃏 生成闪卡</button></span><span class="right"><button class="m-btn ghost" onclick="closeExpand()">关闭</button></span></div>
   </div>
 </div>
 <div class="modal-mask" id="readerModal" onclick="if(event.target===this)closeReader()">
@@ -3298,6 +3303,7 @@ function switchLib(i, target){
   document.querySelectorAll(".lib-tab").forEach(function(t){ t.classList.toggle("active", t.dataset.lib === i); });
   document.querySelectorAll(".page").forEach(function(p){ p.classList.toggle("show", p.dataset.page === i); });
   document.querySelectorAll(".nav-list").forEach(function(n){ n.classList.toggle("show", n.dataset.lib === i); });
+  markNav();
   document.querySelectorAll(".nav-h2.active,.nav-h3.active").forEach(function(a){ a.classList.remove("active"); });
   var name = libName(i);
   var sub = document.getElementById("brandSub"); if (sub) sub.textContent = name;
@@ -5400,6 +5406,11 @@ var KB_FAV_KEY = "kb_favs";   /* { lib: [secId,...] } */
 var KB_NOTE_KEY = "kb_notes"; /* { lib: { secId: "text" } } */
 var KB_UCARD_KEY = "kb_usercards"; /* { lib: [ {id,title,q,a,secId} ] } */
 var _expandCur = null;
+var KB_EXPAND_KEY = "kb_expand"; /* { lib: { secId: {t:"text", ts:ms} } } */
+function expandCache(){ try{ return JSON.parse(localStorage.getItem(KB_EXPAND_KEY)||"{}"); }catch(e){ return {}; } }
+function saveExpandCache(m){ try{ localStorage.setItem(KB_EXPAND_KEY, JSON.stringify(m)); }catch(e){} }
+function getExpand(lib, secId){ var m=expandCache(); return (m[lib] && m[lib][secId]) ? m[lib][secId] : null; }
+function setExpand(lib, secId, text){ var m=expandCache(); if(!m[lib]) m[lib]={}; m[lib][secId]={t:text, ts:Date.now()}; saveExpandCache(m); }
 function userCardMap(){ try{ return JSON.parse(localStorage.getItem(KB_UCARD_KEY)||"{}"); }catch(e){ return {}; } }
 function saveUserCardMap(m){ try{ localStorage.setItem(KB_UCARD_KEY, JSON.stringify(m)); }catch(e){} }
 function secTitleById(lib, sid){
@@ -5430,10 +5441,31 @@ function refreshFavButtons(lib, secId){
   document.querySelectorAll('.page[data-page="'+lib+'"] .h-fav[data-sec="'+secId+'"]').forEach(function(b){
     b.classList.toggle("on", isFav(lib, secId));
   });
+  markNav();
 }
 function refreshNoteButtons(lib, secId){
   document.querySelectorAll('.page[data-page="'+lib+'"] .h-note[data-sec="'+secId+'"]').forEach(function(b){
     b.classList.toggle("on", isNoted(lib, secId));
+  });
+  markNav();
+}
+/* 侧栏导航标记：给有收藏(⭐)/笔记(📝)的章节打小角标，方便复习定位 */
+function markNav(){
+  document.querySelectorAll(".nav-list.show").forEach(function(nl){
+    var lib = nl.dataset.lib;
+    var notes = noteMap()[lib] || {};
+    var favs = favMap()[lib] || [];
+    nl.querySelectorAll("a.nav-h2,a.nav-h3").forEach(function(a){
+      var sid = (a.getAttribute("href") || "").replace(/^#/, "");
+      if (!sid) return;
+      var badge = a.querySelector(".nav-badge");
+      if (!badge){ badge = document.createElement("span"); badge.className = "nav-badge"; a.appendChild(badge); }
+      var parts = [];
+      if (favs.indexOf(sid) >= 0) parts.push("⭐");
+      if (notes[sid]) parts.push("📝");
+      badge.textContent = parts.join(" ");
+      badge.style.display = parts.length ? "" : "none";
+    });
   });
 }
 
@@ -5585,8 +5617,22 @@ function expandSection(lib, secId){
   var title = h ? cleanHeadingText(h) : secId;
   document.getElementById("expandSecTitle").textContent = "· " + title;
   var body = document.getElementById("expandBody");
+  var cached = getExpand(lib, secId);
+  if (cached && cached.t){
+    _expandDone = true; _expandStop = false; _expandAcc = cached.t;
+    body.innerHTML = simpleMd(cached.t);
+    document.getElementById("expandModal").classList.add("show");
+    showExpandCacheHint(true, cached.ts);
+    return;
+  }
   body.innerHTML = '<div class="ai-typing"><i></i><i></i><i></i></div> 正在为你拓展讲解…';
   document.getElementById("expandModal").classList.add("show");
+  showExpandCacheHint(false);
+  runExpandLLM(lib, secId, title);
+}
+function runExpandLLM(lib, secId, title){
+  var body = document.getElementById("expandBody");
+  if (!title){ var hh = document.querySelector('.page[data-page="'+lib+'"] [id="'+secId+'"]'); title = hh ? cleanHeadingText(hh) : secId; }
   var ctx = collectSectionText(lib, secId);
   var sys = { role: "system", content: "你是资深技术讲师。请对用户给出的知识点做深入拓展讲解：补充底层原理、典型例子、常见易错点、与相关技术的对比，以及便于记忆的技巧。用中文，适当使用 Markdown 列表与代码块，控制在 450 字以内，不要复述用户已写的内容。" };
   var user = { role: "user", content: "知识点标题：" + title + "\n\n知识点内容：\n" + ctx };
@@ -5601,13 +5647,36 @@ function expandSection(lib, secId){
     function(){
       if (_expandStop) return;
       _expandDone = true;
-      if (!_expandAcc) body.innerHTML = '<p class="tip">（未能生成内容，请稍后重试）</p>';
+      if (!_expandAcc){ body.innerHTML = '<p class="tip">（未能生成内容，请稍后重试）</p>'; }
+      else { setExpand(lib, secId, _expandAcc); showExpandCacheHint(true, Date.now()); }
     },
     function(errMsg){
       if (_expandStop) return;
       _expandDone = true;
       body.innerHTML = '<p class="tip">⚠️ ' + esc(errMsg || "生成失败") + '</p>';
     });
+}
+function regenExpand(){
+  if (!_expandCur){ kbToast("请先打开一个知识点的拓展"); return; }
+  var lib = _expandCur.lib, secId = _expandCur.secId;
+  var m = expandCache(); if (m[lib] && m[lib][secId]){ delete m[lib][secId]; saveExpandCache(m); }
+  var body = document.getElementById("expandBody");
+  var h = document.querySelector('.page[data-page="'+lib+'"] [id="'+secId+'"]'); var title = h ? cleanHeadingText(h) : secId;
+  body.innerHTML = '<div class="ai-typing"><i></i><i></i><i></i></div> 正在重新生成…';
+  showExpandCacheHint(false);
+  runExpandLLM(lib, secId, title);
+}
+function showExpandCacheHint(cached, ts){
+  var el = document.getElementById("expandCacheHint");
+  if (!el) return;
+  if (cached){
+    var s = ts ? (" · " + new Date(ts).toLocaleString()) : "";
+    el.textContent = "✅ 已读取本地缓存（离线可用）" + s + " · 点「🔄 重新生成」可更新";
+    el.classList.add("show");
+  } else {
+    el.textContent = "🌐 实时调用 AI 生成，完成后自动缓存，下次秒开且可离线";
+    el.classList.remove("show");
+  }
 }
 function stopExpand(){ _expandStop = true; _expandDone = true; }
 function closeExpand(){ document.getElementById("expandModal").classList.remove("show"); _expandStop = true; }
