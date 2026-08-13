@@ -170,6 +170,13 @@ main.main{margin-left:308px;padding:48px 32px 80px;}
 .content::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad);}
 
 .page{display:none;}
+.lib-meta{margin:14px 0 8px;padding:9px 14px;border-radius:10px;background:rgba(216,185,111,.10);
+  border:1px solid rgba(216,185,111,.28);color:var(--muted);font-size:13px;letter-spacing:.2px;}
+.lib-meta b{color:var(--ink);font-weight:700;}
+.v-sensitive{position:relative;border-left:3px solid #f0a04b;background:rgba(240,160,75,.07);
+  padding:12px 14px 10px 16px;border-radius:0 8px 8px 0;margin:16px 0;}
+.v-sensitive::before{content:"随版本变化";position:absolute;top:-9px;left:12px;font-size:10.5px;
+  letter-spacing:.5px;color:#fff;background:#f0a04b;padding:1px 7px;border-radius:6px;}
 .page.show{display:block;animation:pageIn .38s cubic-bezier(.22,.8,.3,1);}
 @keyframes pageIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
 
@@ -609,7 +616,7 @@ body.review h3.open::before{content:"\25BE  ";}
 <aside class="sidebar" id="sidebar">
   <div class="brand"><div class="logo">📚</div><div><div class="t">知识库</div><div class="s" id="brandSub">Java 面试八股</div></div></div>
   <div class="lib-tabs" id="libTabs">
-    <button type="button" class="lib-tab active" data-lib="0" onclick="switchLib('0')"><span class="ic">☕</span><span class="nm">Java 八股</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'0')">×</span></button><button type="button" class="lib-tab" data-lib="1" onclick="switchLib('1')"><span class="ic">🤖</span><span class="nm">Ragent 项目</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'1')">×</span></button><button type="button" class="lib-tab" data-lib="2" onclick="switchLib('2')"><span class="ic">🔗</span><span class="nm">LangChain 1.0+</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'2')">×</span></button><button type="button" class="lib-tab" data-lib="3" onclick="switchLib('3')"><span class="ic">🤖</span><span class="nm">Embabel Agent</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'3')">×</span></button><button type="button" class="lib-tab" data-lib="4" onclick="switchLib('4')"><span class="ic">🌱</span><span class="nm">Spring AI</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'4')">×</span></button><button type="button" class="lib-tab" data-lib="5" onclick="switchLib('5')"><span class="ic">🧭</span><span class="nm">业务开发模板</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'5')">×</span></button><button type="button" class="lib-tab" data-lib="6" onclick="switchLib('6')"><span class="ic">📨</span><span class="nm">消息队列 MQ</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'6')">×</span></button>
+    <button type="button" class="lib-tab active" data-lib="0" title="版本 Java 21 · 最后更新 2026-08-06" onclick="switchLib('0')"><span class="ic">☕</span><span class="nm">Java 八股</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'0')">×</span></button><button type="button" class="lib-tab" data-lib="1" title="版本 — · 最后更新 2026-08-06" onclick="switchLib('1')"><span class="ic">🤖</span><span class="nm">Ragent 项目</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'1')">×</span></button><button type="button" class="lib-tab" data-lib="2" title="版本 1.0+ · 最后更新 2026-08-06" onclick="switchLib('2')"><span class="ic">🔗</span><span class="nm">LangChain 1.0+</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'2')">×</span></button><button type="button" class="lib-tab" data-lib="3" title="版本 0.x · 最后更新 2026-08-06" onclick="switchLib('3')"><span class="ic">🤖</span><span class="nm">Embabel Agent</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'3')">×</span></button><button type="button" class="lib-tab" data-lib="4" title="版本 2.0 · 最后更新 2026-08-13" onclick="switchLib('4')"><span class="ic">🌱</span><span class="nm">Spring AI</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'4')">×</span></button><button type="button" class="lib-tab" data-lib="5" title="版本 — · 最后更新 2026-08-06" onclick="switchLib('5')"><span class="ic">🧭</span><span class="nm">业务开发模板</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'5')">×</span></button><button type="button" class="lib-tab" data-lib="6" title="版本 — · 最后更新 2026-08-06" onclick="switchLib('6')"><span class="ic">📨</span><span class="nm">消息队列 MQ</span><span class="ct"></span><span class="pbar"><i></i></span><span class="del" title="删除该知识库" onclick="delLib(event,'6')">×</span></button>
     <button type="button" class="lib-add" onclick="openLibModal()">＋ 新建知识库</button>
   </div>
   <div class="search"><input id="search" type="text" placeholder="🔍 搜索当前知识库…" oninput="onSearch(this.value)"><label class="search-global" title="跨全部知识库搜索"><input type="checkbox" id="searchGlobal" onchange="onSearch(document.getElementById('search').value)">全局</label><div class="search-hint" id="searchHint" onclick="jumpOtherLib()"></div><div class="search-results" id="searchResults"></div></div>
@@ -619,7 +626,8 @@ body.review h3.open::before{content:"\25BE  ";}
   </div>
 </aside>
 <main class="main"><div class="content" id="contentBox">
-  <section class="page show" data-page="0"><h1 id="sec-1">Java 面试八股完整知识库（概念 + 业务实战）</h1>
+  <section class="page show" data-page="0"><div class="lib-meta">📌 <b>Java 八股</b> · 版本 <b>Java 21</b> · 最后更新 <b>2026-08-06</b></div>
+    <h1 id="sec-1">Java 面试八股完整知识库（概念 + 业务实战）</h1>
 <blockquote>整理：Java 后端高频面试知识点（八股文）+ 真实业务场景实战 适用：校招 / 社招 Java 开发岗复习 说明： - <strong>第一部分「核心知识点」</strong>：以「题目 + 要点」形式组织，便于背诵与速查。 - <strong>第二部分「业务场景实战」</strong>：把抽象知识点落到真实业务，每个场景给出「业务背景 → 用到的知识点 → 关键实现思路 → 面试追问」。 - 两者打通，既能背概念，又能在面试被问「项目里怎么用的」时张口就来。</blockquote>
 <hr class="sep">
 <h2 id="sec-2">总目录</h2>
@@ -1266,8 +1274,9 @@ orderTx.execute(() -&gt; {
 <li><strong>不会的问题应对公式</strong>：坦诚承认 + 讲出现有认知（相关经验）+ 给出学习思路，切忌不懂装懂。</li></ul>
 <blockquote>至此 Java 八股部分覆盖「基础概念 → 业务实战 → 分布式专项 → 2026 新版进阶」四层，建议按 T0 → T1 → T2 顺序滚动复习。</blockquote>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('1')">下一个知识库：Ragent 项目 →</button></div>
-  </section><section class="page" data-page="1"><h1 id="sec-136">Ragent 平台项目知识库（Agentic RAG 企业级实战）</h1>
+  <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('1')">下一个知识库：Ragent 项目 →</button></div>
+  </section><section class="page" data-page="1"><div class="lib-meta">📌 <b>Ragent 项目</b> · 版本 <b>—</b> · 最后更新 <b>2026-08-06</b></div>
+    <h1 id="sec-136">Ragent 平台项目知识库（Agentic RAG 企业级实战）</h1>
 <blockquote>整理自 <code>ragent-main</code> 开源项目（nageoffer/ragent）：Java 17 + Spring Boot 3 + React 18 的企业级 <strong>Agentic RAG</strong> 平台。 定位：「后端程序员转型 AI 工程师的第一站」。覆盖从<strong>文档入库 → 智能问答 → 工具调用</strong>的完整链路。 学习理念：<strong>源码即文档</strong>——下面每个知识点都对应真实可调试的类与方法，建议配合断点跟一次请求走完整条链路。</blockquote>
 <hr class="sep">
 <h2 id="sec-137">一、项目定位与技术栈</h2>
@@ -1467,8 +1476,9 @@ orderTx.execute(() -&gt; {
 <li><strong>主动暴露边界</strong>：记忆摘要默认关闭、红锁没用（Redisson 看门狗够用）、ES 可选——知道「哪里做了简化」比假装完美更可信。</li></ul>
 <blockquote>建议打开 IDE 对照本章类名逐个断点跟一遍 <code>StreamChatPipeline.execute</code>，一小时就能建立全链路肌肉记忆。</blockquote>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('2')">下一个知识库：LangChain 1.0+ →</button></div>
-  </section><section class="page" data-page="2"><h1 id="sec-400">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</h1>
+  <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('2')">下一个知识库：LangChain 1.0+ →</button></div>
+  </section><section class="page" data-page="2"><div class="lib-meta">📌 <b>LangChain 1.0+</b> · 版本 <b>1.0+</b> · 最后更新 <b>2026-08-06</b></div>
+    <h1 id="sec-400">LangChain 1.0+ 知识库（从 0.x 到 1.x 完全指南）</h1>
 <blockquote>LangChain 于 <strong>2025 年 10 月发布 1.0（GA）</strong>，是一次「做减法」的大版本：砍掉数百个历史遗留 Chain/Agent，把框架收敛到单一的高层智能体抽象 <code>create_agent</code>，底层跑在 LangGraph 运行时之上；2025 年 12 月 2 日又推出 <strong>1.1</strong>，新增模型能力画像（model profiles）。本知识库覆盖包结构、核心 API、中间件、标准内容块、RAG 与迁移，答法遵循「概念 → 用法 → 原理 → 坑点 → 实战」。</blockquote>
 <hr class="sep">
 <h2 id="sec-401">一、定位与设计哲学</h2>
@@ -1842,8 +1852,9 @@ agent = create_agent(
 <hr class="sep">
 <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">— LangChain 1.0+ 知识库结束 · 内容基于官方 1.0 / 1.1 公告与迁移指南整理 —</p>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('3')">下一个知识库：Embabel Agent →</button></div>
-  </section><section class="page" data-page="3"><h1 id="sec-500">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</h1>
+  <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('3')">下一个知识库：Embabel Agent →</button></div>
+  </section><section class="page" data-page="3"><div class="lib-meta">📌 <b>Embabel Agent</b> · 版本 <b>0.x</b> · 最后更新 <b>2026-08-06</b></div>
+    <h1 id="sec-500">Embabel Agent 知识库（JVM 上的目标导向智能体框架）</h1>
 <blockquote>Embabel（发音 Em-BAY-bel）是由 <strong>Spring Framework 创始人 Rod Johnson</strong> 打造的 JVM 智能体框架，构建于 Spring AI 之上，用 <strong>Kotlin</strong> 编写但对 Java 极其友好。它的核心主张是：用<strong>非 LLM 的确定性规划算法（GOAP/A*）动态编排 Actions</strong>，把 LLM 调用与普通 JVM 代码、强类型领域模型无缝混合，从而得到「可解释、可调试、可重构」的智能体。本知识库基于官方文档 docs.embabel.com 与 GitHub 仓库整理，答法遵循「概念 → 注解 → 代码 → 原理 → 坑点」。</blockquote>
 <hr class="sep">
 <h2 id="sec-501">一、定位与背景</h2>
@@ -2105,8 +2116,9 @@ chat</code></pre>
 <li>License：Apache 2.0，仓库 <code>github.com/embabel/embabel-agent</code>，文档 <code>docs.embabel.com</code>。</li>
 </ul>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('4')">下一个知识库：Spring AI →</button></div>
-  </section><section class="page" data-page="4"><h1 id="sec-600">Spring AI 知识库（Java 生态的 AI 工程框架）</h1>
+  <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('4')">下一个知识库：Spring AI →</button></div>
+  </section><section class="page" data-page="4"><div class="lib-meta">📌 <b>Spring AI</b> · 版本 <b>2.0</b> · 最后更新 <b>2026-08-13</b></div>
+    <h1 id="sec-600">Spring AI 知识库（Java 生态的 AI 工程框架）</h1>
 <blockquote>Spring AI 是 Spring 官方出品的 <strong>AI 工程应用框架</strong>，于 <strong>2025-05-20 发布 1.0 GA</strong>。它把 Spring 生态的设计原则（可移植、模块化、以 POJO 为积木）带到 AI 领域，核心挑战是<strong>把企业数据与 API 连接到大模型</strong>。核心 API 是 <code>ChatClient</code>（可移植、易用的模型交互入口）。本库基于 spring.io 官方文档与参考手册整理，答法遵循「概念 → API → 代码 → 实战 → 坑点」。2026-05-28 发布 <strong>2.0 GA</strong>：基于 Spring Boot 4 / Framework 7 / Java 21，带来 Jackson 3、setter 全面改为 builder、MCP 进入核心、官方 OpenAI SDK 等重大升级，同时伴随一批破坏性变更（迁移需评估，见第十九、二十章）。</blockquote>
 <hr class="sep">
 <h2 id="sec-601">一、定位与版本</h2>
@@ -2369,7 +2381,7 @@ EvaluationResponse res = evaluator.evaluate(req);
 </ul>
 <hr class="sep">
 <h2 id="sec-619">十九、Spring AI 2.0 重大升级（GA：2026-05-28）</h2>
-<blockquote>2.0 是 Spring AI 的「企业级地基」版本：从 Spring Boot 3.x 全面迁到 <strong>Spring Boot 4.0 / Spring Framework 7.0 / Jakarta EE 11</strong>，并要求 <strong>Java 21</strong>。它合并了 67+ 项改动（M1 阶段），并在 M5/M6 持续打磨，最终于 2026-05-28 发布 GA。核心变化是「平台升级 + API 收敛 + 生态增强」，但也带来一批破坏性变更（见二十章）。</blockquote>
+<blockquote class="v-sensitive">2.0 是 Spring AI 的「企业级地基」版本：从 Spring Boot 3.x 全面迁到 <strong>Spring Boot 4.0 / Spring Framework 7.0 / Jakarta EE 11</strong>，并要求 <strong>Java 21</strong>。它合并了 67+ 项改动（M1 阶段），并在 M5/M6 持续打磨，最终于 2026-05-28 发布 GA。核心变化是「平台升级 + API 收敛 + 生态增强」，但也带来一批破坏性变更（见二十章）。</blockquote>
 <h3 id="sec-6191">19.1 平台与基线</h3>
 <table><thead><tr><th>项</th><th>1.x</th><th>2.0</th></tr></thead><tbody>
 <tr><td>Spring Boot</td><td>3.x</td><td>4.0 GA（硬依赖，不能跑在 3.x）</td></tr>
@@ -2480,8 +2492,9 @@ OpenAiChatOptions o = OpenAiChatOptions.builder()
 <li><strong>可混搭</strong>，但务必在架构层做好抽象边界（隔离 ChatClient / AiServices 调用），避免被单一框架绑架。</li>
 </ul>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('5')">下一个知识库：业务开发模板 →</button></div>
-  </section><section class="page" data-page="5"><h1 id="sec-7000">后端业务项目开发模板（以 Ragent 为蓝本）</h1>
+  <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('5')">下一个知识库：业务开发模板 →</button></div>
+  </section><section class="page" data-page="5"><div class="lib-meta">📌 <b>业务开发模板</b> · 版本 <b>—</b> · 最后更新 <b>2026-08-06</b></div>
+    <h1 id="sec-7000">后端业务项目开发模板（以 Ragent 为蓝本）</h1>
 <h2 id="sec-7001">零、开篇：拿到一个后端业务项目，从哪里开始？</h2>
 <p>很多人一上来就「先堆 CRUD、再补功能」，结果越写越乱、越改越怕。正确的顺序是<strong>先想清楚、再动手</strong>：<strong>需求 → 选型 → 架构 → 实现 → 运维</strong> 五个阶段闭环推进，而不是一条直线冲到底。本库以「Ragent（一个 AI 智能问答 / 知识库系统）」为蓝本，把<strong>一个真实业务项目从 0 到 1 该考虑的每件事</strong>拆给你看——既能当方法论，也能当检查清单。</p>
 <table><thead><tr><th>阶段</th><th>核心问题</th><th>产出物</th></tr></thead><tbody>
@@ -2852,8 +2865,9 @@ return fallbackAnswer();                        // 全部失败→降级回复</
 </tbody></table>
 <blockquote>把这页存成「选型速查卡」，每次接到新功能先来这里对照——它就是把 Ragent 真实踩坑浓缩成的「后端业务开发模板」。</blockquote>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('6')">下一个知识库：消息队列 MQ →</button></div>
-  </section><section class="page" data-page="6"><h1 id="sec-8000">消息队列（MQ）知识体系</h1>
+  <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('6')">下一个知识库：消息队列 MQ →</button></div>
+  </section><section class="page" data-page="6"><div class="lib-meta">📌 <b>消息队列 MQ</b> · 版本 <b>—</b> · 最后更新 <b>2026-08-06</b></div>
+    <h1 id="sec-8000">消息队列（MQ）知识体系</h1>
 <h2 id="sec-8001">零、开篇：为什么需要消息队列</h2>
 <p>消息队列（Message Queue，简称 MQ）是一个<strong>跨进程的异步通信中间件</strong>：生产者把消息放进队列就返回，消费者按自己的节奏异步取走处理。它解决的不是「传输」，而是「解耦、异步、削峰」三件事。</p>
 <table><thead><tr><th>它能解决的问题</th><th>说明</th><th>反例（不用 MQ 会怎样）</th></tr></thead><tbody>
@@ -3062,7 +3076,7 @@ p.sendMessageInTransaction(new Message("order", payload.getBytes()), null);</pre
 </tbody></table>
 <p>👉 相关：消息可靠性与「不丢不重」的本质是分布式一致性问题，可对照 <a href="#sec-8005">四、投递语义</a> 与 <a href="#sec-8010">十、可靠性保障</a> 一起看。</p>
 
-    <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('0')">↻ 回到：Java 八股</button></div>
+  <div class="page-foot"><span></span><button class="pf-btn" onclick="switchLib('0')">↻ 回到：Java 八股</button></div>
   </section>
   <div class="empty-tip" id="emptyTip">暂无知识库，点击左侧「＋ 新建知识库」开始添加。</div>
 </div></main>
