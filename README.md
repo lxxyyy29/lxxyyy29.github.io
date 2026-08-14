@@ -72,7 +72,9 @@ src_long.html         原始长页正文（库 0/1 的来源；CI 构建用，�
 sync_gitee.sh         一键同步到 Gitee（大陆访问）
 ```
 
-> ⚠️ `lsp-bridge/`（IDEA 级 Java 补全后端）为**可选本地组件，不在本仓库内**。它位于本地 WorkBuddy 工程，需自行在本地或自有服务器运行（详见其自带 `README.md` / `家用部署说明_Windows.md`），再在站点 ⚙ 里填 `ws://localhost:5008`（或自有服务器的 `wss://域名/lsp`）。未运行时站点自动回退到内置静态补全。
+> ⚠️ `lsp-bridge/`（IDEA 级 Java 补全后端）为**可选本地组件，不在本仓库内**。它位于本地 WorkBuddy 工程，需自行在本地或自有服务器运行（详见其自带 `README.md` / `家用部署说明_Windows.md`），再在站点 ⚙ 的「**智能补全**」里填 `ws://localhost:5008`（或自有服务器的 `wss://域名/lsp`）。未运行时站点自动回退到内置静态补全。
+>
+> 🔴 **易错点**：`ws://localhost:5008` 是 **Java 语言服务(LSP) 的端口，不是 AI / 大模型代理**！千万不要把它填进 ⚙ 的「**AI 代理**」字段——那样浏览器会用 `fetch` 请求 `ws://` 协议而直接报错（表现为 AI 拓展一直「未能生成内容」）。AI 拓展默认走**浏览器直连 DeepSeek**，绝大多数情况下**代理字段留空即可**；只有当你所在网络对 `api.deepseek.com` 有跨域(CORS)限制时，才需要填一个 HTTP 代理（如 `http://localhost:8787/?url=`），并本地运行相应代理服务。代码已内置检测：若 AI 代理误填了 `ws://localhost:5008`，会自动清除并改走直连。
 
 新增一个知识库的标准做法（**数据驱动，只加一行**）：写 `frag_xxx.html`（以 `<h1>` 作为导航分组标题，章节用 `<h2>/<h3>` 并带 `id="sec-xxxx"`），在 `build_kb.py` 的 `EXTRA_LIBS` 列表加一行 `("7","🚀","新库名","frag_xxx.html")`，再 `python build_kb.py` 重建。库切换逻辑全读 DOM，无需改 JS。
 
