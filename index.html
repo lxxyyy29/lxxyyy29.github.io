@@ -3272,7 +3272,7 @@ p.sendMessageInTransaction(new Message("order", payload.getBytes()), null);</pre
 <div class="modal-mask" id="expandModal" onclick="if(event.target===this)closeExpand()">
   <div class="modal">
     <h3>✨ AI 拓展讲解 <span class="mn-sub" id="expandSecTitle"></span></h3>
-    <p class="tip" id="expandTip">AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。需配置 API Key（⚙）。</p>
+    <p class="tip" id="expandTip">AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。</p>
     <div class="expand-body" id="expandBody"></div>
     <p class="expand-cache-hint" id="expandCacheHint"></p>
     <div class="actions"><span class="left"><button class="m-btn ghost" onclick="stopExpand()">⏹ 停止</button><button class="m-btn ghost" onclick="regenExpand()">🔄 重新生成</button><button class="m-btn ghost" onclick="saveExpandAsNote()">💾 存为笔记</button><button class="m-btn ghost" onclick="genFlashcardFromSection()">🃏 生成闪卡</button></span><span class="right"><button class="m-btn ghost" onclick="closeExpand()">关闭</button></span></div>
@@ -5847,6 +5847,13 @@ function expandSection(lib, secId){
   var h = page ? page.querySelector('[id="' + secId + '"]') : null;
   var title = h ? cleanHeadingText(h) : secId;
   document.getElementById("expandSecTitle").textContent = "· " + title;
+  var tipEl = document.getElementById("expandTip");
+  if (tipEl){
+    var ec = getAiCfg();
+    tipEl.innerHTML = (ec && ec.key)
+      ? "AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。已检测到 Key，点展开即可生成。"
+      : "AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。需先在 ⚙ 配置 API Key 才能生成。";
+  }
   var body = document.getElementById("expandBody");
   var cached = getExpand(lib, secId);
   if (cached && cached.t){
