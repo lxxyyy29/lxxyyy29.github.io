@@ -3187,9 +3187,9 @@ p.sendMessageInTransaction(new Message("order", payload.getBytes()), null);</pre
     <input type="text" id="aiUrl" placeholder="API 地址，如 https://api.deepseek.com/v1">
     <input type="password" id="aiKey" placeholder="API Key（仅保存在本浏览器）">
     <input type="text" id="aiModel" placeholder="模型名，如 deepseek-chat">
-    <input type="text" id="aiProxy" placeholder="代理地址（可选，解决跨域/网络拦截，如 https://corsproxy.io/v1?url=）">
+    <input type="text" id="aiProxy" placeholder="代理地址（可选）：部署云端 relay 后留空即自动启用；或填 https://你的relay/?url=">
     <div class="row"><button class="m-btn primary" onclick="saveAiCfg()">保存并启用</button><button class="m-btn ghost" onclick="clearAiCfg()">清除，用回本地检索</button></div>
-    <div class="hint">支持任意 OpenAI 兼容接口（DeepSeek / 通义 / 硅基流动等）。配置后回答由大模型生成，上下文取自当前知识库。<b>若 AI 调用报“Failed to fetch”</b>：多半是打开方式（预览面板/本地文件）或网络访问不了 api.deepseek.com，可在「代理地址」填一个 CORS 代理（如 https://corsproxy.io/v1?url=），代理会转发你的 Key，仅在你本浏览器生效。</div>
+    <div class="hint">支持任意 OpenAI 兼容接口（DeepSeek / 通义 / 硅基流动等）。配置后回答由大模型生成，上下文取自当前知识库。<b>最简用法</b>：只填 API Key，在能直连 api.deepseek.com 的网络（手机流量 / 家庭网络）即可直接使用。<b>若报 “Failed to fetch” 或 HTTP 400</b>：多半是网络访问不了 api.deepseek.com，可在「代理地址」填一个云端 relay（如 https://你的relay.workers.dev/?url=，部署步骤见项目 README，免费且无需信用卡），代理只转发、不存储你的 Key，仅在你本浏览器生效。</div>
     <div class="lsp-cfg">
       <div class="lsp-title">智能补全（IDEA 级 · 需本地 Java 语言服务器）</div>
       <input type="text" id="lspWs" placeholder="ws://localhost:5008（本地 LSP 后端地址）">
@@ -3749,6 +3749,10 @@ function showEmpty(){
 /* ===== AI 学习助手 ===== */
 var AI_CFG_KEY = "kb_ai_cfg";
 var AI_DEFAULT = { url: "https://api.deepseek.com", key: "", model: "deepseek-v4-flash" };
+/* 默认代理（云端 relay）。部署 relay-worker/ 后，把你的 Worker 地址 + "/?url=" 填到这里，
+   则所有打开本网页的用户无需手动填代理，只需填 API Key 即可跨设备 / 跨网络使用 AI 拓展。
+   留空 "" 表示默认直连（适合手机流量 / 家庭网络等不被拦截的环境）。 */
+var DEFAULT_PROXY = "";
 var aiIndex = null;      /* 惰性构建的检索索引 */
 var aiBusy = false;
 
@@ -3756,6 +3760,9 @@ function getAiCfg(){
   try {
     var c = JSON.parse(localStorage.getItem(AI_CFG_KEY) || "null");
     if (c && c.url && c.key){
+      /* 预填默认云端 relay：用户未显式设置代理（为空/未填）时，自动套用 DEFAULT_PROXY，
+         实现「部署一次 relay 后，全网用户只需填 Key」；若用户手动清空或自定义则尊重其设置。 */
+      if (!c.proxy && DEFAULT_PROXY) c.proxy = DEFAULT_PROXY;
       /* 迁移：ws://localhost:5008 是 Java 语言服务(LSP)端口，不是 LLM 代理；
          误填它会导致浏览器用 fetch 请求 ws:// 协议而直接报错。自动清除改走直连。 */
       if (c.proxy && /ws:\/\/localhost:5008/.test(c.proxy)){
