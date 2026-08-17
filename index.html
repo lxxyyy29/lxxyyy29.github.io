@@ -42,6 +42,9 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
   background-image:radial-gradient(1200px 600px at 85% -5%,rgba(207,165,83,.08),transparent 60%),radial-gradient(900px 500px at -10% 100%,rgba(41,66,83,.06),transparent 55%);
   background-attachment:fixed;
   transition:background .3s,color .3s;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+.app-shell{max-width:1400px;margin:14px auto;display:grid;grid-template-columns:260px 1fr;
+  border-radius:24px;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;
+  background:var(--card);}
 ::selection{background:rgba(207,165,83,.32);}
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-thumb{background:#c9c2b0;border-radius:6px;border:2px solid var(--bg);}
@@ -61,14 +64,10 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
 .reader-prev b{color:var(--strong);}
 
 /* ===== 侧边栏（墨色 + 金，始终深色） ===== */
-.sidebar{position:fixed;left:14px;top:14px;bottom:14px;width:300px;z-index:1000;color:#dbe3ea;
-  transition:transform .28s cubic-bezier(.32,.72,.35,1),box-shadow .28s ease;
+.sidebar{position:sticky;top:14px;align-self:start;height:calc(100vh - 28px);width:260px;z-index:10;color:#dbe3ea;
   background:linear-gradient(175deg,#0c1821 0%,#12242f 52%,#173039 100%);
-  display:flex;flex-direction:column;overflow:hidden;
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:18px;
-  box-shadow:0 10px 40px rgba(10,20,28,.45);
-  transform:translateX(calc(-100% - 28px));}
+  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  border-right:1px solid rgba(255,255,255,.12);}
 .sidebar.open{transform:translateX(0);}
 .sidebar::before{content:"";position:absolute;top:-120px;right:-120px;width:280px;height:280px;border-radius:50%;
   background:radial-gradient(circle,rgba(207,165,83,.16),transparent 68%);pointer-events:none;}
@@ -197,7 +196,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
 /* KB-FIX(monaco-suggest-v2): 必须限定为 main 标签。裸 .main 会命中 Monaco 补全项内部的
    <div class="main">，把候选文字挤出可视区（margin-left:308px + padding-top:48px），
    表现为"下拉框有、选中行蓝、但文字看不见"。 */
-main.main{margin-left:0;padding:72px 32px 80px;}
+main.main{margin-left:0;padding:28px 36px 80px;min-width:0;background:var(--card);}
 .content{max-width:880px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;
   box-shadow:var(--shadow);padding:56px 64px;transition:background .3s,border-color .3s;
   font-size:var(--reader-fs,15.5px);line-height:var(--reader-lh,1.9);
@@ -638,15 +637,12 @@ body.review h3.open::before{content:"\25BE  ";}
 .menu-btn{display:none;}
 .overlay{display:none;position:fixed;inset:0;background:rgba(10,20,28,.45);backdrop-filter:blur(2px);z-index:990;}
 .overlay.show{display:block;}
-.menu-float{display:flex;position:fixed;top:18px;left:18px;z-index:950;width:46px;height:46px;
-  align-items:center;justify-content:center;border:none;border-radius:14px;background:var(--card);color:var(--ink);
-  font-size:21px;cursor:pointer;box-shadow:var(--shadow);transition:transform .18s,background .18s;}
-.menu-float:hover{transform:translateY(-2px);background:var(--bg);}
-[data-theme="dark"] .menu-float{background:#121d26;color:#e5eaef;}
-[data-theme="dark"] .menu-float:hover{background:#1a2833;}
+.menu-float{display:none;}
 @media (max-width:920px){
-  .menu-float{display:none;}
-  .sidebar{left:0;top:0;bottom:0;border-radius:0 18px 18px 0;transform:translateX(-100%);width:80%;max-width:300px;transition:transform .25s ease;}
+  .app-shell{display:block;margin:0;border-radius:0;border:none;box-shadow:none;background:transparent;max-width:none;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;height:auto;align-self:auto;overflow:hidden;
+    border-right:none;border-radius:0 18px 18px 0;transform:translateX(-100%);width:80%;max-width:300px;transition:transform .25s ease;z-index:1000;}
+  main.main{background:transparent;padding:calc(66px + env(safe-area-inset-top)) 14px calc(44px + env(safe-area-inset-bottom));}
   .sidebar.open{transform:translateX(0);box-shadow:6px 0 32px rgba(10,20,28,.35);}
   main.main{margin-left:0;padding:calc(66px + env(safe-area-inset-top)) 14px calc(44px + env(safe-area-inset-bottom));} /* KB-FIX(monaco-suggest-v2) 同上，禁止裸 .main */
   .content{padding:28px 20px;border-radius:16px;}
@@ -717,6 +713,7 @@ body.review h3.open::before{content:"\25BE  ";}
 }
 </style></head><body>
 <div class="progress" id="progress"></div>
+<div class="app-shell" id="appShell">
 <div class="topbar"><button class="menu-btn" onclick="toggleMenu()">☰</button><span class="title" id="topTitle">知识库</span></div>
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 <button class="menu-float" onclick="toggleMenu()" aria-label="打开菜单">☰</button>
@@ -3349,6 +3346,7 @@ p.sendMessageInTransaction(new Message("order", payload.getBytes()), null);</pre
     <p class="tip" id="syncStatus" style="margin-top:12px;min-height:18px"></p>
     <div class="actions"><span></span><span class="right"><button class="m-btn ghost" onclick="closeCloudSync()">关闭</button></span></div>
   </div>
+</div>
 </div>
 <script>
 var currentLib = "0";
