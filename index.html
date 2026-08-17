@@ -642,12 +642,9 @@ body.review h3.open::before{content:"\25BE  ";}
   [data-theme="dark"] .topbar{background:rgba(18,29,38,.88);}
   .menu-btn{display:inline-block;font-size:21px;background:none;border:none;cursor:pointer;margin-right:12px;color:var(--ink);}
   .topbar .title{font-weight:700;font-size:15px;}
-  /* 移动端抽屉精简：品牌头与顶部栏标题重复，收起副标题、缩小留白，减少冗余感 */
-  .brand{padding:14px 16px 10px;gap:10px;}
-  .brand .logo{width:34px;height:34px;border-radius:10px;font-size:18px;}
-  .brand .t{font-size:14px;}
-  .brand .s{display:none;}
-  .lib-tabs{padding:8px 12px 6px;}
+  /* 移动端抽屉精简：品牌头与顶部栏标题重复，直接在抽屉内隐藏品牌头，减少一个割裂区块 */
+  .brand{display:none;}
+  .lib-tabs{padding:10px 12px 8px;}
   .search{padding:6px 12px 2px;}
   .nav-h1{margin:14px 10px 5px;font-size:11px;}
   .nav-h2{padding:5px 26px 5px 10px;font-size:13px;}
@@ -674,9 +671,10 @@ body.review h3.open::before{content:"\25BE  ";}
   .page > h1{font-size:20px;}
   h2{font-size:18px;padding-left:10px;}
   h3{font-size:15px;}
-  /* 工具区改为紧凑 4 列图标网格，告别原来横滑一长排的冗余感 */
-  .tools{gap:6px;padding:8px 12px 10px;display:grid;grid-template-columns:repeat(4,1fr);overflow:visible;flex-wrap:wrap;}
-  .tools button{flex:none;width:100%;font-size:11px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.1;white-space:normal;}
+  /* 工具区改为扁平 4 列网格：去掉 pill 边框，避免一堆积木方块带来的割裂感 */
+  .tools{gap:0;padding:0 12px 8px;display:grid;grid-template-columns:repeat(4,1fr);overflow:visible;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.06);}
+  .tools button{flex:none;width:100%;font-size:11px;padding:11px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.1;white-space:normal;border:none;border-radius:0;background:transparent;color:#dbe3ea;}
+  .tools button.on{background:rgba(207,165,83,.18);color:#e8c87d;}
   .monaco-mount{height:150px;}
   .prac .ed .lh{font-size:10px;}
   .modal{max-width:100%;}
