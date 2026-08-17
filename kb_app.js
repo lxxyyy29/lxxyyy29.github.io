@@ -27,6 +27,7 @@ function switchLib(i, target){
   document.querySelectorAll(".lib-tab").forEach(function(t){ t.classList.toggle("active", t.dataset.lib === i); });
   document.querySelectorAll(".page").forEach(function(p){ p.classList.toggle("show", p.dataset.page === i); });
   document.querySelectorAll(".nav-list").forEach(function(n){ n.classList.toggle("show", n.dataset.lib === i); });
+  markNav();
   document.querySelectorAll(".nav-h2.active,.nav-h3.active").forEach(function(a){ a.classList.remove("active"); });
   var name = libName(i);
   var sub = document.getElementById("brandSub"); if (sub) sub.textContent = name;
@@ -175,13 +176,42 @@ function jumpOtherLib(){
 /* ===== 主题 ===== */
 function applyTheme(t){
   document.documentElement.dataset.theme = t;
+  var tc = document.querySelector('meta[name="theme-color"]');
+  if (tc) tc.setAttribute('content', t === 'dark' ? '#0b1218' : t === 'sepia' ? '#efe6d2' : '#f2efe7');
   var b = document.getElementById("themeBtn");
-  if (b) b.innerHTML = (t === "dark") ? "☀️ 亮色" : "🌙 暗色";
+  if (b) b.innerHTML = (t === "dark") ? "☀️ 浅色" : (t === "sepia") ? "🌙 暗色" : "🌿 护眼";
+  var to = document.getElementById("themeOpts");
+  if (to) Array.prototype.forEach.call(to.querySelectorAll("button"), function(x){ x.classList.toggle("on", x.dataset.t === t); });
   try { localStorage.setItem("kb_theme", t); } catch(e){}
 }
+function setTheme(t){ applyTheme(t); }
 function toggleTheme(){
-  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  var cur = document.documentElement.dataset.theme || "light";
+  var order = ["light","sepia","dark"];
+  applyTheme(order[(order.indexOf(cur) + 1) % 3]);
 }
+function applyReader(){
+  var rf = document.getElementById("rFs"), rl = document.getElementById("rLh");
+  if (!rf || !rl) return;
+  var fs = parseFloat(rf.value), lh = parseFloat(rl.value);
+  document.documentElement.style.setProperty("--reader-fs", fs + "px");
+  document.documentElement.style.setProperty("--reader-lh", lh);
+  var fv = document.getElementById("rFsVal"); if (fv) fv.textContent = fs;
+  var lv = document.getElementById("rLhVal"); if (lv) lv.textContent = lh;
+  try { localStorage.setItem("kb_reader", JSON.stringify({fs:fs, lh:lh})); } catch(e){}
+}
+function openReader(){
+  try {
+    var r = JSON.parse(localStorage.getItem("kb_reader") || "{}");
+    var fs = r.fs || 15.5, lh = r.lh || 1.9;
+    var rf = document.getElementById("rFs"); if (rf) rf.value = fs;
+    var rl = document.getElementById("rLh"); if (rl) rl.value = lh;
+    var fv = document.getElementById("rFsVal"); if (fv) fv.textContent = fs;
+    var lv = document.getElementById("rLhVal"); if (lv) lv.textContent = lh;
+  } catch(e){}
+  var m = document.getElementById("readerModal"); if (m) m.classList.add("show");
+}
+function closeReader(){ var m = document.getElementById("readerModal"); if (m) m.classList.remove("show"); }
 
 /* ===== 背题模式（两个库分别构建折叠区） ===== */
 function buildFolds(c){
@@ -399,7 +429,15 @@ var aiBusy = false;
 function getAiCfg(){
   try {
     var c = JSON.parse(localStorage.getItem(AI_CFG_KEY) || "null");
-    if (c && c.url && c.key) return c;
+    if (c && c.url && c.key){
+      /* 迁移：ws://localhost:5008 是 Java 语言服务(LSP)端口，不是 LLM 代理；
+         误填它会导致浏览器用 fetch 请求 ws:// 协议而直接报错。自动清除改走直连。 */
+      if (c.proxy && /ws:\/\/localhost:5008/.test(c.proxy)){
+        try { delete c.proxy; localStorage.setItem(AI_CFG_KEY, JSON.stringify(c)); } catch(e){}
+        if (typeof kbToast === "function") kbToast("已清除 AI 代理中误填的 LSP 端口，改走直连");
+      }
+      return c;
+    }
   } catch(e){}
   return AI_DEFAULT;   /* 内置默认配置：DeepSeek V4 Flash */
 }
@@ -570,7 +608,14 @@ function callLLMStream(msgs, onToken, onDone, onFail){
     var timer = setTimeout(function(){ ctrl.abort(); }, viaProxy ? 90000 : 60000);
     return fetch(url, { method: "POST", headers: headers, body: body, signal: ctrl.signal })
       .then(function(r){
-        if (!r.ok) throw new Error("HTTP " + r.status);
+        if (!r.ok){
+          return r.text().then(function(txt){
+            var detail = "";
+            try { var j = JSON.parse(txt); if (j && j.error && j.error.message) detail = j.error.message; else if (typeof j === "string") detail = j; } catch(e){}
+            if (!detail) detail = (txt || "").replace(/\s+/g, " ").slice(0, 240);
+            throw new Error("HTTP " + r.status + (detail ? " · " + detail : ""));
+          });
+        }
         if (!r.body || !r.body.getReader) throw new Error("stream_unsupported");
         var reader = r.body.getReader();
         var dec = new TextDecoder("utf-8");
@@ -600,17 +645,66 @@ function callLLMStream(msgs, onToken, onDone, onFail){
       .finally(function(){ clearTimeout(timer); });
   }
   var realUrl = cfg.url.replace(/\/+$/, "") + "/chat/completions";
+  var failed = false;
+  function fail(msg){ failed = true; if (onFail) onFail(msg); }
+  /* WebSocket 代理：本地代理服务接收 {url,method,headers,body} 并转发流式响应 */
+  function readStreamWS(pUrl, onToken2){
+    return new Promise(function(resolve, reject){
+      var ws;
+      try { ws = new WebSocket(pUrl); } catch(e){ reject(e); return; }
+      var buf = "", closed = false;
+      var timer = setTimeout(function(){ try { ws.close(); } catch(e){} reject(new Error("代理超时(90s)")); }, 90000);
+      ws.onopen = function(){
+        try { ws.send(JSON.stringify({ url: realUrl, method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": headers.Authorization }, body: body })); }
+        catch(e){ clearTimeout(timer); reject(e); }
+      };
+      ws.onmessage = function(ev){
+        var text = ev.data || "";
+        buf += text;
+        var parts = buf.split("\n");
+        buf = parts.pop();
+        for (var i = 0; i < parts.length; i++){
+          var ln = parts[i].trim();
+          if (!ln || ln.indexOf("data:") !== 0) continue;
+          var payload = ln.slice(5).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            var obj = JSON.parse(payload);
+            var d = obj.choices && obj.choices[0] && obj.choices[0].delta && obj.choices[0].delta.content;
+            if (d) onToken2(d);
+          } catch (e) { /* 碎片 JSON 忽略 */ }
+        }
+      };
+      ws.onerror = function(){ if (!closed){ closed = true; clearTimeout(timer); reject(new Error("WebSocket 代理连接失败")); } };
+      ws.onclose = function(){ if (!closed){ closed = true; clearTimeout(timer); resolve(); } };
+    });
+  }
   readStream(realUrl, false)
-    .then(function(){ if (onDone) onDone(); })
+    .then(function(){ if (onDone && !failed) onDone(); })
     .catch(function(err){
-      if (cfg.proxy){
-        var pUrl = cfg.proxy.indexOf("{url}") >= 0 ? cfg.proxy.replace("{url}", encodeURIComponent(realUrl)) : (cfg.proxy + encodeURIComponent(realUrl));
-        readStream(pUrl, true)
-          .then(function(){ if (onDone) onDone(); })
-          .catch(function(err2){ if (onFail) onFail(String(err2 && err2.message || err2)); if (onDone) onDone(); });
+      var directMsg = String(err && err.message || err);
+      if (!cfg.proxy){
+        fail("直连 DeepSeek 失败：" + directMsg + "。若为浏览器跨域(CORS)限制，请在 ⚙ 的「代理」填一个 HTTP 代理地址（如 http://localhost:8787/?url=）后重试。");
+        if (onDone && !failed) onDone();
+        return;
+      }
+      var p = cfg.proxy;
+      if (p.indexOf("ws://") === 0 || p.indexOf("wss://") === 0){
+        readStreamWS(p, onToken)
+          .then(function(){ if (onDone && !failed) onDone(); })
+          .catch(function(err2){
+            fail("代理(WebSocket)失败：" + String(err2 && err2.message || err2) + "；直连也失败：" + directMsg);
+            if (onDone && !failed) onDone();
+          });
       } else {
-        if (onFail) onFail(String(err && err.message || err));
-        if (onDone) onDone();
+        var pUrl = p.indexOf("{url}") >= 0 ? p.replace("{url}", encodeURIComponent(realUrl)) : (p + encodeURIComponent(realUrl));
+        readStream(pUrl, true)
+          .then(function(){ if (onDone && !failed) onDone(); })
+          .catch(function(err2){
+            fail("代理(HTTP)失败：" + String(err2 && err2.message || err2) + "；直连也失败：" + directMsg);
+            if (onDone && !failed) onDone();
+          });
       }
     });
 }
@@ -774,6 +868,63 @@ function resetProgress(){
   var p = getProg(); p[currentLib] = [];
   saveProg(p);
   applyProg();
+}
+
+/* ===== 学习中心仪表盘 ===== */
+function dashCard(label, val){
+  return '<div class="dash-card"><div class="v">' + val + '</div><div class="l">' + label + '</div></div>';
+}
+function buildHeat(learn){
+  var days = 30, now = new Date(); now.setHours(0, 0, 0, 0);
+  var counts = {};
+  Object.keys(learn).forEach(function(lib){
+    Object.keys(learn[lib]).forEach(function(id){
+      var d = new Date(learn[lib][id].t); d.setHours(0, 0, 0, 0);
+      var diff = Math.round((now - d) / 86400000);
+      if (diff >= 0 && diff < days) counts[diff] = (counts[diff] || 0) + 1;
+    });
+  });
+  var cells = "";
+  for (var i = days - 1; i >= 0; i--){
+    var c = counts[i] || 0;
+    var lvl = c === 0 ? 0 : (c < 2 ? 1 : (c < 4 ? 2 : 3));
+    cells += '<span class="hm hm' + lvl + '" title="' + (i === 0 ? "今天" : (i + " 天前")) + "：" + c + ' 次学习"></span>';
+  }
+  return cells;
+}
+function openDashboard(){
+  var prog = getProg(), learn = getLearnAll(), notes = noteMap(), favs = favMap(), ucards = userCardMap();
+  var libs = liveLibs();
+  var tot = { sec: 0, done: 0, note: 0, fav: 0, card: 0, due: 0 }, rows = "";
+  libs.forEach(function(lib){
+    var total = document.querySelectorAll('.nav-list[data-lib="' + lib + '"] .nav-h2').length;
+    var dn = (prog[lib] || []).filter(function(id){ return !!document.getElementById(id); }).length;
+    var nNote = Object.keys(notes[lib] || {}).length;
+    var nFav = (favs[lib] || []).length;
+    var nCard = (ucards[lib] || []).length;
+    var due = 0;
+    (prog[lib] || []).forEach(function(id){
+      if (!document.getElementById(id)) return;
+      var st = (learn[lib] || {})[id]; if (!st) st = { t: Date.now(), n: 0 };
+      var days = (Date.now() - st.t) / 86400000;
+      var iv = INTERVALS[Math.min(st.n, INTERVALS.length - 1)];
+      if (days >= iv) due++;
+    });
+    tot.sec += total; tot.done += dn; tot.note += nNote; tot.fav += nFav; tot.card += nCard; tot.due += due;
+    var pct = total ? Math.round(dn / total * 100) : 0;
+    rows += '<div class="dash-row"><div class="dash-name" title="' + esc(libName(lib)) + '">' + esc(libName(lib)) + '</div>'
+      + '<div class="dash-bar"><i style="width:' + pct + '%"></i></div>'
+      + '<div class="dash-num">' + dn + '/' + total + '</div>'
+      + '<div class="dash-stat">📝 ' + nNote + ' · ⭐ ' + nFav + ' · 🃏 ' + nCard + ' · 📅 ' + due + ' 待复习</div></div>';
+  });
+  var html = '<div class="dash-cards">'
+    + dashCard("章节", tot.sec) + dashCard("已学", tot.done) + dashCard("笔记", tot.note)
+    + dashCard("收藏", tot.fav) + dashCard("闪卡", tot.card) + dashCard("今日复习", tot.due)
+    + '</div>'
+    + '<div class="dash-sub">各知识库进度</div>' + (rows || '<div class="dash-empty">还没有任何学习记录</div>')
+    + '<div class="dash-sub">近 30 天学习活跃度</div><div class="dash-heat">' + buildHeat(learn) + '</div>';
+  document.getElementById("dashBody").innerHTML = html;
+  document.getElementById("dashModal").classList.add("show");
 }
 
 /* ===== 艾宾浩斯复习提醒 ===== */
@@ -951,12 +1102,22 @@ function warmupCurrent(){
 }
 function cardPool(){
   if (!aiIndex) buildAiIndex();
-  return aiIndex.filter(function(c){ return c.lib === currentLib && c.text.trim().length > 40 && c.id; });
+  var pool = aiIndex.filter(function(c){ return c.lib === currentLib && c.text.trim().length > 40 && c.id; });
+  var um = userCardMap()[currentLib] || [];
+  um.forEach(function(c){ pool.push({ lib: currentLib, id: c.id, title: c.title, text: c.a || c.q, parent: c.title, _uc: true }); });
+  return pool;
+}
+function shuffleArr(a){
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
 }
 function startCards(){
   var pool = cardPool();
   if (!pool.length){ alert("当前知识库没有可做闪卡的内容"); return; }
-  FC.queue = pool.slice();
+  FC.queue = shuffleArr(pool.slice());   /* 每次打开都随机排序，不总从第一个开始 */
   FC.total = pool.length;
   document.getElementById("fcMask").classList.add("show");
   nextCard();
@@ -1918,6 +2079,33 @@ function renderPlan(plan, start, lib, titles){
 /* ===== 初始化 ===== */
 (function(){
   var t = "light"; try { t = localStorage.getItem("kb_theme") || "light"; } catch(e){} applyTheme(t);
+  try { var r = JSON.parse(localStorage.getItem("kb_reader") || "{}"); if (r.fs) document.documentElement.style.setProperty("--reader-fs", r.fs + "px"); if (r.lh) document.documentElement.style.setProperty("--reader-lh", r.lh); } catch(e){}
+  try { if (location.protocol === "https:" && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){}); } catch(e){}
+
+  /* ===== PWA 安装引导（添加到主屏） ===== */
+  var deferredInstall = null;
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredInstall = e; maybeShowInstall(); });
+  window.addEventListener('appinstalled', function(){ var b = document.getElementById('installBanner'); if (b) b.style.display = 'none'; });
+  function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
+  function maybeShowInstall(){
+    try { if (localStorage.getItem('kb_install_dismiss') === '1') return; } catch(e){}
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return;
+    if (navigator.standalone === true) return;
+    var b = document.getElementById('installBanner'); if (!b) return;
+    var txt = document.getElementById('ibTxt'), btn = document.getElementById('ibBtn');
+    if (deferredInstall){
+      txt.innerHTML = '把知识库装到主屏，像 App 一样离线使用';
+      btn.style.display = '';
+      btn.onclick = function(){ if (deferredInstall){ deferredInstall.prompt(); deferredInstall.userChoice.then(function(){}); } deferredInstall = null; b.style.display = 'none'; };
+    } else if (isIOS()){
+      txt.innerHTML = '点击 Safari 底部「分享」→「添加到主屏幕」，即可像 App 使用';
+      btn.style.display = 'none';
+    } else { return; }
+    b.style.display = 'flex';
+  }
+  function dismissInstall(){ var b = document.getElementById('installBanner'); if (b) b.style.display = 'none'; try { localStorage.setItem('kb_install_dismiss', '1'); } catch(e){} }
+  window.dismissInstall = dismissInstall;
+  maybeShowInstall();
 
   /* 图标选择 */
   var io = document.getElementById("iconOpts");
@@ -2007,9 +2195,74 @@ function doImport(file){
   r.readAsText(file);
 }
 
+/* ---------- 跨设备云同步（GitHub Gist 中转） ---------- */
+function setSyncStatus(m){ var s = document.getElementById("syncStatus"); if (s) s.textContent = m; }
+function openCloudSync(){
+  var t = ""; try { t = localStorage.getItem("sync_ghtoken") || ""; } catch(e){}
+  var inp = document.getElementById("syncToken"); if (inp && t) inp.value = t;
+  document.getElementById("cloudSyncModal").classList.add("show");
+}
+function closeCloudSync(){ document.getElementById("cloudSyncModal").classList.remove("show"); }
+function _syncTok(){
+  var v = (document.getElementById("syncToken").value || "").trim();
+  if (!v){ try { v = localStorage.getItem("sync_ghtoken") || ""; } catch(e){} }
+  if (v){ try { localStorage.setItem("sync_ghtoken", v); } catch(e){} }
+  return v;
+}
+function syncPush(){
+  var tok = _syncTok();
+  if (!tok){ setSyncStatus("请先填写 GitHub Token"); return; }
+  var data = {};
+  for (var i = 0; i < localStorage.length; i++){
+    var k = localStorage.key(i);
+    if (k && k.indexOf("kb_") === 0) data[k] = localStorage.getItem(k);
+  }
+  var gid = null; try { gid = localStorage.getItem("sync_gist_id"); } catch(e){}
+  var body = JSON.stringify({ description:"kb-sync", public:false, files:{ "kb-sync.json":{ content: JSON.stringify(data) } } });
+  var url = gid ? ("https://api.github.com/gists/" + gid) : "https://api.github.com/gists";
+  var method = gid ? "PATCH" : "POST";
+  setSyncStatus("正在上传…");
+  fetch(url, { method:method, headers:{ "Authorization":"Bearer "+tok, "Content-Type":"application/json" }, body:body })
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.message || ("HTTP "+r.status)); return j; }); })
+    .then(function(j){ try { localStorage.setItem("sync_gist_id", j.id); } catch(e){} setSyncStatus("上传成功 ✅ Gist: "+j.id); kbToast("云同步上传成功"); })
+    .catch(function(err){ setSyncStatus("上传失败：" + err.message); });
+}
+function syncPull(){
+  var tok = _syncTok();
+  if (!tok){ setSyncStatus("请先填写 GitHub Token"); return; }
+  var gid = null; try { gid = localStorage.getItem("sync_gist_id"); } catch(e){}
+  if (!gid){ setSyncStatus("还没有上传过，请先「上传到此设备」或在另一台设备拿到 Gist ID 后填写"); return; }
+  setSyncStatus("正在拉取…");
+  fetch("https://api.github.com/gists/" + gid, { headers:{ "Authorization":"Bearer "+tok } })
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.message || ("HTTP "+r.status)); return j; }); })
+    .then(function(j){
+      var content = j.files && j.files["kb-sync.json"] && j.files["kb-sync.json"].content;
+      if (!content) throw new Error("云端没有同步数据");
+      var data = JSON.parse(content);
+      for (var k in data){ if (data.hasOwnProperty(k)) localStorage.setItem(k, data[k]); }
+      setSyncStatus("拉取成功 ✅ 即将刷新…"); kbToast("云同步拉取成功");
+      setTimeout(function(){ location.reload(); }, 700);
+    })
+    .catch(function(err){ setSyncStatus("拉取失败：" + err.message); });
+}
+
 /* ---------- 笔记 / 收藏 ---------- */
 var KB_FAV_KEY = "kb_favs";   /* { lib: [secId,...] } */
 var KB_NOTE_KEY = "kb_notes"; /* { lib: { secId: "text" } } */
+var KB_UCARD_KEY = "kb_usercards"; /* { lib: [ {id,title,q,a,secId} ] } */
+var _expandCur = null;
+var KB_EXPAND_KEY = "kb_expand"; /* { lib: { secId: {t:"text", ts:ms} } } */
+function expandCache(){ try{ return JSON.parse(localStorage.getItem(KB_EXPAND_KEY)||"{}"); }catch(e){ return {}; } }
+function saveExpandCache(m){ try{ localStorage.setItem(KB_EXPAND_KEY, JSON.stringify(m)); }catch(e){} }
+function getExpand(lib, secId){ var m=expandCache(); return (m[lib] && m[lib][secId]) ? m[lib][secId] : null; }
+function setExpand(lib, secId, text){ var m=expandCache(); if(!m[lib]) m[lib]={}; m[lib][secId]={t:text, ts:Date.now()}; saveExpandCache(m); }
+function userCardMap(){ try{ return JSON.parse(localStorage.getItem(KB_UCARD_KEY)||"{}"); }catch(e){ return {}; } }
+function saveUserCardMap(m){ try{ localStorage.setItem(KB_UCARD_KEY, JSON.stringify(m)); }catch(e){} }
+function secTitleById(lib, sid){
+  var page = document.querySelector('.page[data-page="'+lib+'"]');
+  var h = page ? page.querySelector('[id="'+sid+'"]') : null;
+  return h ? cleanHeadingText(h) : null;
+}
 var _mnFilter = "all";
 var _curNote = null;
 
@@ -2033,10 +2286,31 @@ function refreshFavButtons(lib, secId){
   document.querySelectorAll('.page[data-page="'+lib+'"] .h-fav[data-sec="'+secId+'"]').forEach(function(b){
     b.classList.toggle("on", isFav(lib, secId));
   });
+  markNav();
 }
 function refreshNoteButtons(lib, secId){
   document.querySelectorAll('.page[data-page="'+lib+'"] .h-note[data-sec="'+secId+'"]').forEach(function(b){
     b.classList.toggle("on", isNoted(lib, secId));
+  });
+  markNav();
+}
+/* 侧栏导航标记：给有收藏(⭐)/笔记(📝)的章节打小角标，方便复习定位 */
+function markNav(){
+  document.querySelectorAll(".nav-list.show").forEach(function(nl){
+    var lib = nl.dataset.lib;
+    var notes = noteMap()[lib] || {};
+    var favs = favMap()[lib] || [];
+    nl.querySelectorAll("a.nav-h2,a.nav-h3").forEach(function(a){
+      var sid = (a.getAttribute("href") || "").replace(/^#/, "");
+      if (!sid) return;
+      var badge = a.querySelector(".nav-badge");
+      if (!badge){ badge = document.createElement("span"); badge.className = "nav-badge"; a.appendChild(badge); }
+      var parts = [];
+      if (favs.indexOf(sid) >= 0) parts.push("⭐");
+      if (notes[sid]) parts.push("📝");
+      badge.textContent = parts.join(" ");
+      badge.style.display = parts.length ? "" : "none";
+    });
   });
 }
 
@@ -2057,7 +2331,11 @@ function decorateHeadings(){
       note.className = "h-note" + (isNoted(lib, sid) ? " on" : "");
       note.title = "写笔记"; note.textContent = "📝"; note.setAttribute("data-sec", sid);
       note.onclick = function(e){ e.stopPropagation(); openNoteEditor(lib, sid); };
-      act.appendChild(fav); act.appendChild(note); h.appendChild(act);
+      var exp = document.createElement("button");
+      exp.className = "h-expand";
+      exp.title = "AI 拓展讲解"; exp.textContent = "✨"; exp.setAttribute("data-sec", sid);
+      exp.onclick = function(e){ e.stopPropagation(); expandSection(lib, sid); };
+      act.appendChild(fav); act.appendChild(note); act.appendChild(exp); h.appendChild(act);
     });
   });
 }
@@ -2070,6 +2348,21 @@ function openMyNotes(){
   var favs = favMap()[lib] || [];
   var notes = noteMap()[lib] || {};
   var list = document.getElementById("mnList"); list.innerHTML = "";
+  if (_mnFilter === "card"){
+    var ucs = (userCardMap()[lib] || []);
+    if (!ucs.length){ list.innerHTML = '<div class="mn-empty">还没有用 AI 生成的闪卡。打开任意知识点的 ✨ 拓展，点「🃏 生成闪卡」即可。</div>'; }
+    ucs.forEach(function(c){
+      var row = document.createElement("div"); row.className = "mn-row";
+      var t = document.createElement("span"); t.className = "mn-title"; t.textContent = "🃏 " + (c.q || c.title);
+      var db = document.createElement("span"); db.className = "mn-note-badge on"; db.textContent = "🗑"; db.title = "删除该闪卡";
+      db.onclick = function(){ delUserCard(lib, c.id); };
+      row.appendChild(t); row.appendChild(db);
+      list.appendChild(row);
+    });
+    document.getElementById("mnTip").textContent = "共 " + ucs.length + " 张 AI 闪卡";
+    document.getElementById("myNotesModal").classList.add("show");
+    return;
+  }
   var arr = Array.prototype.slice.call(secs);
   if (!arr.length){ list.innerHTML = '<div class="mn-empty">这个知识库还没有小节。</div>'; }
   arr.forEach(function(h){
@@ -2137,6 +2430,239 @@ function delNote(){
   closeNoteEditor();
 }
 function closeNoteEditor(){ document.getElementById("noteModal").classList.remove("show"); _curNote = null; }
+
+/* ---------- 单知识点 AI 拓展讲解 ---------- */
+var _expandAcc = "", _expandDone = false, _expandStop = false;
+
+function cleanHeadingText(h){
+  var c = h.cloneNode(true);
+  var acts = c.querySelector(".h-actions"); if (acts) acts.parentNode.removeChild(acts);
+  return (c.textContent || "").replace(/[⭐📝✨]/g, "").replace(/\s+/g, " ").trim();
+}
+
+/* ===== 全局搜索（跨全部知识库） ===== */
+var _searchIdx = null;
+function buildSearchIndex(){
+  if (_searchIdx) return _searchIdx;
+  var idx = [];
+  document.querySelectorAll(".page").forEach(function(page){
+    var lib = page.dataset.page;
+    page.querySelectorAll('h2[id^="sec-"],h3[id^="sec-"]').forEach(function(h){
+      var sid = h.id;
+      var title = cleanHeadingText(h);
+      var body = collectSectionText(lib, sid) || "";
+      if (body.length > 700) body = body.slice(0, 700);
+      idx.push({ lib: lib, secId: sid, title: title, body: body });
+    });
+  });
+  _searchIdx = idx;
+  return idx;
+}
+function openSearch(){
+  buildSearchIndex();
+  document.querySelectorAll(".modal-mask.show").forEach(function(m){ if (m.id !== "searchModal") m.classList.remove("show"); });
+  var box = document.getElementById("searchModal");
+  box.classList.add("show");
+  var inp = document.getElementById("searchInput");
+  inp.value = "";
+  document.getElementById("searchResults").innerHTML = '<div class="sr-empty">输入关键词，跨全部知识库搜索章节标题与内容…</div>';
+  setTimeout(function(){ try { inp.focus(); } catch(e){} }, 50);
+}
+function closeSearch(){ var m = document.getElementById("searchModal"); if (m) m.classList.remove("show"); }
+function searchGo(){
+  var inp = document.getElementById("searchInput");
+  var box = document.getElementById("searchResults");
+  var q = (inp.value || "").trim().toLowerCase();
+  if (!q){ box.innerHTML = '<div class="sr-empty">输入关键词，跨全部知识库搜索章节标题与内容…</div>'; return; }
+  var idx = buildSearchIndex();
+  var out = [];
+  for (var i = 0; i < idx.length && out.length < 50; i++){
+    var it = idx[i];
+    var tl = (it.title || "").toLowerCase();
+    var bl = (it.body || "").toLowerCase();
+    var inTitle = tl.indexOf(q) >= 0;
+    var inBody = bl.indexOf(q) >= 0;
+    if (!inTitle && !inBody) continue;
+    var snippet = "";
+    if (inBody){
+      var bp = bl.indexOf(q);
+      var s = Math.max(0, bp - 28);
+      snippet = (s > 0 ? "…" : "") + it.body.slice(s, bp + q.length + 42).replace(/\s+/g, " ").trim() + "…";
+    }
+    out.push({ lib: it.lib, secId: it.secId, title: it.title, snippet: snippet, pri: inTitle ? 0 : 1 });
+  }
+  out.sort(function(a, b){ return a.pri - b.pri; });
+  if (!out.length){ box.innerHTML = '<div class="sr-empty">没有匹配到「' + esc(q) + '」的章节。</div>'; return; }
+  box.innerHTML = "";
+  var frag = document.createDocumentFragment();
+  out.forEach(function(r){
+    var item = document.createElement("div"); item.className = "sr-item";
+    var lib = document.createElement("span"); lib.className = "sr-lib"; lib.textContent = libName(r.lib);
+    var ti = document.createElement("div"); ti.className = "sr-title"; ti.textContent = r.title;
+    item.appendChild(lib); item.appendChild(ti);
+    if (r.snippet){ var sn = document.createElement("div"); sn.className = "sr-snippet"; sn.textContent = r.snippet; item.appendChild(sn); }
+    item.onclick = function(){ closeSearch(); switchLib(r.lib, r.secId); };
+    frag.appendChild(item);
+  });
+  box.appendChild(frag);
+}
+/* 收集某小节的正文纯文本（标题 + 到下一个同级标题之前的所有内容），截断喂给 AI */
+function collectSectionText(lib, secId){
+  var page = document.querySelector('.page[data-page="' + lib + '"]');
+  var h = page ? page.querySelector('[id="' + secId + '"]') : null;
+  if (!h) return "";
+  var parts = [cleanHeadingText(h)];
+  var n = h.nextElementSibling;
+  while (n && !/^h[123]$/i.test(n.tagName)){
+    var t = (n.innerText || n.textContent || "").replace(/\s+/g, " ").trim();
+    if (t) parts.push(t);
+    n = n.nextElementSibling;
+  }
+  var s = parts.join("\n\n");
+  if (s.length > 1500) s = s.slice(0, 1500) + "……";
+  return s;
+}
+function expandSection(lib, secId){
+  _expandCur = { lib: lib, secId: secId };
+  var page = document.querySelector('.page[data-page="' + lib + '"]');
+  var h = page ? page.querySelector('[id="' + secId + '"]') : null;
+  var title = h ? cleanHeadingText(h) : secId;
+  document.getElementById("expandSecTitle").textContent = "· " + title;
+  var tipEl = document.getElementById("expandTip");
+  if (tipEl){
+    var ec = getAiCfg();
+    tipEl.innerHTML = (ec && ec.key)
+      ? "AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。已检测到 Key，点展开即可生成。"
+      : "AI 会基于该知识点做深入拓展（原理 / 例子 / 易错点 / 对比 / 记忆技巧）。需先在 ⚙ 配置 API Key 才能生成。";
+  }
+  var body = document.getElementById("expandBody");
+  var cached = getExpand(lib, secId);
+  if (cached && cached.t){
+    _expandDone = true; _expandStop = false; _expandAcc = cached.t;
+    body.innerHTML = simpleMd(cached.t);
+    document.getElementById("expandModal").classList.add("show");
+    showExpandCacheHint(true, cached.ts);
+    return;
+  }
+  body.innerHTML = '<div class="ai-typing"><i></i><i></i><i></i></div> 正在为你拓展讲解…';
+  document.getElementById("expandModal").classList.add("show");
+  showExpandCacheHint(false);
+  runExpandLLM(lib, secId, title);
+}
+function runExpandLLM(lib, secId, title){
+  var body = document.getElementById("expandBody");
+  if (!title){ var hh = document.querySelector('.page[data-page="'+lib+'"] [id="'+secId+'"]'); title = hh ? cleanHeadingText(hh) : secId; }
+  var ctx = collectSectionText(lib, secId);
+  var sys = { role: "system", content: "你是资深技术讲师。请对用户给出的知识点做深入拓展讲解：补充底层原理、典型例子、常见易错点、与相关技术的对比，以及便于记忆的技巧。用中文，适当使用 Markdown 列表与代码块，控制在 450 字以内，不要复述用户已写的内容。" };
+  var user = { role: "user", content: "知识点标题：" + title + "\n\n知识点内容：\n" + ctx };
+  _expandAcc = ""; _expandDone = false; _expandStop = false;
+  callLLMStream([sys, user],
+    function(delta){
+      if (_expandStop || _expandDone) return;
+      _expandAcc += delta;
+      body.innerHTML = simpleMd(_expandAcc);
+      body.scrollTop = body.scrollHeight;
+    },
+    function(){
+      if (_expandStop) return;
+      _expandDone = true;
+      if (!_expandAcc){ body.innerHTML = '<p class="tip">（未能生成内容，请稍后重试）</p>'; }
+      else { setExpand(lib, secId, _expandAcc); showExpandCacheHint(true, Date.now()); }
+    },
+    function(errMsg){
+      if (_expandStop) return;
+      _expandDone = true;
+      body.innerHTML = '<p class="tip">⚠️ ' + esc(errMsg || "生成失败") + '</p>';
+    });
+}
+function regenExpand(){
+  if (!_expandCur){ kbToast("请先打开一个知识点的拓展"); return; }
+  var lib = _expandCur.lib, secId = _expandCur.secId;
+  var m = expandCache(); if (m[lib] && m[lib][secId]){ delete m[lib][secId]; saveExpandCache(m); }
+  var body = document.getElementById("expandBody");
+  var h = document.querySelector('.page[data-page="'+lib+'"] [id="'+secId+'"]'); var title = h ? cleanHeadingText(h) : secId;
+  body.innerHTML = '<div class="ai-typing"><i></i><i></i><i></i></div> 正在重新生成…';
+  showExpandCacheHint(false);
+  runExpandLLM(lib, secId, title);
+}
+function showExpandCacheHint(cached, ts){
+  var el = document.getElementById("expandCacheHint");
+  if (!el) return;
+  if (cached){
+    var s = ts ? (" · " + new Date(ts).toLocaleString()) : "";
+    el.textContent = "✅ 已读取本地缓存（离线可用）" + s + " · 点「🔄 重新生成」可更新";
+    el.classList.add("show");
+  } else {
+    el.textContent = "🌐 实时调用 AI 生成，完成后自动缓存，下次秒开且可离线";
+    el.classList.remove("show");
+  }
+}
+function stopExpand(){ _expandStop = true; _expandDone = true; }
+function closeExpand(){ document.getElementById("expandModal").classList.remove("show"); _expandStop = true; }
+function saveExpandAsNote(){
+  if (!_expandCur){ kbToast("请先打开一个知识点的拓展"); return; }
+  if (!_expandAcc || !_expandAcc.trim()){ kbToast("请先等待 AI 拓展生成完成"); return; }
+  var lib = _expandCur.lib, secId = _expandCur.secId;
+  var nm = noteMap(); if (!nm[lib]) nm[lib] = {};
+  var existing = nm[lib][secId] || "";
+  nm[lib][secId] = (existing ? existing + "\n\n— AI 拓展 —\n" : "") + _expandAcc.trim();
+  saveNoteMap(nm);
+  refreshNoteButtons(lib, secId);
+  kbToast("已存为笔记 ✅");
+}
+function exportNotesMD(){
+  var favs = favMap(), notes = noteMap(), ucards = userCardMap();
+  var libs = [];
+  for (var k in notes) if (notes.hasOwnProperty(k)) libs.push(k);
+  for (var k2 in favs) if (favs.hasOwnProperty(k2) && libs.indexOf(k2) < 0) libs.push(k2);
+  if (!libs.length){ kbToast("还没有任何笔记或收藏"); return; }
+  var md = "# 知识库笔记与收藏导出\n\n> 导出时间：" + new Date().toLocaleString() + "\n\n";
+  libs.forEach(function(lib){
+    md += "## " + libName(lib) + "\n\n";
+    var secs = notes[lib] || {}; var fs = favs[lib] || []; var us = ucards[lib] || [];
+    Object.keys(secs).forEach(function(sid){
+      var title = secTitleById(lib, sid);
+      md += "### " + (title || sid) + (fs.indexOf(sid) >= 0 ? "  ★" : "") + "\n\n" + secs[sid].trim() + "\n\n";
+    });
+    fs.forEach(function(sid){ if (!secs[sid]) md += "### " + (secTitleById(lib, sid) || sid) + "  ★\n\n*(仅收藏，无笔记)*\n\n"; });
+    if (us.length){ md += "#### 🃏 本节 AI 闪卡\n\n"; us.forEach(function(c){ md += "- **Q:** " + (c.q||"") + "\n  - **A:** " + (c.a||"") + "\n"; }); md += "\n"; }
+  });
+  var blob = new Blob([md], { type: "text/markdown" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "知识库笔记_" + new Date().toISOString().slice(0,10) + ".md";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  kbToast("已导出笔记 Markdown");
+}
+function genFlashcardFromSection(){
+  if (!_expandCur){ kbToast("请先打开一个知识点的拓展"); return; }
+  var lib = _expandCur.lib, secId = _expandCur.secId;
+  var title = secTitleById(lib, secId) || secId;
+  var ctx = collectSectionText(lib, secId);
+  var sys = { role:"system", content:"你是出题助手。请基于给定知识点生成一道供记忆复习用的闪卡。严格按格式输出，不要多余文字：\n问题：<一句考查该知识点的题目>\n答案：<该题目的要点答案，2-4 句>" };
+  var user = { role:"user", content:"知识点标题：" + title + "\n内容：\n" + ctx };
+  kbToast("正在生成闪卡…");
+  callLLM([sys, user], function(txt){
+    var q = title, a = txt.trim();
+    var mq = txt.match(/问题[:：]\s*([\s\S]*?)\s*答案[:：]/);
+    var ma = txt.match(/答案[:：]\s*([\s\S]*)$/);
+    if (mq) q = mq[1].trim();
+    if (ma) a = ma[1].trim();
+    var um = userCardMap(); if (!um[lib]) um[lib] = [];
+    um[lib].push({ id: "uc_" + Date.now(), lib: lib, secId: secId, title: title, q: q, a: a });
+    saveUserCardMap(um);
+    kbToast("已生成闪卡 🃏 可在「📝 我的 → 🃏 闪卡」查看，或直接点「🃏 闪卡」练习");
+  }, function(){ kbToast("生成闪卡失败，请重试"); });
+}
+function delUserCard(lib, id){
+  var um = userCardMap(); if (!um[lib]) return;
+  um[lib] = um[lib].filter(function(c){ return c.id !== id; });
+  if (!um[lib].length) delete um[lib];
+  saveUserCardMap(um);
+  openMyNotes();
+  kbToast("已删除闪卡");
+}
 
 function realAppUrl(){
   var APP_URL = "https://1c0993a0612f4d948cebcf9059e2d530.sh2.agentos-app.net";
