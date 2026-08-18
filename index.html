@@ -46,17 +46,6 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
 .app-shell{display:grid;grid-template-columns:260px 1fr;
   border-radius:24px;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;
   background:var(--card);}
-.deco{position:absolute;z-index:6;pointer-events:none;font-size:22px;line-height:1;user-select:none;
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.12));transition:transform .2s;}
-.deco:hover{transform:scale(1.15) rotate(-6deg);}
-.deco-tl{top:-15px;left:-12px;}
-.deco-tr{top:-15px;right:-12px;}
-.deco-bl{bottom:-15px;left:-12px;}
-.deco-br{bottom:-15px;right:-12px;}
-.deco-tc{top:-19px;left:50%;transform:translateX(-50%);font-size:20px;}
-.deco-bc{bottom:-19px;left:50%;transform:translateX(-50%);font-size:20px;}
-.deco-l{top:50%;left:-16px;transform:translateY(-50%);font-size:20px;}
-.deco-r{top:50%;right:-16px;transform:translateY(-50%);font-size:20px;}
 ::selection{background:rgba(207,165,83,.32);}
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-thumb{background:#c9c2b0;border-radius:6px;border:2px solid var(--bg);}
@@ -81,18 +70,16 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang 
   display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
   border-right:1px solid rgba(255,255,255,.12);}
 .sidebar.open{transform:translateX(0);}
-.sidebar::before{content:"";position:absolute;top:-120px;right:-120px;width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,rgba(207,165,83,.16),transparent 68%);pointer-events:none;}
-.brand{position:relative;padding:18px 20px 14px;display:flex;gap:12px;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.06);}
-.brand .logo{width:40px;height:40px;flex:none;border-radius:12px;background:var(--grad);
-  display:flex;align-items:center;justify-content:center;font-size:23px;
-  box-shadow:0 8px 20px rgba(207,165,83,.35),inset 0 1px 0 rgba(255,255,255,.35);}
+.brand{position:relative;padding:14px 16px 12px;display:flex;gap:12px;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.06);flex:none;}
+.brand .logo{width:36px;height:36px;flex:none;border-radius:10px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-size:21px;
+  box-shadow:0 6px 16px rgba(207,165,83,.35),inset 0 1px 0 rgba(255,255,255,.35);}
 .brand .t{font-family:"Noto Serif SC","Source Han Serif SC","STSong","SimSun",serif;
-  font-weight:800;font-size:18px;letter-spacing:2px;color:#f3e9d0;line-height:1.2;}
-.brand .s{font-size:11.5px;color:#93a3b0;margin-top:4px;letter-spacing:.6px;transition:color .2s;}
+  font-weight:800;font-size:17px;letter-spacing:1.5px;color:#f3e9d0;line-height:1.2;}
+.brand .s{font-size:11px;color:#93a3b0;margin-top:3px;letter-spacing:.5px;transition:color .2s;}
 
-.lib-tabs{display:flex;flex-wrap:nowrap;gap:8px;padding:12px 14px 10px;position:relative;overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(207,165,83,.5) transparent;}
+.lib-tabs{display:flex;flex-wrap:nowrap;gap:8px;padding:10px 14px 8px;position:relative;overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(207,165,83,.5) transparent;flex:none;}
 .lib-tabs::-webkit-scrollbar{height:7px;}
 .lib-tabs::-webkit-scrollbar-track{background:transparent;}
 .lib-tabs::-webkit-scrollbar-thumb{background:rgba(207,165,83,.45);border-radius:4px;}
@@ -652,7 +639,6 @@ body.review h3.open::before{content:"\25BE  ";}
 .menu-float{display:none;}
 @media (max-width:920px){
   .app-frame{margin:0;}
-  .deco{display:none;}
   .app-shell{display:block;margin:0;border-radius:0;border:none;box-shadow:none;background:transparent;max-width:none;}
   .sidebar{position:fixed;left:0;top:0;bottom:0;height:auto;align-self:auto;overflow:hidden;
     border-right:none;border-radius:0 18px 18px 0;transform:translateX(-100%);width:80%;max-width:300px;transition:transform .25s ease;z-index:1000;}
@@ -728,14 +714,6 @@ body.review h3.open::before{content:"\25BE  ";}
 </style></head><body>
 <div class="progress" id="progress"></div>
 <div class="app-frame" id="appFrame">
-  <span class="deco deco-tl">🌿</span>
-  <span class="deco deco-tc">☁️</span>
-  <span class="deco deco-tr">⭐</span>
-  <span class="deco deco-l">🌱</span>
-  <span class="deco deco-r">✨</span>
-  <span class="deco deco-bl">🍃</span>
-  <span class="deco deco-bc">🌸</span>
-  <span class="deco deco-br">🌟</span>
 <div class="app-shell" id="appShell">
 <div class="topbar"><button class="menu-btn" onclick="toggleMenu()">☰</button><span class="title" id="topTitle">知识库</span></div>
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
