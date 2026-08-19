@@ -423,6 +423,10 @@ function showEmpty(){
 /* ===== AI 学习助手 ===== */
 var AI_CFG_KEY = "kb_ai_cfg";
 var AI_DEFAULT = { url: "https://api.deepseek.com", key: "", model: "deepseek-v4-flash" };
+/* 默认代理（云端 relay）。部署 relay-worker/ 后，把你的 Worker 地址 + "/?url=" 填到这里，
+   则所有打开本网页的用户无需手动填代理，只需填 API Key 即可跨设备 / 跨网络使用 AI 拓展。
+   留空 "" 表示默认直连（适合手机流量 / 家庭网络等不被拦截的环境）。 */
+var DEFAULT_PROXY = "";
 var aiIndex = null;      /* 惰性构建的检索索引 */
 var aiBusy = false;
 
@@ -430,6 +434,9 @@ function getAiCfg(){
   try {
     var c = JSON.parse(localStorage.getItem(AI_CFG_KEY) || "null");
     if (c && c.url && c.key){
+      /* 预填默认云端 relay：用户未显式设置代理（为空/未填）时，自动套用 DEFAULT_PROXY，
+         实现「部署一次 relay 后，全网用户只需填 Key」；若用户手动清空或自定义则尊重其设置。 */
+      if (!c.proxy && DEFAULT_PROXY) c.proxy = DEFAULT_PROXY;
       /* 迁移：ws://localhost:5008 是 Java 语言服务(LSP)端口，不是 LLM 代理；
          误填它会导致浏览器用 fetch 请求 ws:// 协议而直接报错。自动清除改走直连。 */
       if (c.proxy && /ws:\/\/localhost:5008/.test(c.proxy)){
@@ -542,7 +549,7 @@ function jumpRef(id){
   var pg = pageOf(id);
   if (String(pg) !== currentLib) switchLib(pg, id);
   else { var el = document.getElementById(id); if (el) el.scrollIntoView({ block: "start" }); }
-  if (window.innerWidth <= 920) toggleAI();
+  if (window.innerWidth <= 760) toggleAI();
 }
 function refsHtml(hits){
   if (!hits.length) return "";
